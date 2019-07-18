@@ -1,0 +1,79 @@
+version: "3"
+networks:
+  develop:
+    driver: bridge
+
+services:
+  mysql-master:
+    build: ./mysql-master
+    container_name: mysql-master
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./mysql-master/my.cnf:/etc/mysql/my.cnf
+      - ./mysql-master/conf.d/:/etc/mysql/conf.d/
+      - ./mysql-master/data:/var/lib/mysql
+      - ./mysql-master/log/error.log:/var/log/mysql/error.log
+    environment:
+      MYSQL_ROOT_PASSWORD: 123456
+    networks: 
+      - develop
+
+  redis:
+    build: ./redis
+    container_name: redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - ./redis/log/redis.log:/var/log/redis/redis-server.log
+      - ./redis/data/:/var/lib/redis/
+    networks: 
+      - develop
+
+  php-fpm:
+    build: ./php
+    container_name: php-fpm
+    ports:
+      - "9000:9000"
+      - "8080:8080"
+    links:
+      - "mysql-master"
+      - "redis"
+    volumes:
+      - ./php/php.ini:/usr/local/etc/php/php.ini
+      - ./php/php-fpm.conf:/usr/local/etc/php/php-fpm.conf
+      - ./php/pool.d:/usr/local/etc/php/pool.d/
+      - ./php/log/php-fpm.log:/var/log/php-fpm.log
+      - ~/develop:/www
+    networks: 
+      - develop
+
+  nginx:
+    build: ./nginx
+    container_name: nginx
+    ports:
+      - "10.39.30.76:80:80"
+      - "127.0.0.1:80:80"
+    links:
+      - "php-fpm"
+    volumes:
+      - ~/develop:/www
+      - ./nginx/site-enabled/:/etc/nginx/conf.d/
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./nginx/log/:/nginx/log
+    networks: 
+      - develop
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
