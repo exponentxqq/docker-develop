@@ -4,18 +4,28 @@ networks:
     driver: bridge
 
 services:
-  mysql-master:
-    build: ./mysql-master
-    container_name: mysql-master
+  node:
+    build: ./node
+    container_name: node
+    ports: 
+      - "8888:8888"
+    volumes:
+      - ~/develop:/www
+    networks:
+      - develop
+
+  mysql:
+    build: ./mysql
+    container_name: mysql
     ports:
       - "3306:3306"
     volumes:
-      - ./mysql-master/my.cnf:/etc/mysql/my.cnf
-      - ./mysql-master/conf.d/:/etc/mysql/conf.d/
-      - ./mysql-master/data:/var/lib/mysql
-      - ./mysql-master/log/error.log:/var/log/mysql/error.log
+      - ./mysql/my.cnf:/etc/mysql/my.cnf
+      - ./mysql/conf.d/:/etc/mysql/conf.d/
+      - ./mysql/data:/var/lib/mysql
+      - ./mysql/log/error.log:/var/log/mysql/error.log
     environment:
-      MYSQL_ROOT_PASSWORD: 123456
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
     networks: 
       - develop
 
@@ -31,13 +41,17 @@ services:
       - develop
 
   php-fpm:
-    build: ./php
+    build:
+      context: ./php
+      args:
+        - PHP_VERSION=${PHP_VERSION}
     container_name: php-fpm
     ports:
       - "9000:9000"
-      - "8080:8080"
+    extra_hosts:
+      - "dockerhost:${DOCKER_HOST_IP}"
     links:
-      - "mysql-master"
+      - "mysql"
       - "redis"
     volumes:
       - ./php/php.ini:/usr/local/etc/php/php.ini
@@ -52,9 +66,11 @@ services:
     build: ./nginx
     container_name: nginx
     ports:
-      - "10.39.30.76:80:80"
+      - "10.0.0.12:80:80"
       - "127.0.0.1:80:80"
     links:
+      - "php-fpm"
+    depends_on:
       - "php-fpm"
     volumes:
       - ~/develop:/www

@@ -1,4 +1,5 @@
-FROM php:7.1-fpm
+ARG PHP_VERSION
+FROM php:${PHP_VERSION}-fpm
 
 RUN mkdir /usr/local/etc/php/pool.d/ && mkdir /www/
 
@@ -18,25 +19,28 @@ RUN docker-php-ext-install pdo_mysql && \
     docker-php-ext-install pcntl && \
     docker-php-ext-install posix
 
-RUN curl -fsSL 'https://xdebug.org/files/xdebug-2.6.0.tgz' -o xdebug.tar.gz \
-    && mkdir -p xdebug \
-    && tar -xf xdebug.tar.gz -C xdebug --strip-components=1 \
-    && rm xdebug.tar.gz \
-    && ( \
-    cd xdebug \
-    && phpize \
-    && ./configure --enable-xdebug \
-    && make -j$(nproc) \
-    && make install \
-    ) \
-    && rm -r xdebug \
-&& docker-php-ext-enable xdebug
+RUN if [ $(php -r "echo PHP_MAJOR_VERSION;") = "5" ]; then \
+        pecl install xdebug-2.5.5; \
+    else \
+        pecl install xdebug; \
+    fi \
+    && docker-php-ext-enable xdebug
 
 ADD http://pecl.php.net/get/redis-4.0.0.tgz /home
 RUN pecl install /home/redis-4.0.0.tgz \
     && docker-php-ext-enable redis
-RUN pecl install swoole \
-    && docker-php-ext-enable swoole
+
+RUN if [ $(php -r "echo PHP_MAJOR_VERSION;") = "5" ]; then \
+        pecl install swoole-2.0.10; \
+    else \
+        if [ $(php -r "echo PHP_MINOR_VERSION;") = "0" ]; then \
+            pecl install swoole-2.2.0; \
+        else \
+            pecl install swoole; \
+        fi \
+    fi && \
+    docker-php-ext-enable swoole \
+    && php -m | grep -q 'swoole'
 
 ADD https://getcomposer.org/composer.phar /usr/local/bin/composer
 RUN chmod 755 /usr/local/bin/composer
@@ -44,13 +48,13 @@ RUN chmod 755 /usr/local/bin/composer
 ADD ./phpunit-7.1.5.phar /usr/local/bin/phpunit
 RUN chmod 755 /usr/local/bin/phpunit
 
-RUN apt-get install -y node && \
-    apt-get install -y nodejs-legacy && \
-    apt-get install -y npm && \
-    npm config set registry https://registry.npm.taobao.org && \
-    npm install n -g && n stable && \
-    npm install -g yarn && \
-    npm install -g vue-cli
+# RUN apt-get install -y node && \
+#     apt-get install -y nodejs-legacy && \
+#     apt-get install -y npm && \
+#     npm config set registry https://registry.npm.taobao.org && \
+#     npm install n -g && n stable && \
+#     npm install -g yarn && \
+#     npm install -g vue-cli
 
 ENV PATH /usr/java/bin:$PATH
 ENV CLASSPATH /usr/java/lib
