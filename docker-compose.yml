@@ -47,7 +47,7 @@ services:
         - PHP_VERSION=${PHP_VERSION}
     container_name: php-fpm
     ports:
-      - "9000:9000"
+      - "9000"
     extra_hosts:
       - "dockerhost:${DOCKER_HOST_IP}"
     links:
@@ -66,8 +66,8 @@ services:
     build: ./nginx
     container_name: nginx
     ports:
-      - "10.0.0.12:80:80"
-      - "127.0.0.1:80:80"
+      - "80:80"
+      - "443:443"
     links:
       - "php-fpm"
     depends_on:
