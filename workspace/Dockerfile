@@ -1,16 +1,16 @@
 ARG PHP_VERSION
 FROM php:${PHP_VERSION}
 
-RUN mkdir /usr/local/etc/php/pool.d/ && mkdir /www/
+RUN apt-get update
 
-RUN apt-get update  && \
-    apt-get install -y libpng-dev && \
+RUN apt-get install -y libpng-dev && \
     apt-get install -y git && \
     apt-get install -y vim && \
     apt-get install -y ps-watcher && \
     apt-get install -y net-tools && \
     apt-get install -y iputils-ping && \
-    apt-get install -y gdb
+    apt-get install -y gdb && \
+    apt-get install -y default-mysql-client
 
 RUN docker-php-ext-install pdo_mysql && \
     docker-php-ext-install mysqli && \
@@ -19,12 +19,16 @@ RUN docker-php-ext-install pdo_mysql && \
     docker-php-ext-install pcntl && \
     docker-php-ext-install posix
 
-RUN if [ $(php -r "echo PHP_MAJOR_VERSION;") = "5" ]; then \
-        pecl install xdebug-2.5.5; \
-    else \
-        pecl install xdebug; \
-    fi \
-    && docker-php-ext-enable xdebug
+ARG WORKSPACE_XDEBUG
+
+RUN if [ ${WORKSPACE_XDEBUG} = true ]; then \
+        if [ $(php -r "echo PHP_MAJOR_VERSION;") = "5" ]; then \
+            pecl install xdebug-2.5.5; \
+        else \
+            pecl install xdebug; \
+        fi \
+        && docker-php-ext-enable xdebug; \
+    fi
 
 ADD http://pecl.php.net/get/redis-4.0.0.tgz /home
 RUN pecl install /home/redis-4.0.0.tgz \
@@ -60,3 +64,31 @@ ENV PATH /usr/java/bin:$PATH
 ENV CLASSPATH /usr/java/lib
 ADD ./jdk-10.0.1_linux-x64_bin.tar.gz /opt
 RUN mkdir /usr/java && cp -r /opt/jdk-10.0.1/* /usr/java/
+
+RUN apt-get install -y python2 && \
+    apt-get install -y python-dev && \
+    apt-get install -y python-pip && \
+    apt-get install -y python3 && \
+    apt-get install -y python3-dev && \
+    apt-get install -y python3-pip && \
+    apt-get install -y python-qt4 && \
+    apt-get install -y default-libmysqlclient-dev
+
+RUN sed -i 's/unsigned long packet_length;/unsigned long packet_length;unsigned int reconnect;/' /usr/include/mysql/mysql.h;
+
+RUN pip install jieba && \
+    pip install MySQL-python && \
+    pip install opencv-python && \
+    pip install image && \
+    pip install hanziconv && \
+    pip install lark-parser && \
+    pip install torndb && \
+    pip install imutils
+
+RUN git clone https://github.com/jonnywang/phpjieba.git /opt/phpjieba && \
+    cd /opt/phpjieba/cjieba && \
+    make && \
+    cd .. && \
+    phpize && \
+    ./configure && \
+    make && make install

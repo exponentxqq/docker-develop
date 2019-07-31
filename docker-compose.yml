@@ -13,12 +13,14 @@ services:
     ports: 
       - "8888:8888"
     volumes:
+      - ./workspace/conf.d:/usr/local/etc/php/conf.d
       - ./php/php.ini:/usr/local/etc/php/php.ini
-      - ./php/php-fpm.conf:/usr/local/etc/php/php-fpm.conf
-      - ./php/pool.d:/usr/local/etc/php/pool.d/
-      - ./php/log/php-fpm.log:/var/log/php-fpm.log
       - /develop:/develop
     tty: true
+    links:
+      - mysql
+    depends_on:
+      - mysql
     networks:
       - develop
 
@@ -62,9 +64,10 @@ services:
       - "mysql"
       - "redis"
     volumes:
+      - ./php/conf.d:/usr/local/etc/php/conf.d
       - ./php/php.ini:/usr/local/etc/php/php.ini
-      - ./php/php-fpm.conf:/usr/local/etc/php/php-fpm.conf
-      - ./php/pool.d:/usr/local/etc/php/pool.d/
+      - ./php/php-fpm.conf:/usr/local/etc/php-fpm.conf
+      - ./php/pool.d:/usr/local/etc/php-fpm.d
       - ./php/log/php-fpm.log:/var/log/php-fpm.log
       - /develop:/develop
     networks: 

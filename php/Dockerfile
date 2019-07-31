@@ -5,11 +5,6 @@ RUN mkdir /usr/local/etc/php/pool.d/ && mkdir /www/
 
 RUN apt-get update  && \
     apt-get install -y libpng-dev && \
-    apt-get install -y git && \
-    apt-get install -y vim && \
-    apt-get install -y ps-watcher && \
-    apt-get install -y net-tools && \
-    apt-get install -y iputils-ping && \
     apt-get install -y gdb
 
 RUN docker-php-ext-install pdo_mysql && \
