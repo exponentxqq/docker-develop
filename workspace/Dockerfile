@@ -52,13 +52,10 @@ RUN chmod 755 /usr/local/bin/composer
 ADD ./phpunit-7.1.5.phar /usr/local/bin/phpunit
 RUN chmod 755 /usr/local/bin/phpunit
 
-#RUN apt-get install -y node && \
-#    apt-get install -y nodejs-legacy && \
-#    apt-get install -y npm && \
-#    npm config set registry https://registry.npm.taobao.org && \
-#    npm install n -g && n stable && \
-#    npm install -g yarn && \
-#    npm install -g vue-cli
+RUN apt-get install -y nodejs && \
+    apt-get install -y npm && \
+    npm config set registry https://registry.npm.taobao.org && \
+    npm install n -g && n stable
 
 ENV PATH /usr/java/bin:$PATH
 ENV CLASSPATH /usr/java/lib
@@ -92,3 +89,5 @@ RUN git clone https://github.com/jonnywang/phpjieba.git /opt/phpjieba && \
     phpize && \
     ./configure && \
     make && make install
+
+COPY ./conf.d/jieba.ini /usr/local/etc/php/conf.d

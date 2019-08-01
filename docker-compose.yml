@@ -11,6 +11,7 @@ services:
         - PHP_VERSION=${PHP_VERSION}
     container_name: workspace
     ports: 
+      - "8081:8081"
       - "8888:8888"
     volumes:
       - ./workspace/conf.d:/usr/local/etc/php/conf.d
@@ -57,17 +58,16 @@ services:
         - PHP_VERSION=${PHP_VERSION}
     container_name: php-fpm
     ports:
-      - "9000"
+      - "9000:9000"
     extra_hosts:
       - "dockerhost:${DOCKER_HOST_IP}"
     links:
       - "mysql"
       - "redis"
     volumes:
-      - ./php/conf.d:/usr/local/etc/php/conf.d
       - ./php/php.ini:/usr/local/etc/php/php.ini
-      - ./php/php-fpm.conf:/usr/local/etc/php-fpm.conf
-      - ./php/pool.d:/usr/local/etc/php-fpm.d
+#      - ./php/php-fpm.conf:/usr/local/etc/php-fpm.conf
+#      - ./php/pool.d:/usr/local/etc/php-fpm.d
       - ./php/log/php-fpm.log:/var/log/php-fpm.log
       - /develop:/develop
     networks: 

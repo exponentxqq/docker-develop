@@ -5,7 +5,8 @@ RUN mkdir /usr/local/etc/php/pool.d/ && mkdir /www/
 
 RUN apt-get update  && \
     apt-get install -y libpng-dev && \
-    apt-get install -y gdb
+    apt-get install -y gdb && \
+    apt-get install -y git
 
 RUN docker-php-ext-install pdo_mysql && \
     docker-php-ext-install mysqli && \
@@ -20,6 +21,8 @@ RUN if [ $(php -r "echo PHP_MAJOR_VERSION;") = "5" ]; then \
         pecl install xdebug; \
     fi \
     && docker-php-ext-enable xdebug
+
+COPY ./conf.d/xdebug.ini /usr/local/etc/php/conf.d
 
 ADD http://pecl.php.net/get/redis-4.0.0.tgz /home
 RUN pecl install /home/redis-4.0.0.tgz \
@@ -37,21 +40,32 @@ RUN if [ $(php -r "echo PHP_MAJOR_VERSION;") = "5" ]; then \
     docker-php-ext-enable swoole \
     && php -m | grep -q 'swoole'
 
-ADD https://getcomposer.org/composer.phar /usr/local/bin/composer
-RUN chmod 755 /usr/local/bin/composer
+RUN apt-get install -y python2 && \
+    apt-get install -y python-dev && \
+    apt-get install -y python-pip && \
+    apt-get install -y python3 && \
+    apt-get install -y python3-dev && \
+    apt-get install -y python3-pip && \
+    apt-get install -y python-qt4 && \
+    apt-get install -y default-libmysqlclient-dev
 
-#ADD ./phpunit-7.1.5.phar /usr/local/bin/phpunit
-#RUN chmod 755 /usr/local/bin/phpunit
+RUN sed -i 's/unsigned long packet_length;/unsigned long packet_length;unsigned int reconnect;/' /usr/include/mysql/mysql.h;
 
-# RUN apt-get install -y node && \
-#     apt-get install -y nodejs-legacy && \
-#     apt-get install -y npm && \
-#     npm config set registry https://registry.npm.taobao.org && \
-#     npm install n -g && n stable && \
-#     npm install -g yarn && \
-#     npm install -g vue-cli
+RUN pip install jieba && \
+    pip install MySQL-python && \
+    pip install opencv-python && \
+    pip install image && \
+    pip install hanziconv && \
+    pip install lark-parser && \
+    pip install torndb && \
+    pip install imutils
 
-#ENV PATH /usr/java/bin:$PATH
-#ENV CLASSPATH /usr/java/lib
-#ADD ./jdk-10.0.1_linux-x64_bin.tar.gz /opt
-#RUN mkdir /usr/java && cp -r /opt/jdk-10.0.1/* /usr/java/
+RUN git clone https://github.com/jonnywang/phpjieba.git /opt/phpjieba && \
+    cd /opt/phpjieba/cjieba && \
+    make && \
+    cd .. && \
+    phpize && \
+    ./configure && \
+    make && make install
+
+COPY ./conf.d/jieba.ini /usr/local/etc/php/conf.d
