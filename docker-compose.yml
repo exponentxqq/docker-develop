@@ -14,13 +14,10 @@ services:
       - "8081:8081"
       - "8888:8888"
     volumes:
-      - ./workspace/conf.d:/usr/local/etc/php/conf.d
       - ./php/php.ini:/usr/local/etc/php/php.ini
       - /develop:/develop
     tty: true
     links:
-      - mysql
-    depends_on:
       - mysql
     networks:
       - develop

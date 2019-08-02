@@ -21,14 +21,14 @@ RUN docker-php-ext-install pdo_mysql && \
 
 ARG WORKSPACE_XDEBUG
 
-RUN if [ ${WORKSPACE_XDEBUG} = true ]; then \
-        if [ $(php -r "echo PHP_MAJOR_VERSION;") = "5" ]; then \
-            pecl install xdebug-2.5.5; \
-        else \
-            pecl install xdebug; \
-        fi \
-        && docker-php-ext-enable xdebug; \
-    fi
+RUN if [ $(php -r "echo PHP_MAJOR_VERSION;") = "5" ]; then \
+        pecl install xdebug-2.5.5; \
+    else \
+        pecl install xdebug; \
+    fi \
+    && docker-php-ext-enable xdebug
+
+COPY ./conf.d/xdebug.ini /usr/local/etc/php/conf.d
 
 ADD http://pecl.php.net/get/redis-4.0.0.tgz /home
 RUN pecl install /home/redis-4.0.0.tgz \
