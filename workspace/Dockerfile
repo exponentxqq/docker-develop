@@ -8,12 +8,14 @@ RUN apt-get install -y python-software-properties && \
 RUN apt-get update
 
 RUN apt-get install -y libpng-dev && \
-    apt-get install -y php7.2 && \
+    apt-get install -y php${PHP_VERSION} && \
     apt-get install -y git && \
     apt-get install -y vim && \
     apt-get install -y ps-watcher && \
     apt-get install -y net-tools && \
     apt-get install -y iputils-ping
+
+RUN echo "export EDITOR=vim" >> /etc/profile
 
 ADD https://getcomposer.org/composer.phar /usr/local/bin/composer
 RUN chmod 755 /usr/local/bin/composer
