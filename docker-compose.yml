@@ -4,24 +4,6 @@ networks:
     driver: bridge
 
 services:
-  workspace:
-    build:
-      context: ./workspace
-      args:
-        - PHP_VERSION=${PHP_VERSION}
-    container_name: workspace
-    ports: 
-      - "8081:8081"
-      - "8888:8888"
-    volumes:
-      - ./php/php.ini:/usr/local/etc/php/php.ini
-      - /develop:/develop
-    tty: true
-    links:
-      - mysql
-    networks:
-      - develop
-
   mysql:
     build: ./mysql
     container_name: mysql
@@ -88,16 +70,37 @@ services:
     networks: 
       - develop
 
-  
+  workspace:
+    build:
+      context: ./workspace
+      args:
+        - PHP_VERSION=${PHP_VERSION}
+    container_name: workspace
+    ports:
+      - "8081:8081"
+      - "8888:8888"
+    volumes:
+      - ./php/php.ini:/usr/local/etc/php/php.ini
+      - /develop:/develop
+    tty: true
+    links:
+      - mysql
+      - redis
+    networks:
+      - develop
 
-
-
-
-
-
-
-
-
-
-
-
+  phpunit:
+    build:
+      context: ./phpunit
+      args:
+        - PHP_VERSION=${PHP_VERSION}
+    container_name: phpunit
+    volumes:
+      - ./php/php.ini:/usr/local/etc/php/php.ini
+      - /develop:/develop
+    tty: true
+    links:
+      - mysql
+      - redis
+    networks:
+      - develop
