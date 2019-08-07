@@ -1,6 +1,6 @@
 version: "3"
 networks:
-  develop:
+  backend:
     driver: bridge
 
 services:
@@ -17,7 +17,7 @@ services:
     environment:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
     networks: 
-      - develop
+      - backend
 
   redis:
     build: ./redis
@@ -28,7 +28,7 @@ services:
       - ./redis/log/redis.log:/var/log/redis/redis-server.log
       - ./redis/data/:/var/lib/redis/
     networks: 
-      - develop
+      - backend
 
   php-fpm:
     build:
@@ -45,12 +45,10 @@ services:
       - "redis"
     volumes:
       - ./php/php.ini:/usr/local/etc/php/php.ini
-#      - ./php/php-fpm.conf:/usr/local/etc/php-fpm.conf
-#      - ./php/pool.d:/usr/local/etc/php-fpm.d
       - ./php/log/php-fpm.log:/var/log/php-fpm.log
       - /develop:/develop
     networks: 
-      - develop
+      - backend
 
   nginx:
     build: ./nginx
@@ -69,13 +67,20 @@ services:
       - ./nginx/ssl/:/etc/nginx/ssl/
       - ./nginx/log/:/nginx/log
     networks: 
-      - develop
+      - backend
 
   workspace:
     build:
       context: ./workspace
       args:
         - PHP_VERSION=${PHP_VERSION}
+        - INSTALL_GIT=${WORKSPACE_INSTALL_GIT}
+        - INSTALL_VIM=${WORKSPACE_INSTALL_VIM}
+        - INSTALL_NETTOOLS=${WORKSPACE_INSTALL_NETTOOLS}
+        - INSTALL_COMPOSER=${WORKSPACE_INSTALL_COMPOSER}
+        - INSTALL_NODE=${WORKSPACE_INSTALL_NODE}
+        - INSTALL_PS_WATCHER=${WORKSPACE_INSTALL_PS_WATCHER}
+        - INSTALL_JDK=${WORKSPACE_INSTALL_JDK}
     container_name: workspace
     ports:
       - "8081:8081"
@@ -84,11 +89,11 @@ services:
       - ./php/php.ini:/usr/local/etc/php/php.ini
       - /develop:/develop
     tty: true
-    links:
-      - mysql
-      - redis
+    # links:
+    #   - mysql
+    #   - redis
     networks:
-      - develop
+      - backend
 
   phpunit:
     build:
@@ -104,4 +109,4 @@ services:
       - mysql
       - redis
     networks:
-      - develop
+      - backend

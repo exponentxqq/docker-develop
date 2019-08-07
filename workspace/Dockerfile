@@ -1,31 +1,108 @@
-ARG PHP_VERSION
 FROM phusion/baseimage
 
-RUN apt-get update
-RUN apt-get install -y python-software-properties && \
+#---------------------------------------------
+# PHP
+#---------------------------------------------
+
+ARG PHP_VERSION
+
+# Add the "PHP 7" ppa
+RUN apt-get install -y software-properties-common && \
     add-apt-repository -y ppa:ondrej/php
 
-RUN apt-get update
+RUN apt-get update && \
+    apt-get install -y php${PHP_VERSION} \
+    php${PHP_VERSION}-dev \
+    php${PHP_VERSION}-curl \
+    php${PHP_VERSION}-gd \
+    php${PHP_VERSION}-mbstring \
+    php${PHP_VERSION}-xml \
+    php${PHP_VERSION}-zip \
+    php${PHP_VERSION}-mysql
+
+#---------------------------------------------
+# BASE
+#---------------------------------------------
 
 RUN apt-get install -y libpng-dev && \
-    apt-get install -y php${PHP_VERSION} && \
-    apt-get install -y git && \
-    apt-get install -y vim && \
-    apt-get install -y ps-watcher && \
-    apt-get install -y net-tools && \
     apt-get install -y iputils-ping
 
-RUN echo "export EDITOR=vim" >> /etc/profile
+#---------------------------------------------
+# GIT
+#---------------------------------------------
 
-ADD https://getcomposer.org/composer.phar /usr/local/bin/composer
-RUN chmod 755 /usr/local/bin/composer
+ARG INSTALL_GIT=false
 
-RUN apt-get install -y nodejs && \
-    apt-get install -y npm && \
+RUN if [ ${INSTALL_GIT} = true ]; then \
+    apt-get install -y git \
+;fi
+
+#---------------------------------------------
+# VIM
+#---------------------------------------------
+
+ARG INSTALL_VIM=false
+
+RUN if [ ${INSTALL_VIM} = true ]; then \
+    apt-get install -y vim && \
+    echo "export EDITOR=vim" >> /etc/profile \
+;fi
+
+#---------------------------------------------
+# NET-TOOLS
+#---------------------------------------------
+
+ARG INSTALL_NETTOOLS=false
+
+RUN if [ ${INSTALL_NETTOOLS} = true ]; then \
+    apt-get install -y net-tools \
+;fi
+
+#---------------------------------------------
+# PS-WATCHER
+#---------------------------------------------
+
+ARG INSTALL_PS_WATCHER=false
+
+RUN if [ ${INSTALL_PS_WATCHER} = true ]; then \
+    apt-get install -y ps-watcher \
+;fi
+
+#---------------------------------------------
+# COMPOSER
+#---------------------------------------------
+
+ARG INSTALL_COMPOSER=false
+
+RUN if [ ${INSTALL_COMPOSER} = true ]; then \
+    curl -s http://getcomposer.org/installer | php && \
+    echo "export PATH=${PATH}:/var/www/vendor/bin" >> ~/.bashrc && \
+    mv composer.phar /usr/local/bin/composer \
+;fi
+
+#---------------------------------------------
+# NODE
+#---------------------------------------------
+
+ARG INSTALL_NODE=false
+
+RUN if [ ${INSTALL_NODE} = true ]; then \
+    apt-get install -y nodejs && \
+    npm && \
     npm config set registry https://registry.npm.taobao.org && \
-    npm install n -g && n stable
+    npm install n -g && n stable \
+;fi
+
+#---------------------------------------------
+# JDK
+#---------------------------------------------
+
+ARG INSTALL_JDK=false
 
 ENV PATH /usr/java/bin:$PATH
 ENV CLASSPATH /usr/java/lib
 ADD ./jdk-10.0.1_linux-x64_bin.tar.gz /opt
-RUN mkdir /usr/java && cp -r /opt/jdk-10.0.1/* /usr/java/
+
+RUN if [ ${INSTALL_JDK} = true ]; then \
+    mkdir /usr/java && cp -r /opt/jdk-10.0.1/* /usr/java/ \
+;fi
