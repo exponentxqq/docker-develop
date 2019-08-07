@@ -89,9 +89,9 @@ services:
       - ./php/php.ini:/usr/local/etc/php/php.ini
       - /develop:/develop
     tty: true
-    # links:
-    #   - mysql
-    #   - redis
+    links:
+      - mysql
+      - redis
     networks:
       - backend
 
