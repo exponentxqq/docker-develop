@@ -83,7 +83,7 @@ ARG INSTALL_NODE=false
 
 RUN if [ ${INSTALL_NODE} = true ]; then \
     apt-get install -y nodejs && \
-    npm && \
+    apt-get install -y npm && \
     npm config set registry https://registry.npm.taobao.org && \
     npm install n -g && n stable \
 ;fi
