@@ -1,8 +1,16 @@
 # macos auto generated
-.DS_Store
+/**/.DS_Store
 
 # ide auto generated
 .idea
 
 # vscode auto generated
 .vscode
+
+mysql/data/*
+
+/**/log/*
+
+/nginx/site-enabled/*
+
+/nginx/ssl/*

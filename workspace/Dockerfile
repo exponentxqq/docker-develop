@@ -1,6 +1,5 @@
-ARG PHP_VERSION
 FROM phusion/baseimage
-
+ARG PHP_VERSION
 RUN apt-get update
 RUN apt-get install -y python-software-properties && \
     add-apt-repository -y ppa:ondrej/php
@@ -9,11 +8,22 @@ RUN apt-get update
 
 RUN apt-get install -y libpng-dev && \
     apt-get install -y php${PHP_VERSION} && \
+    apt-get install -y php${PHP_VERSION}-dev && \
     apt-get install -y git && \
     apt-get install -y vim && \
     apt-get install -y ps-watcher && \
     apt-get install -y net-tools && \
-    apt-get install -y iputils-ping
+    apt-get install -y iputils-ping && \
+    apt-get install -y mysql-client && \
+    apt-get install -y libmysqld-dev
+
+RUN apt-get install -y php${PHP_VERSION}-curl && \
+    apt-get install -y php${PHP_VERSION}-gd && \
+    apt-get install -y php${PHP_VERSION}-mbstring && \
+    apt-get install -y php${PHP_VERSION}-xml && \
+    apt-get install -y php${PHP_VERSION}-zip && \
+    apt-get install -y php${PHP_VERSION}-mysql
+
 
 RUN echo "export EDITOR=vim" >> /etc/profile
 
