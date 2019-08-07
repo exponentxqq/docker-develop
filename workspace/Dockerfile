@@ -18,14 +18,9 @@ RUN apt-get update && \
     php${PHP_VERSION}-mbstring \
     php${PHP_VERSION}-xml \
     php${PHP_VERSION}-zip \
-    php${PHP_VERSION}-mysql
-
-#---------------------------------------------
-# BASE
-#---------------------------------------------
-
-RUN apt-get install -y libpng-dev && \
-    apt-get install -y iputils-ping
+    php${PHP_VERSION}-mysql \
+    libpng-dev \
+    iputils-ping
 
 #---------------------------------------------
 # GIT
