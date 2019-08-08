@@ -35,6 +35,13 @@ services:
       context: ./php
       args:
         - PHP_VERSION=${PHP_VERSION}
+        - INSTALL_XDEBUG=${PHP_INSTALL_XDEBUG}
+        - INSTALL_REDIS=${PHP_INSTALL_REDIS}
+        - INSTALL_JIEBA=${PHP_INSTALL_JIEBA}
+        - INSTALL_SWOOLE=${PHP_INSTALL_SWOOLE}
+        - INSTALL_PYTHON2=${PHP_INSTALL_PYTHON2}
+        - INSTALL_PYTHON3=${PHP_INSTALL_PYTHON3}
+        - INSTALL_PYTHON_PACK=${PHP_INSTALL_PYTHON_PACK}
     container_name: php-fpm
     ports:
       - "9000:9000"

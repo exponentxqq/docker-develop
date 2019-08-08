@@ -15,19 +15,42 @@ RUN docker-php-ext-install pdo_mysql && \
     docker-php-ext-install pcntl && \
     docker-php-ext-install posix
 
-RUN if [ $(php -r "echo PHP_MAJOR_VERSION;") = "5" ]; then \
+#---------------------------------------------
+# PHP_XDEBUG
+#---------------------------------------------
+
+ARG INSTALL_XDEBUG=false
+
+RUN if [ ${INSTALL_XDEBUG} = true ]; then \
+    if [ $(php -r "echo PHP_MAJOR_VERSION;") = "5" ]; then \
         pecl install xdebug-2.5.5; \
     else \
         pecl install xdebug; \
-    fi
+    fi \
+;fi
 
 COPY ./conf.d/xdebug.ini /usr/local/etc/php/conf.d
 
-ADD http://pecl.php.net/get/redis-4.0.0.tgz /home
-RUN pecl install /home/redis-4.0.0.tgz \
-    && docker-php-ext-enable redis
+#---------------------------------------------
+# REDIS
+#---------------------------------------------
 
-RUN if [ $(php -r "echo PHP_MAJOR_VERSION;") = "5" ]; then \
+ARG INSTALL_REDIS=false
+
+RUN if [ ${INSTALL_REDIS} = true ]; then \
+    printf "\n" | pecl install -o -f redis && \
+    rm -rf /tmp/pear && \
+    docker-php-ext-enable redis \
+;fi
+
+#---------------------------------------------
+# SWOOLE
+#---------------------------------------------
+
+ARG INSTALL_SWOOLE=false
+
+RUN if [ ${INSTALL_SWOOLE} = true ]; then \
+    if [ $(php -r "echo PHP_MAJOR_VERSION;") = "5" ]; then \
         pecl install swoole-2.0.10; \
     else \
         if [ $(php -r "echo PHP_MINOR_VERSION;") = "0" ]; then \
@@ -36,35 +59,69 @@ RUN if [ $(php -r "echo PHP_MAJOR_VERSION;") = "5" ]; then \
             pecl install swoole; \
         fi \
     fi && \
-    docker-php-ext-enable swoole \
-    && php -m | grep -q 'swoole'
+    docker-php-ext-enable swoole && \
+    php -m | grep -q 'swoole' \
+;fi
 
-RUN apt-get install -y python2 && \
-    apt-get install -y python-dev && \
-    apt-get install -y python-pip && \
-    apt-get install -y python3 && \
-    apt-get install -y python3-dev && \
-    apt-get install -y python3-pip && \
-    apt-get install -y python-qt4 && \
-    apt-get install -y default-libmysqlclient-dev
+#---------------------------------------------
+# PYTHON2
+#---------------------------------------------
 
-RUN sed -i 's/unsigned long packet_length;/unsigned long packet_length;unsigned int reconnect;/' /usr/include/mysql/mysql.h;
+ARG INSTALL_PYTHON2=false
 
-RUN pip install jieba && \
-    pip install MySQL-python && \
-    pip install opencv-python && \
-    pip install image && \
-    pip install hanziconv && \
-    pip install lark-parser && \
-    pip install torndb && \
-    pip install imutils
+RUN if [ ${INSTALL_PYTHON2} = true ]; then \
+    apt-get-install -y python2 \
+    python-dev \
+    python-pip \
+    python-qt4 \
+;fi
 
-RUN git clone https://github.com/jonnywang/phpjieba.git /opt/phpjieba && \
+#---------------------------------------------
+# PYTHON3
+#---------------------------------------------
+
+ARG INSTALL_PYTHON3=false
+
+RUN if [ ${INSTALL_PYTHON3} = true ]; then \
+    apt-get install -y python3 \
+    python3-dev \
+    python3-pip \
+    default-libmysqlclient-dev \
+;fi
+
+#---------------------------------------------
+# PYTHON PACK
+#---------------------------------------------
+
+ARG INSTALL_PYTHON_PACK=false
+
+RUN if [ ${INSTALL_PYTHON_PACK} = true ]; then \
+    sed -i 's/unsigned long packet_length;/unsigned long packet_length;unsigned int reconnect;/' /usr/include/mysql/mysql.h && \
+    pip install jieba \
+    MySQL-python \
+    opencv-python \
+    image \
+    hanziconv \
+    lark-parser \
+    torndb \
+    imutils \
+;fi
+
+#---------------------------------------------
+# PHP_JIEBA
+#---------------------------------------------
+
+ARG INSTALL_JIEBA=false
+
+RUN if [ ${INSTALL_JIEBA} = true ]; then \
+    git clone https://github.com/jonnywang/phpjieba.git /opt/phpjieba && \
     cd /opt/phpjieba/cjieba && \
     make && \
     cd .. && \
     phpize && \
     ./configure && \
-    make && make install
+    make && \
+    make install \
+;fi
 
 COPY ./conf.d/jieba.ini /usr/local/etc/php/conf.d
