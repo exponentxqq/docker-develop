@@ -70,7 +70,7 @@ RUN if [ ${INSTALL_SWOOLE} = true ]; then \
 ARG INSTALL_PYTHON2=false
 
 RUN if [ ${INSTALL_PYTHON2} = true ]; then \
-    apt-get-install -y python2 \
+    apt-get install -y python2 \
     python-dev \
     python-pip \
     python-qt4 \
