@@ -5,18 +5,21 @@ networks:
 
 services:
   mysql:
-    build: ./mysql
-    container_name: mysql
-    ports:
-      - "3306:3306"
-    volumes:
-      - ./mysql/my.cnf:/etc/mysql/my.cnf
-      - ./mysql/conf.d/:/etc/mysql/conf.d/
-      - ./mysql/data:/var/lib/mysql
-      - ./mysql/log/error.log:/var/log/mysql/error.log
+    build:
+      context: ./mysql
+      args:
+        - MYSQL_VERSION=${MYSQL_VERSION}
     environment:
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
-    networks: 
+      - MYSQL_USER=${MYSQL_USER}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - TZ=${TIMEZONE}
+    volumes:
+      - ${DATA_PATH_HOST}/mysql:/var/lib/mysql
+      - ${MYSQL_ENTRYPOINT_INITDB}:/docker-entrypoint-initdb.d
+    ports:
+      - "${MYSQL_PORT}:3306"
+    networks:
       - backend
 
   redis:
@@ -88,6 +91,7 @@ services:
         - INSTALL_NODE=${WORKSPACE_INSTALL_NODE}
         - INSTALL_PS_WATCHER=${WORKSPACE_INSTALL_PS_WATCHER}
         - INSTALL_JDK=${WORKSPACE_INSTALL_JDK}
+        - INSTALL_MONGO=${WORKSPACE_INSTALL_MONGO}
     container_name: workspace
     ports:
       - "8081:8081"

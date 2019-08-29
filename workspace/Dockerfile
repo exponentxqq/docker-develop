@@ -12,15 +12,21 @@ RUN apt-get install -y software-properties-common && \
 
 RUN apt-get update && \
     apt-get install -y php${PHP_VERSION} \
-    php${PHP_VERSION}-dev \
-    php${PHP_VERSION}-curl \
-    php${PHP_VERSION}-gd \
-    php${PHP_VERSION}-mbstring \
-    php${PHP_VERSION}-xml \
-    php${PHP_VERSION}-zip \
-    php${PHP_VERSION}-mysql \
-    libpng-dev \
-    iputils-ping
+        php${PHP_VERSION}-dev \
+        php${PHP_VERSION}-curl \
+        php${PHP_VERSION}-gd \
+        php${PHP_VERSION}-mbstring \
+        php${PHP_VERSION}-xml \
+        php${PHP_VERSION}-zip \
+        php${PHP_VERSION}-mysql \
+        libpng-dev \
+        iputils-ping
+
+ARG INSTALL_MONGO=false
+RUN if [ ${INSTALL_MONGO} = true ]; then \
+    apt-get install -y mongodb \
+        php${PHP_VERSION}-mongo \
+;fi
 
 #---------------------------------------------
 # GIT
