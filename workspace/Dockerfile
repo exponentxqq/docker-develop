@@ -20,7 +20,8 @@ RUN apt-get update && \
         php${PHP_VERSION}-zip \
         php${PHP_VERSION}-mysql \
         libpng-dev \
-        iputils-ping
+        iputils-ping \
+        mysql-client
 
 ARG INSTALL_MONGO=false
 RUN if [ ${INSTALL_MONGO} = true ]; then \
@@ -100,10 +101,12 @@ RUN if [ ${INSTALL_NODE} = true ]; then \
 
 ARG INSTALL_JDK=false
 
-ENV PATH /usr/java/bin:$PATH
-ENV CLASSPATH /usr/java/lib
 ADD ./jdk-10.0.1_linux-x64_bin.tar.gz /opt
 
 RUN if [ ${INSTALL_JDK} = true ]; then \
     mkdir /usr/java && cp -r /opt/jdk-10.0.1/* /usr/java/ \
 ;fi
+
+RUN echo "export PATH=/usr/java/bin:$PATH" >> /etc/profile
+RUN /bin/bash -c "source /etc/profile"
+ENV CLASSPATH /usr/java/lib
