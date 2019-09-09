@@ -9,13 +9,14 @@ services:
       context: ./mysql
       args:
         - MYSQL_VERSION=${MYSQL_VERSION}
+    container_name: mysql
     environment:
       - MYSQL_USER=${MYSQL_USER}
       - MYSQL_PASSWORD=${MYSQL_PASSWORD}
       - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
       - TZ=${TIMEZONE}
     volumes:
-      - ${DATA_PATH_HOST}/mysql:/var/lib/mysql
+      - ${MYSQL_HOST_DATA_PATH}:${MYSQL_CONTAINER_DATA_PATH}
       - ${MYSQL_ENTRYPOINT_INITDB}:/docker-entrypoint-initdb.d
     ports:
       - "${MYSQL_PORT}:3306"
@@ -29,7 +30,7 @@ services:
       - "6379:6379"
     volumes:
       - ./redis/log/redis.log:/var/log/redis/redis-server.log
-      - ./redis/data/:/data
+      - ${REDIS_HOST_DATA_PATH}:${REDIS_CONTAINER_DATA_PATH}
     networks: 
       - backend
 
@@ -46,6 +47,7 @@ services:
         - INSTALL_PYTHON3=${PHP_INSTALL_PYTHON3}
         - INSTALL_PYTHON_PACK=${PHP_INSTALL_PYTHON_PACK}
     container_name: php-fpm
+    working_dir: ${CONTAINER_PROJECT_PATH}
     ports:
       - "9000:9000"
     extra_hosts:
@@ -56,7 +58,7 @@ services:
     volumes:
       - ./php/php.ini:/usr/local/etc/php/php.ini
       - ./php/log/php-fpm.log:/var/log/php-fpm.log
-      - /develop:/develop
+      - ${HOST_PROJECT_PATH}:${CONTAINER_PROJECT_PATH}
     networks: 
       - backend
 
@@ -71,7 +73,7 @@ services:
     depends_on:
       - "php-fpm"
     volumes:
-      - /develop:/develop
+      - ${HOST_PROJECT_PATH}:${CONTAINER_PROJECT_PATH}
       - ./nginx/site-enabled/:/etc/nginx/conf.d/
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf
       - ./nginx/ssl/:/etc/nginx/ssl/
@@ -93,12 +95,13 @@ services:
         - INSTALL_JDK=${WORKSPACE_INSTALL_JDK}
         - INSTALL_MONGO=${WORKSPACE_INSTALL_MONGO}
     container_name: workspace
+    working_dir: ${CONTAINER_PROJECT_PATH}
     ports:
       - "8081:8081"
       - "8888:8888"
     volumes:
       - ./php/php.ini:/usr/local/etc/php/php.ini
-      - /develop:/develop
+      - ${HOST_PROJECT_PATH}:${CONTAINER_PROJECT_PATH}
     tty: true
     links:
       - mysql

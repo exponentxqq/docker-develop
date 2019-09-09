@@ -13,7 +13,8 @@ RUN docker-php-ext-install pdo_mysql && \
     docker-php-ext-install gd && \
     docker-php-ext-install zip && \
     docker-php-ext-install pcntl && \
-    docker-php-ext-install posix
+    docker-php-ext-install posix && \
+    docker-php-ext-install exif
 
 #---------------------------------------------
 # PHP_XDEBUG
