@@ -14,5 +14,14 @@ if [ false == $exists ]; then
     exit 1;
 fi
 
-echo "current project_path: $project_path"
-docker exec -it $1 /bin/bash -c "cd $project_path && $2 $3 $4 $5 $6 $7 $8 $9 ${10} ${11} ${12} ${13} ${14} ${15} ${16} ${17} ${18} ${19}"
+echo "[$1]current project_path: $project_path"
+command=$*
+command=${command#* }
+
+if [[ $1 == "redis" ]]; then
+    docker exec -it $1 /bin/bash -c "$command"
+elif [[ $1 == "workspace" ]]; then
+    docker exec -it $1 /bin/zsh -c "[ -d $project_path ] && (cd $project_path && $command) || $command"
+else
+    docker exec -it $1 /bin/bash -c "[ -d $project_path ] && (cd $project_path && $command) || $command"
+fi

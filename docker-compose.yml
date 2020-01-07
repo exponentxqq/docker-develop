@@ -98,11 +98,13 @@ services:
     container_name: workspace
     working_dir: ${CONTAINER_PROJECT_PATH}
     ports:
-      - "8081:8081"
-      - "8888:8888"
+      - "8000-8080:8000-8080"
+      - "8081:3000"
     volumes:
       - ./php/php.ini:/usr/local/etc/php/php.ini
       - ${HOST_PROJECT_PATH}:${CONTAINER_PROJECT_PATH}
+      - ./cache/composer-cache/:/root/.composer/
+      - ./cache/npm-cache/:/root/.npm/
     tty: true
     links:
       - mysql
@@ -125,3 +127,19 @@ services:
       - redis
     networks:
       - backend
+
+  java:
+    build:
+      context: ./java
+      args:
+        - JDK_VERSION=${JDK_VERSION}
+    container_name: java
+    volumes:
+      - /develop:/develop
+    tty: true
+    links:
+      - mysql
+      - redis
+    networks:
+      - backend
+

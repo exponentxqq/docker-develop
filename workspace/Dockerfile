@@ -35,7 +35,7 @@ RUN if [ ${INSTALL_MONGO} = true ]; then \
 ARG INSTALL_GIT=false
 
 RUN if [ ${INSTALL_GIT} = true ]; then \
-    apt-get install -y git \
+    apt-get install -y git git-flow \
 ;fi
 
 #---------------------------------------------
@@ -91,8 +91,14 @@ RUN if [ ${INSTALL_NODE} = true ]; then \
     apt-get install -y nodejs && \
     apt-get install -y npm && \
     npm config set registry https://registry.npm.taobao.org && \
-    npm install n -g && n stable \
+    npm install n -g && n stable && \
+    npm i npm -g && \
+    npm i docsify-cli -g && \
+    npm i -g umi \
 ;fi
+
+RUN apt-get install -y wget zsh && \
+    wget https://github.com/robbyrussell/oh-my-zsh/raw/master/tools/install.sh -O - | sh
 
 #---------------------------------------------
 # JDK
@@ -106,6 +112,7 @@ RUN if [ ${INSTALL_JDK} = true ]; then \
     mkdir /usr/java && cp -r /opt/jdk-10.0.1/* /usr/java/ \
 ;fi
 
-RUN echo "export PATH=/usr/java/bin:$PATH" >> /etc/profile
-RUN /bin/bash -c "source /etc/profile"
+RUN PATH=$PATH:/usr/java/bin
 ENV CLASSPATH /usr/java/lib
+
+RUN apt-get clean
