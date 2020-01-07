@@ -100,19 +100,4 @@ RUN if [ ${INSTALL_NODE} = true ]; then \
 RUN apt-get install -y wget zsh && \
     wget https://github.com/robbyrussell/oh-my-zsh/raw/master/tools/install.sh -O - | sh
 
-#---------------------------------------------
-# JDK
-#---------------------------------------------
-
-ARG INSTALL_JDK=false
-
-ADD ./jdk-10.0.1_linux-x64_bin.tar.gz /opt
-
-RUN if [ ${INSTALL_JDK} = true ]; then \
-    mkdir /usr/java && cp -r /opt/jdk-10.0.1/* /usr/java/ \
-;fi
-
-RUN PATH=$PATH:/usr/java/bin
-ENV CLASSPATH /usr/java/lib
-
 RUN apt-get clean
