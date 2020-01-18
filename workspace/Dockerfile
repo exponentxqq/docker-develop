@@ -1,14 +1,16 @@
-FROM phusion/baseimage
+FROM ubuntu:18.04
+
+ENV DEBIAN_FRONTEND=noninteractive
+
+# Add the "PHP 7" ppa
+RUN apt-get update && \
+    apt-get install -y software-properties-common && \
+    add-apt-repository -y ppa:ondrej/php
 
 #---------------------------------------------
 # PHP
 #---------------------------------------------
 ARG PHP_VERSION
-
-# Add the "PHP 7" ppa
-RUN apt-get install -y software-properties-common && \
-    add-apt-repository -y ppa:ondrej/php
-
 RUN apt-get update && \
     apt-get install -y php${PHP_VERSION} \
         php${PHP_VERSION}-dev \
@@ -82,22 +84,13 @@ RUN if [ ${INSTALL_COMPOSER} = true ]; then \
 ;fi
 
 #---------------------------------------------
-# NODE
+# ZSH-USER
 #---------------------------------------------
-
-ARG INSTALL_NODE=false
-
-RUN if [ ${INSTALL_NODE} = true ]; then \
-    apt-get install -y nodejs && \
-    apt-get install -y npm && \
-    npm config set registry https://registry.npm.taobao.org && \
-    npm install n -g && n stable && \
-    npm i npm -g && \
-    npm i docsify-cli -g && \
-    npm i -g umi \
-;fi
-
 RUN apt-get install -y wget zsh && \
-    wget https://github.com/robbyrussell/oh-my-zsh/raw/master/tools/install.sh -O - | sh
+    apt-get clean
+ARG USER_ID
+RUN useradd docker -u ${USER_ID} -g root -m
+USER docker
+RUN wget https://github.com/robbyrussell/oh-my-zsh/raw/master/tools/install.sh -O - | sh
 
-RUN apt-get clean
+

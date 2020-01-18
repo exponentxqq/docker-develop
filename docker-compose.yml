@@ -49,10 +49,12 @@ services:
         - INSTALL_PYTHON_PACK=${PHP_INSTALL_PYTHON_PACK}
     container_name: php-fpm
     working_dir: ${CONTAINER_PROJECT_PATH}
+    user: ${USER_ID}:${USER_ID}
     ports:
       - "9000:9000"
     extra_hosts:
       - "dockerhost:${DOCKER_HOST_IP}"
+      - "aizuoyetest:10.35.21.18"
     links:
       - "mysql"
       - "redis"
@@ -86,25 +88,26 @@ services:
     build:
       context: ./workspace
       args:
+        - USER_ID=${USER_ID}
         - PHP_VERSION=${PHP_VERSION}
         - INSTALL_GIT=${WORKSPACE_INSTALL_GIT}
         - INSTALL_VIM=${WORKSPACE_INSTALL_VIM}
         - INSTALL_NETTOOLS=${WORKSPACE_INSTALL_NETTOOLS}
         - INSTALL_COMPOSER=${WORKSPACE_INSTALL_COMPOSER}
-        - INSTALL_NODE=${WORKSPACE_INSTALL_NODE}
         - INSTALL_PS_WATCHER=${WORKSPACE_INSTALL_PS_WATCHER}
-        - INSTALL_JDK=${WORKSPACE_INSTALL_JDK}
         - INSTALL_MONGO=${WORKSPACE_INSTALL_MONGO}
     container_name: workspace
+    user: ${USER_ID}:${USER_ID}
     working_dir: ${CONTAINER_PROJECT_PATH}
+    extra_hosts:
+      - "aizuoyetest:10.35.21.18"
     ports:
       - "8000-8080:8000-8080"
       - "8081:3000"
     volumes:
       - ./php/php.ini:/usr/local/etc/php/php.ini
       - ${HOST_PROJECT_PATH}:${CONTAINER_PROJECT_PATH}
-      - ./cache/composer-cache/:/root/.composer/
-      - ./cache/npm-cache/:/root/.npm/
+      - ./cache/composer-cache/:/home/docker/.composer/
     tty: true
     links:
       - mysql
@@ -118,6 +121,8 @@ services:
       args:
         - PHP_VERSION=${PHP_VERSION}
     container_name: phpunit
+    extra_hosts:
+      - "aizuoyetest:10.35.21.18"
     volumes:
       - ./php/php.ini:/usr/local/etc/php/php.ini
       - /develop:/develop
@@ -128,12 +133,27 @@ services:
     networks:
       - backend
 
+  node:
+    build:
+      context: ./node
+      args:
+        - NODE_VERSION=${NODE_VERSION}
+    container_name: node
+    user: ${USER_ID}:${USER_ID}
+    volumes:
+      - /develop:/develop
+      - ./cache/npm-cache/:/home/node/.npm/
+    tty: true
+    networks: 
+      - backend
+
   java:
     build:
       context: ./java
       args:
         - JDK_VERSION=${JDK_VERSION}
     container_name: java
+    user: ${USER_ID}:${USER_ID}
     volumes:
       - /develop:/develop
     tty: true

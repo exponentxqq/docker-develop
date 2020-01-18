@@ -28,9 +28,9 @@ RUN if [ $(php -r "echo PHP_MAJOR_VERSION;") = "5" ]; then \
 
 COPY ./conf.d/xdebug.ini /usr/local/etc/php/conf.d
 
-ADD http://pecl.php.net/get/redis-4.0.0.tgz /home
-RUN pecl install /home/redis-4.0.0.tgz \
-    && docker-php-ext-enable redis
+RUN printf "\n" | pecl install -o -f redis && \
+    rm -rf /tmp/pear && \
+    docker-php-ext-enable redis
 
 ADD ./phpunit-7.1.5.phar /usr/local/bin/phpunit
 RUN chmod 755 /usr/local/bin/phpunit
