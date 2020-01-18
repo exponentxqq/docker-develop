@@ -1,9 +1,8 @@
 ARG PHP_VERSION
 FROM php:${PHP_VERSION}
 
-RUN apt-get update
-
-RUN apt-get install -y libpng-dev && \
+RUN apt-get update &&\
+    apt-get install -y libpng-dev && \
     apt-get install -y git && \
     apt-get install -y vim && \
     apt-get install -y ps-watcher && \

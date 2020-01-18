@@ -19,6 +19,7 @@ services:
       - ${MYSQL_HOST_DATA_PATH}:${MYSQL_CONTAINER_DATA_PATH}
       - ${MYSQL_ENTRYPOINT_INITDB}:/docker-entrypoint-initdb.d
       - ./mysql/my.cnf:/etc/mysql/conf.d/my.cnf
+      - ./mysql/logs/error.log:/var/log/mysql/error.log
     ports:
       - "${MYSQL_PORT}:3306"
     networks:
@@ -56,6 +57,9 @@ services:
       - "dockerhost:${DOCKER_HOST_IP}"
       - "aizuoyetest:10.35.21.18"
     links:
+      - "mysql"
+      - "redis"
+    depends_on:
       - "mysql"
       - "redis"
     volumes:
@@ -103,7 +107,6 @@ services:
       - "aizuoyetest:10.35.21.18"
     ports:
       - "8000-8080:8000-8080"
-      - "8081:3000"
     volumes:
       - ./php/php.ini:/usr/local/etc/php/php.ini
       - ${HOST_PROJECT_PATH}:${CONTAINER_PROJECT_PATH}
