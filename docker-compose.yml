@@ -19,7 +19,6 @@ services:
       - ${MYSQL_HOST_DATA_PATH}:${MYSQL_CONTAINER_DATA_PATH}
       - ${MYSQL_ENTRYPOINT_INITDB}:/docker-entrypoint-initdb.d
       - ./mysql/my.cnf:/etc/mysql/conf.d/my.cnf
-      - ./mysql/logs/error.log:/var/log/mysql/error.log
     ports:
       - "${MYSQL_PORT}:3306"
     networks:
@@ -105,8 +104,6 @@ services:
     working_dir: ${CONTAINER_PROJECT_PATH}
     extra_hosts:
       - "aizuoyetest:10.35.21.18"
-    ports:
-      - "8000-8080:8000-8080"
     volumes:
       - ./php/php.ini:/usr/local/etc/php/php.ini
       - ${HOST_PROJECT_PATH}:${CONTAINER_PROJECT_PATH}
@@ -143,6 +140,8 @@ services:
         - NODE_VERSION=${NODE_VERSION}
     container_name: node
     user: ${USER_ID}:${USER_ID}
+    ports:
+      - "8000-8080:8000-8080"
     volumes:
       - /develop:/develop
       - ./cache/npm-cache/:/home/node/.npm/
@@ -157,6 +156,8 @@ services:
         - JDK_VERSION=${JDK_VERSION}
     container_name: java
     user: ${USER_ID}:${USER_ID}
+    ports:
+      - "5005:5005"
     volumes:
       - /develop:/develop
     tty: true
