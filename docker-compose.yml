@@ -2,6 +2,9 @@ version: "3"
 networks:
   backend:
     driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
 
 services:
   mysql:
@@ -22,7 +25,8 @@ services:
     ports:
       - "${MYSQL_PORT}:3306"
     networks:
-      - backend
+      backend:
+        ipv4_address: 172.20.0.4
 
   redis:
     build: ./redis
@@ -33,7 +37,8 @@ services:
       - ./redis/log/redis.log:/var/log/redis/redis-server.log
       - ${REDIS_HOST_DATA_PATH}:${REDIS_CONTAINER_DATA_PATH}
     networks: 
-      - backend
+      backend:
+        ipv4_address: 172.20.0.5
 
   php-fpm:
     build:
@@ -54,7 +59,6 @@ services:
       - "9000:9000"
     extra_hosts:
       - "dockerhost:${DOCKER_HOST_IP}"
-      - "aizuoyetest:10.35.21.18"
     links:
       - "mysql"
       - "redis"
@@ -65,8 +69,10 @@ services:
       - ./php/php.ini:/usr/local/etc/php/php.ini
       - ./php/log/php-fpm.log:/var/log/php-fpm.log
       - ${HOST_PROJECT_PATH}:${CONTAINER_PROJECT_PATH}
+      - ./php/log/xdebug.log:/var/log/xdebug.log
     networks: 
-      - backend
+      backend:
+        ipv4_address: 172.20.0.7
 
   nginx:
     build: ./nginx
@@ -85,7 +91,8 @@ services:
       - ./nginx/ssl/:/etc/nginx/ssl/
       - ./nginx/log/:/nginx/log
     networks: 
-      - backend
+      backend:
+        ipv4_address: 172.20.0.3
 
   workspace:
     build:
@@ -102,8 +109,6 @@ services:
     container_name: workspace
     user: ${USER_ID}:${USER_ID}
     working_dir: ${CONTAINER_PROJECT_PATH}
-    extra_hosts:
-      - "aizuoyetest:10.35.21.18"
     volumes:
       - ./php/php.ini:/usr/local/etc/php/php.ini
       - ${HOST_PROJECT_PATH}:${CONTAINER_PROJECT_PATH}
@@ -113,7 +118,8 @@ services:
       - mysql
       - redis
     networks:
-      - backend
+      backend:
+        ipv4_address: 172.20.0.8
 
   phpunit:
     build:
@@ -121,8 +127,6 @@ services:
       args:
         - PHP_VERSION=${PHP_VERSION}
     container_name: phpunit
-    extra_hosts:
-      - "aizuoyetest:10.35.21.18"
     volumes:
       - ./php/php.ini:/usr/local/etc/php/php.ini
       - /develop:/develop
@@ -131,7 +135,8 @@ services:
       - mysql
       - redis
     networks:
-      - backend
+      backend:
+        ipv4_address: 172.20.0.9
 
   node:
     build:
@@ -147,7 +152,8 @@ services:
       - ./cache/npm-cache/:/home/node/.npm/
     tty: true
     networks: 
-      - backend
+      backend:
+        ipv4_address: 172.20.0.2
 
   java:
     build:
@@ -156,8 +162,6 @@ services:
         - JDK_VERSION=${JDK_VERSION}
     container_name: java
     user: ${USER_ID}:${USER_ID}
-    ports:
-      - "5005:5005"
     volumes:
       - /develop:/develop
     tty: true
@@ -165,5 +169,5 @@ services:
       - mysql
       - redis
     networks:
-      - backend
-
+      backend:
+        ipv4_address: 172.20.0.6

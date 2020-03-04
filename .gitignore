@@ -9,8 +9,15 @@
 
 mysql/data/*
 
+redis/data
+
 /**/log/*
+
+/**/*.log
 
 /nginx/site-enabled/*
 
 /nginx/ssl/*
+
+/cache/composer-cache/*
+/cache/npm-cache/*
