@@ -1,2 +1,5 @@
 ARG JDK_VERSION=latest
 FROM openjdk:${JDK_VERSION}
+
+ENV MAVEN_HOME /usr/local/maven
+ENV PATH $PATH:$JAVA_HOME/bin:$MAVEN_HOME/bin

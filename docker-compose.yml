@@ -146,10 +146,12 @@ services:
     container_name: node
     user: ${USER_ID}:${USER_ID}
     ports:
-      - "8000-8080:8000-8080"
+      - "8000-8010:8000-8010"
     volumes:
       - /develop:/develop
       - ./cache/npm-cache/:/home/node/.npm/
+    links: 
+      - java
     tty: true
     networks: 
       backend:
@@ -164,6 +166,12 @@ services:
     user: ${USER_ID}:${USER_ID}
     volumes:
       - /develop:/develop
+      - ${HOST_MAVEN_PATH}:/usr/local/maven
+    extra_hosts:
+      - "www.auth.localhost:172.20.0.3"
+      - "dockerhost:${DOCKER_HOST_IP}"
+    ports:
+      - "8011-8020:8011-8020"
     tty: true
     links:
       - mysql
