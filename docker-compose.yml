@@ -172,6 +172,8 @@ services:
       - /develop:/develop
       - ${HOST_MAVEN_PATH}:/usr/local/maven
       - ${HOST_GRADLE_PATH}:/usr/local/gradle
+      - ./cache/gradle-cache/:/home/docker/.gradle/
+      - ./cache/maven-cache/:/home/docker/.m2/
     extra_hosts:
       - "www.auth.localhost:172.20.0.3"
       - "dockerhost:${DOCKER_HOST_IP}"
