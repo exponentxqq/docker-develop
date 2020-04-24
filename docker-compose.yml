@@ -145,6 +145,9 @@ services:
         - NODE_VERSION=${NODE_VERSION}
     container_name: node
     user: ${USER_ID}:${USER_ID}
+    extra_hosts:
+      - "dockerhost:${DOCKER_HOST_IP}"
+      - "www.auth.localhost:172.20.0.3"
     ports:
       - "8000-8010:8000-8010"
     volumes:
@@ -162,11 +165,13 @@ services:
       context: ./java
       args:
         - JDK_VERSION=${JDK_VERSION}
+        - USER_ID=${USER_ID}
     container_name: java
     user: ${USER_ID}:${USER_ID}
     volumes:
       - /develop:/develop
       - ${HOST_MAVEN_PATH}:/usr/local/maven
+      - ${HOST_GRADLE_PATH}:/usr/local/gradle
     extra_hosts:
       - "www.auth.localhost:172.20.0.3"
       - "dockerhost:${DOCKER_HOST_IP}"

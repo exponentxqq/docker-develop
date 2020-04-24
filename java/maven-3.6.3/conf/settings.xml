@@ -130,6 +130,17 @@ under the License.
       <passphrase>optional; leave empty if not used.</passphrase>
     </server>
     -->
+    <server>  
+      <id>maven-snapshots</id>  
+      <username>admin</username>  
+      <password>123456</password>  
+    </server>
+
+    <server>  
+      <id>maven-releases</id>  
+      <username>admin</username>  
+      <password>123456</password>  
+    </server>
   </servers>
 
   <!-- mirrors
