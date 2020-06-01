@@ -52,6 +52,7 @@ services:
         - INSTALL_PYTHON2=${PHP_INSTALL_PYTHON2}
         - INSTALL_PYTHON3=${PHP_INSTALL_PYTHON3}
         - INSTALL_PYTHON_PACK=${PHP_INSTALL_PYTHON_PACK}
+        - INSTALL_IMAGIC=${PHP_INSTALL_IMAGIC}
     container_name: php-fpm
     working_dir: ${CONTAINER_PROJECT_PATH}
     user: ${USER_ID}:${USER_ID}
@@ -172,8 +173,10 @@ services:
       - /develop:/develop
       - ${HOST_MAVEN_PATH}:/usr/local/maven
       - ${HOST_GRADLE_PATH}:/usr/local/gradle
+      - ${HOST_JAVAFX_PATH}:/usr/local/lib/javafx
       - ./cache/gradle-cache/:/home/docker/.gradle/
       - ./cache/maven-cache/:/home/docker/.m2/
+      - ./cache/javafx-cache/:/home/docker/.openjfx/
     extra_hosts:
       - "www.auth.localhost:172.20.0.3"
       - "dockerhost:${DOCKER_HOST_IP}"

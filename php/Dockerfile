@@ -126,3 +126,16 @@ RUN if [ ${INSTALL_JIEBA} = true ]; then \
 ;fi
 
 COPY ./conf.d/jieba.ini /usr/local/etc/php/conf.d
+
+#---------------------------------------------
+# PHP_IMAGIC
+#---------------------------------------------
+
+ARG INSTALL_IMAGIC=false
+
+RUN if [ ${INSTALL_IMAGIC} = true ]; then \
+    apt-get -y install imagemagick libmagick++-dev && \
+    pecl install imagick \
+;fi
+
+COPY ./conf.d/imagick.ini /usr/local/etc/php/conf.d
