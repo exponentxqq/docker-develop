@@ -63,3 +63,16 @@ RUN git clone https://github.com/jonnywang/phpjieba.git /opt/phpjieba && \
     make && make install
 
 COPY ./conf.d/jieba.ini /usr/local/etc/php/conf.d
+
+#---------------------------------------------
+# Latex
+#---------------------------------------------
+
+ARG INSTALL_LATEX=false
+
+RUN if [ ${INSTALL_LATEX} = true ]; then\
+    apt-get -y --fix-missing install dvipng texlive \
+;fi
+
+RUN apt-get -y install imagemagick libmagick++-dev && \
+    pecl install imagick

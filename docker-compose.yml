@@ -53,6 +53,7 @@ services:
         - INSTALL_PYTHON3=${PHP_INSTALL_PYTHON3}
         - INSTALL_PYTHON_PACK=${PHP_INSTALL_PYTHON_PACK}
         - INSTALL_IMAGIC=${PHP_INSTALL_IMAGIC}
+        - INSTALL_LATEX=${PHP_INSTALL_LATEX}
     container_name: php-fpm
     working_dir: ${CONTAINER_PROJECT_PATH}
     user: ${USER_ID}:${USER_ID}
@@ -127,6 +128,7 @@ services:
       context: ./phpunit
       args:
         - PHP_VERSION=${PHP_VERSION}
+        - INSTALL_LATEX=${PHP_INSTALL_LATEX}
     container_name: phpunit
     volumes:
       - ./php/php.ini:/usr/local/etc/php/php.ini
@@ -181,7 +183,7 @@ services:
       - "www.auth.localhost:172.20.0.3"
       - "dockerhost:${DOCKER_HOST_IP}"
     ports:
-      - "8011-8020:8011-8020"
+      - "8080:8080"
     tty: true
     links:
       - mysql

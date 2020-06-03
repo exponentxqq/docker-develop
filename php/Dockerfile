@@ -139,3 +139,13 @@ RUN if [ ${INSTALL_IMAGIC} = true ]; then \
 ;fi
 
 COPY ./conf.d/imagick.ini /usr/local/etc/php/conf.d
+
+#---------------------------------------------
+# Latex
+#---------------------------------------------
+
+ARG INSTALL_LATEX=false
+
+RUN if [ ${INSTALL_LATEX} = true ]; then\
+    apt-get -y --fix-missing install dvipng texlive\
+;fi
