@@ -92,6 +92,8 @@ services:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf
       - ./nginx/ssl/:/etc/nginx/ssl/
       - ./nginx/log/:/nginx/log
+    extra_hosts:
+      - "dockerhost:${DOCKER_HOST_IP}"
     networks: 
       backend:
         ipv4_address: 172.20.0.3
@@ -133,6 +135,8 @@ services:
     volumes:
       - ./php/php.ini:/usr/local/etc/php/php.ini
       - /develop:/develop
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /usr/bin/docker:/bin/docker
     tty: true
     links:
       - mysql

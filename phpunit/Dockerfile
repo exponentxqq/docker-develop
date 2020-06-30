@@ -1,7 +1,13 @@
 ARG PHP_VERSION
 FROM php:${PHP_VERSION}
 
-RUN apt-get update &&\
+RUN apt-get update && apt-get install -y gnupg2 && apt-get clean
+
+COPY source.list /etc/apt/sources.list
+
+RUN apt-key adv --recv-keys --keyserver keyserver.ubuntu.com 40976EAF437D05B5 && \
+    apt-key adv --recv-keys --keyserver keyserver.ubuntu.com 3B4FE6ACC0B21F32 && \
+    apt-get update && \
     apt-get install -y libpng-dev && \
     apt-get install -y git && \
     apt-get install -y vim && \
@@ -41,9 +47,7 @@ RUN apt-get install -y python2 && \
     apt-get install -y python3-dev && \
     apt-get install -y python3-pip && \
     apt-get install -y python-qt4 && \
-    apt-get install -y default-libmysqlclient-dev
-
-RUN sed -i 's/unsigned long packet_length;/unsigned long packet_length;unsigned int reconnect;/' /usr/include/mysql/mysql.h;
+    apt-get install -y libmysqlclient-dev
 
 RUN pip install jieba && \
     pip install MySQL-python && \
@@ -76,3 +80,5 @@ RUN if [ ${INSTALL_LATEX} = true ]; then\
 
 RUN apt-get -y install imagemagick libmagick++-dev && \
     pecl install imagick
+
+RUN cp -r usr/local/lib/python2.7/dist-packages/backports /usr/local/lib/python2.7/dist-packages/docker/transport
