@@ -1,4 +1,5 @@
 ARG NODE_VERSION
 FROM node:${NODE_VERSION}
 
-RUN npm install vue-cli -g
+# install vue-cli3.x
+RUN npm install -g @vue/cli

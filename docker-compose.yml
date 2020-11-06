@@ -36,6 +36,7 @@ services:
     volumes:
       - ./redis/log/redis.log:/var/log/redis/redis-server.log
       - ${REDIS_HOST_DATA_PATH}:${REDIS_CONTAINER_DATA_PATH}
+      - ./redis/redis.conf:/usr/local/etc/redis/redis.conf
     networks: 
       backend:
         ipv4_address: 172.20.0.5
@@ -61,6 +62,8 @@ services:
       - "9000:9000"
     extra_hosts:
       - "dockerhost:${DOCKER_HOST_IP}"
+      - "www.qms.localhost:172.20.0.3"
+      - "www.auth.localhost:172.20.0.3"
     links:
       - "mysql"
       - "redis"
@@ -134,10 +137,12 @@ services:
     container_name: phpunit
     volumes:
       - ./php/php.ini:/usr/local/etc/php/php.ini
-      - /develop:/develop
-      - /var/run/docker.sock:/var/run/docker.sock
-      - /usr/bin/docker:/bin/docker
+      - ${HOST_PROJECT_PATH}:${CONTAINER_PROJECT_PATH}
     tty: true
+    extra_hosts:
+      - "dockerhost:${DOCKER_HOST_IP}"
+      - "www.benchmark.localhost:172.20.0.3"
+      - "www.qms.localhost:172.20.0.3"
     links:
       - mysql
       - redis
@@ -155,10 +160,13 @@ services:
     extra_hosts:
       - "dockerhost:${DOCKER_HOST_IP}"
       - "www.auth.localhost:172.20.0.3"
+      - "www.miniqms.localhost:172.20.0.3"
+      - "www.template.localhost:172.20.0.3"
+      - "www.qms.localhost:172.20.0.3"
     ports:
       - "8000-8010:8000-8010"
     volumes:
-      - /develop:/develop
+      - ${HOST_PROJECT_PATH}:${CONTAINER_PROJECT_PATH}
       - ./cache/npm-cache/:/home/node/.npm/
     links: 
       - java
@@ -176,7 +184,7 @@ services:
     container_name: java
     user: ${USER_ID}:${USER_ID}
     volumes:
-      - /develop:/develop
+      - ${HOST_PROJECT_PATH}:${CONTAINER_PROJECT_PATH}
       - ${HOST_MAVEN_PATH}:/usr/local/maven
       - ${HOST_GRADLE_PATH}:/usr/local/gradle
       - ${HOST_JAVAFX_PATH}:/usr/local/lib/javafx
@@ -195,3 +203,22 @@ services:
     networks:
       backend:
         ipv4_address: 172.20.0.6
+
+  go:
+    build:
+      context: ./go
+    container_name: go
+    volumes:
+      - ${HOST_PROJECT_PATH}:${CONTAINER_PROJECT_PATH}
+    tty: true
+    links:
+      - "mysql"
+      - "redis"
+    depends_on: 
+      - "mysql"
+      - "redis"
+    ports:
+      - "3000:3000"
+    networks:
+      backend:
+        ipv4_address: 172.20.0.10
