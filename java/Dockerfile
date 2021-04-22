@@ -17,8 +17,6 @@ ENV PATH $PATH:$GRADLE_HOME/bin
 COPY ./build.sh /opt
 RUN cd /opt && git config --global http.postBuffer 524288000 && sh build.sh
 
-
-
 ARG USER_ID
 RUN echo ${USER_ID}
 RUN useradd docker -u ${USER_ID} -g root -m
