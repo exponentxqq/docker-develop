@@ -25,4 +25,7 @@ redis/data
 /cache/maven-cache/*
 /cache
 
+/mongo/data
+/mongo/log
+
 .env

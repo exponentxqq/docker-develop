@@ -163,8 +163,6 @@ services:
       - "www.miniqms.localhost:172.20.0.3"
       - "www.template.localhost:172.20.0.3"
       - "www.qms.localhost:172.20.0.3"
-    ports:
-      - "8000-8010:8000-8010"
     volumes:
       - ${HOST_PROJECT_PATH}:${CONTAINER_PROJECT_PATH}
       - ./cache/npm-cache/:/home/node/.npm/
@@ -194,8 +192,6 @@ services:
     extra_hosts:
       - "www.auth.localhost:172.20.0.3"
       - "dockerhost:${DOCKER_HOST_IP}"
-    ports:
-      - "8080:8080"
     tty: true
     links:
       - mysql
@@ -219,6 +215,26 @@ services:
       - "redis"
     ports:
       - "3000:3000"
+    networks:
+      backend:
+        ipv4_address: 172.20.0.10
+
+  mongo:
+    build:
+      context: ./mongo
+      args:
+        - MONGO_VERSION=${MONGO_VERSION}
+    container_name: mongo
+    environment:
+      - MONGO_DATA_DIR=${MONGO_CONTAINER_DATA_DIR}
+      - MONGO_LOG_DIR=${MONGO_CONTAINER_LOG_DIR}
+      - MONGO_INITDB_ROOT_USERNAME=${MONGO_ROOT_USERNAME}
+      - MONGO_INITDB_ROOT_PASSWORD=${MONGO_ROOT_PASSWORD}
+    volumes:
+      - ${MONGO_HOST_DATA_DIR}:${MONGO_CONTAINER_DATA_DIR}
+      - ${MONGO_HOST_LOG_DIR}:${MONGO_CONTAINER_LOG_DIR}
+    ports:
+      - "${MONGO_PORT}:27017"
     networks:
       backend:
         ipv4_address: 172.20.0.10
