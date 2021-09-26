@@ -17,6 +17,7 @@ fi
 
 echo "[$1]current project_path: $project_path"
 command=$*
+echo $command
 command=${command#* }
 
 if [ "$1" == "redis" ]; then

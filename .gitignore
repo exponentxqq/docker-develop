@@ -28,4 +28,6 @@ redis/data
 /mongo/data
 /mongo/log
 
+/python/aws
+
 .env
