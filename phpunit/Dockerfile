@@ -80,5 +80,3 @@ RUN if [ ${INSTALL_LATEX} = true ]; then\
 
 RUN apt-get -y install imagemagick libmagick++-dev && \
     pecl install imagick
-
-RUN cp -r usr/local/lib/python2.7/dist-packages/backports /usr/local/lib/python2.7/dist-packages/docker/transport

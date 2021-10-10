@@ -106,24 +106,14 @@ services:
       context: ./workspace
       args:
         - USER_ID=${USER_ID}
-        - PHP_VERSION=${PHP_VERSION}
-        - INSTALL_GIT=${WORKSPACE_INSTALL_GIT}
-        - INSTALL_VIM=${WORKSPACE_INSTALL_VIM}
-        - INSTALL_NETTOOLS=${WORKSPACE_INSTALL_NETTOOLS}
-        - INSTALL_COMPOSER=${WORKSPACE_INSTALL_COMPOSER}
-        - INSTALL_PS_WATCHER=${WORKSPACE_INSTALL_PS_WATCHER}
-        - INSTALL_MONGO=${WORKSPACE_INSTALL_MONGO}
     container_name: workspace
     user: ${USER_ID}:${USER_ID}
     working_dir: ${CONTAINER_PROJECT_PATH}
     volumes:
-      - ./php/php.ini:/usr/local/etc/php/php.ini
       - ${HOST_PROJECT_PATH}:${CONTAINER_PROJECT_PATH}
-      - ./cache/composer-cache/:/home/docker/.composer/
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /usr/bin/docker:/usr/bin/docker
     tty: true
-    links:
-      - mysql
-      - redis
     networks:
       backend:
         ipv4_address: 172.20.0.8
@@ -155,6 +145,7 @@ services:
       context: ./node
       args:
         - NODE_VERSION=${NODE_VERSION}
+        - USER_ID=${USER_ID}
     container_name: node
     user: ${USER_ID}:${USER_ID}
     extra_hosts:
