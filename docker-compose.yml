@@ -37,13 +37,13 @@ services:
       - ./redis/log/redis.log:/var/log/redis/redis-server.log
       - ${REDIS_HOST_DATA_PATH}:${REDIS_CONTAINER_DATA_PATH}
       - ./redis/redis.conf:/usr/local/etc/redis/redis.conf
-    networks: 
+    networks:
       backend:
         ipv4_address: 172.20.0.5
 
-  php-fpm:
+  fpm:
     build:
-      context: ./php
+      context: fpm
       args:
         - PHP_VERSION=${PHP_VERSION}
         - INSTALL_XDEBUG=${PHP_INSTALL_XDEBUG}
@@ -55,7 +55,7 @@ services:
         - INSTALL_PYTHON_PACK=${PHP_INSTALL_PYTHON_PACK}
         - INSTALL_IMAGIC=${PHP_INSTALL_IMAGIC}
         - INSTALL_LATEX=${PHP_INSTALL_LATEX}
-    container_name: php-fpm
+    container_name: fpm
     working_dir: ${CONTAINER_PROJECT_PATH}
     user: ${USER_ID}:${USER_ID}
     ports:
@@ -75,7 +75,7 @@ services:
       - ./php/log/php-fpm.log:/var/log/php-fpm.log
       - ${HOST_PROJECT_PATH}:${CONTAINER_PROJECT_PATH}
       - ./php/log/xdebug.log:/var/log/xdebug.log
-    networks: 
+    networks:
       backend:
         ipv4_address: 172.20.0.7
 
@@ -97,7 +97,7 @@ services:
       - ./nginx/log/:/nginx/log
     extra_hosts:
       - "dockerhost:${DOCKER_HOST_IP}"
-    networks: 
+    networks:
       backend:
         ipv4_address: 172.20.0.3
 
@@ -107,7 +107,6 @@ services:
       args:
         - USER_ID=${USER_ID}
     container_name: workspace
-    user: ${USER_ID}:${USER_ID}
     working_dir: ${CONTAINER_PROJECT_PATH}
     volumes:
       - ${HOST_PROJECT_PATH}:${CONTAINER_PROJECT_PATH}
@@ -157,10 +156,8 @@ services:
     volumes:
       - ${HOST_PROJECT_PATH}:${CONTAINER_PROJECT_PATH}
       - ./cache/npm-cache/:/home/node/.npm/
-    links: 
-      - java
     tty: true
-    networks: 
+    networks:
       backend:
         ipv4_address: 172.20.0.2
 
@@ -202,7 +199,7 @@ services:
     links:
       - "mysql"
       - "redis"
-    depends_on: 
+    depends_on:
       - "mysql"
       - "redis"
     ports:
@@ -231,9 +228,9 @@ services:
     networks:
       backend:
         ipv4_address: 172.20.0.11
-  
+
   python:
-    build: 
+    build:
       context: ./python
       args:
         - USER_ID=${USER_ID}
@@ -243,6 +240,7 @@ services:
     volumes:
       - ${HOST_PROJECT_PATH}:${CONTAINER_PROJECT_PATH}
       - ./python/aws:/home/docker/.aws
+      - /data:/data
     networks:
       backend:
         ipv4_address: 172.20.0.12

@@ -27,7 +27,7 @@ RUN echo 'root:123456' | chpasswd &&\
     useradd docker -u ${USER_ID} -g root -m &&\
     groupadd docker && \
     gpasswd -a docker docker && \
-    newgrp docker
+    newgrp docker \
 RUN wget https://github.com/robbyrussell/oh-my-zsh/raw/master/tools/install.sh -O - | sh
 
 

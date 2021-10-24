@@ -17,11 +17,19 @@ RUN docker-php-ext-install pdo_mysql && \
     docker-php-ext-install exif
 
 #---------------------------------------------
+# COMPOSER
+#---------------------------------------------
+ARG INSTALL_COMPOSER=false
+RUN if [ ${INSTALL_COMPOSER} = true ]; then \
+    curl -s http://getcomposer.org/installer | php && \
+    echo "export PATH=${PATH}:/var/www/vendor/bin" >> ~/.bashrc && \
+    mv composer.phar /usr/local/bin/composer \
+;fi
+
+#---------------------------------------------
 # PHP_XDEBUG
 #---------------------------------------------
-
 ARG INSTALL_XDEBUG=false
-
 RUN if [ ${INSTALL_XDEBUG} = true ]; then \
     if [ $(php -r "echo PHP_MAJOR_VERSION;") = "5" ]; then \
         pecl install xdebug-2.5.5; \
@@ -29,15 +37,12 @@ RUN if [ ${INSTALL_XDEBUG} = true ]; then \
         pecl install xdebug; \
     fi \
 ;fi
-
 COPY ./conf.d/xdebug.ini /usr/local/etc/php/conf.d
 
 #---------------------------------------------
 # REDIS
 #---------------------------------------------
-
 ARG INSTALL_REDIS=false
-
 RUN if [ ${INSTALL_REDIS} = true ]; then \
     printf "\n" | pecl install -o -f redis && \
     rm -rf /tmp/pear && \
@@ -47,9 +52,7 @@ RUN if [ ${INSTALL_REDIS} = true ]; then \
 #---------------------------------------------
 # SWOOLE
 #---------------------------------------------
-
 ARG INSTALL_SWOOLE=false
-
 RUN if [ ${INSTALL_SWOOLE} = true ]; then \
     if [ $(php -r "echo PHP_MAJOR_VERSION;") = "5" ]; then \
         pecl install swoole-2.0.10; \
@@ -67,9 +70,7 @@ RUN if [ ${INSTALL_SWOOLE} = true ]; then \
 #---------------------------------------------
 # PYTHON2
 #---------------------------------------------
-
 ARG INSTALL_PYTHON2=false
-
 RUN if [ ${INSTALL_PYTHON2} = true ]; then \
     apt-get install -y python2 \
     python-dev \
@@ -80,9 +81,7 @@ RUN if [ ${INSTALL_PYTHON2} = true ]; then \
 #---------------------------------------------
 # PYTHON3
 #---------------------------------------------
-
 ARG INSTALL_PYTHON3=false
-
 RUN if [ ${INSTALL_PYTHON3} = true ]; then \
     apt-get install -y python3 \
     python3-dev \
@@ -93,9 +92,7 @@ RUN if [ ${INSTALL_PYTHON3} = true ]; then \
 #---------------------------------------------
 # PYTHON PACK
 #---------------------------------------------
-
 ARG INSTALL_PYTHON_PACK=false
-
 RUN if [ ${INSTALL_PYTHON_PACK} = true ]; then \
     sed -i 's/unsigned long packet_length;/unsigned long packet_length;unsigned int reconnect;/' /usr/include/mysql/mysql.h && \
     pip install jieba \
@@ -111,9 +108,7 @@ RUN if [ ${INSTALL_PYTHON_PACK} = true ]; then \
 #---------------------------------------------
 # PHP_JIEBA
 #---------------------------------------------
-
 ARG INSTALL_JIEBA=false
-
 RUN if [ ${INSTALL_JIEBA} = true ]; then \
     git clone https://github.com/jonnywang/phpjieba.git /opt/phpjieba && \
     cd /opt/phpjieba/cjieba && \
@@ -124,28 +119,22 @@ RUN if [ ${INSTALL_JIEBA} = true ]; then \
     make && \
     make install \
 ;fi
-
 COPY ./conf.d/jieba.ini /usr/local/etc/php/conf.d
 
 #---------------------------------------------
 # PHP_IMAGIC
 #---------------------------------------------
-
 ARG INSTALL_IMAGIC=false
-
 RUN if [ ${INSTALL_IMAGIC} = true ]; then \
     apt-get -y install imagemagick libmagick++-dev && \
     pecl install imagick \
 ;fi
-
 COPY ./conf.d/imagick.ini /usr/local/etc/php/conf.d
 
 #---------------------------------------------
 # Latex
 #---------------------------------------------
-
 ARG INSTALL_LATEX=false
-
 RUN if [ ${INSTALL_LATEX} = true ]; then\
     apt-get -y --fix-missing install dvipng texlive\
 ;fi
