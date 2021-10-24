@@ -86,9 +86,9 @@ services:
       - "80:80"
       - "443:443"
     links:
-      - "php-fpm"
+      - "fpm"
     depends_on:
-      - "php-fpm"
+      - "fpm"
     volumes:
       - ${HOST_PROJECT_PATH}:${CONTAINER_PROJECT_PATH}
       - ./nginx/site-enabled/:/etc/nginx/conf.d/
@@ -112,6 +112,7 @@ services:
       - ${HOST_PROJECT_PATH}:${CONTAINER_PROJECT_PATH}
       - /var/run/docker.sock:/var/run/docker.sock
       - /usr/bin/docker:/usr/bin/docker
+      - /usr/bin/git:/usr/bin/git
     tty: true
     networks:
       backend:
