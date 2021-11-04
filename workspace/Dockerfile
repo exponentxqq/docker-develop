@@ -24,10 +24,6 @@ RUN echo 'root:123456' | chpasswd &&\
     echo "%sudo ALL=(ALL:ALL) ALL" >> /etc/sudoers &&\
     echo "%sudo ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers && \
     echo "docker ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers &&\
-    useradd docker -u ${USER_ID} -g root -m &&\
-    groupadd docker && \
-    gpasswd -a docker docker && \
-    newgrp docker \
+    useradd docker -u ${USER_ID} -g root -m
+USER docker
 RUN wget https://github.com/robbyrussell/oh-my-zsh/raw/master/tools/install.sh -O - | sh
-
-

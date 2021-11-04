@@ -14,8 +14,6 @@ services:
         - MYSQL_VERSION=${MYSQL_VERSION}
     container_name: mysql
     environment:
-      - MYSQL_USER=${MYSQL_USER}
-      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
       - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
       - TZ=${TIMEZONE}
     volumes:
@@ -32,7 +30,7 @@ services:
     build: ./redis
     container_name: redis
     ports:
-      - "6379:6379"
+      - "${REDIS_PORT}:6379"
     volumes:
       - ./redis/log/redis.log:/var/log/redis/redis-server.log
       - ${REDIS_HOST_DATA_PATH}:${REDIS_CONTAINER_DATA_PATH}
@@ -110,9 +108,8 @@ services:
     working_dir: ${CONTAINER_PROJECT_PATH}
     volumes:
       - ${HOST_PROJECT_PATH}:${CONTAINER_PROJECT_PATH}
-      - /var/run/docker.sock:/var/run/docker.sock
-      - /usr/bin/docker:/usr/bin/docker
       - /usr/bin/git:/usr/bin/git
+      - ./common/.zshrc:/home/docker/.zshrc
     tty: true
     networks:
       backend:
@@ -239,6 +236,8 @@ services:
     tty: true
     user: ${USER_ID}:${USER_ID}
     volumes:
+      - ./common/.zshrc:/home/docker/.zshrc
+      - ./common/.vimrc:/home/docker/.vimrc
       - ${HOST_PROJECT_PATH}:${CONTAINER_PROJECT_PATH}
       - ./python/aws:/home/docker/.aws
       - /data:/data

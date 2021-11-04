@@ -2,13 +2,13 @@ FROM tensorflow/tensorflow
 
 RUN apt-get update
 
-RUN apt-get install -y unzip vim wget zsh git python2.7 python-pip && \
+RUN apt-get install -y unzip vim wget zsh git python2.7 python3-pip && \
     curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip" && \
     unzip awscliv2.zip && \
     ./aws/install && \
     rm -rf awscliv2.zip
 
-RUN pip install tqdm pillow boto3 oss2 chardet pymysql w3lib openpyxl
+RUN pip install tqdm pillow boto3 oss2 chardet pymysql w3lib openpyxl pymongo
 
 ARG USER_ID
 RUN useradd docker -u ${USER_ID} -g root -m
