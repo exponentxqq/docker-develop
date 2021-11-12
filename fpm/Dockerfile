@@ -14,101 +14,71 @@ RUN docker-php-ext-install pdo_mysql && \
     docker-php-ext-install zip && \
     docker-php-ext-install pcntl && \
     docker-php-ext-install posix && \
-    docker-php-ext-install exif
+    docker-php-ext-install exif && \
+    docker-php-ext-install gettext
 
 #---------------------------------------------
-# COMPOSER
+# Composer
 #---------------------------------------------
-ARG INSTALL_COMPOSER=false
-RUN if [ ${INSTALL_COMPOSER} = true ]; then \
-    curl -s http://getcomposer.org/installer | php && \
+ARG INSTALL_COMPOSER
+RUN curl -s http://getcomposer.org/installer | php && \
     echo "export PATH=${PATH}:/var/www/vendor/bin" >> ~/.bashrc && \
-    mv composer.phar /usr/local/bin/composer \
-;fi
+    mv composer.phar /usr/local/bin/composer
 
 #---------------------------------------------
-# PHP_XDEBUG
+# Xdebug
 #---------------------------------------------
-ARG INSTALL_XDEBUG=false
+ARG INSTALL_XDEBUG
 RUN if [ ${INSTALL_XDEBUG} = true ]; then \
-    if [ $(php -r "echo PHP_MAJOR_VERSION;") = "5" ]; then \
-        pecl install xdebug-2.5.5; \
+    # Install the xdebug extension
+    # https://xdebug.org/docs/compat
+    if [ $(php -r "echo PHP_MAJOR_VERSION;") = "8" ] || { [ $(php -r "echo PHP_MAJOR_VERSION;") = "7" ] && { [ $(php -r "echo PHP_MINOR_VERSION;") = "4" ] || [ $(php -r "echo PHP_MINOR_VERSION;") = "3" ] ;} ;}; then \
+        pecl install xdebug-3.1.1; \
     else \
-        pecl install xdebug; \
-    fi \
+        if [ $(php -r "echo PHP_MAJOR_VERSION;") = "5" ]; then \
+            pecl install xdebug-2.5.5; \
+        else \
+            if [ $(php -r "echo PHP_MINOR_VERSION;") = "0" ]; then \
+                pecl install xdebug-2.9.0; \
+            else \
+                pecl install xdebug-2.9.8; \
+            fi \
+        fi \
+    fi && \
+    ln -s /usr/local/etc/php.conf/xdebug.ini /usr/local/etc/php/conf.d/xdebug.ini \
 ;fi
-COPY ./conf.d/xdebug.ini /usr/local/etc/php/conf.d
 
 #---------------------------------------------
-# REDIS
+# Redis
 #---------------------------------------------
-ARG INSTALL_REDIS=false
+ARG INSTALL_REDIS
 RUN if [ ${INSTALL_REDIS} = true ]; then \
     printf "\n" | pecl install -o -f redis && \
     rm -rf /tmp/pear && \
-    docker-php-ext-enable redis \
+    ln -s /usr/local/etc/php.conf/redis.ini /usr/local/etc/php/conf.d/redis.ini \
 ;fi
 
 #---------------------------------------------
-# SWOOLE
+# Swoole
 #---------------------------------------------
-ARG INSTALL_SWOOLE=false
+ARG INSTALL_SWOOLE
 RUN if [ ${INSTALL_SWOOLE} = true ]; then \
-    if [ $(php -r "echo PHP_MAJOR_VERSION;") = "5" ]; then \
+    if [ $(php -r "echo PHP_VERSION_ID - PHP_RELEASE_VERSION;") = "50600" ]; then \
         pecl install swoole-2.0.10; \
+    elif [ $(php -r "echo PHP_VERSION_ID - PHP_RELEASE_VERSION;") = "70000" ]; then \
+        pecl install swoole-4.3.5; \
+    elif [ $(php -r "echo PHP_VERSION_ID - PHP_RELEASE_VERSION;") = "70100" ]; then \
+        pecl install swoole-4.5.11; \
     else \
-        if [ $(php -r "echo PHP_MINOR_VERSION;") = "0" ]; then \
-            pecl install swoole-2.2.0; \
-        else \
-            pecl install swoole; \
-        fi \
-    fi && \
-    docker-php-ext-enable swoole && \
-    php -m | grep -q 'swoole' \
+        pecl install swoole; \
+    fi; \
+    ln -s /usr/local/etc/php.conf/swoole.ini /usr/local/etc/php/conf.d/swoole.ini \
 ;fi
 
 #---------------------------------------------
-# PYTHON2
+# Jieba
 #---------------------------------------------
-ARG INSTALL_PYTHON2=false
-RUN if [ ${INSTALL_PYTHON2} = true ]; then \
-    apt-get install -y python2 \
-    python-dev \
-    python-pip \
-    python-qt4 \
-;fi
-
-#---------------------------------------------
-# PYTHON3
-#---------------------------------------------
-ARG INSTALL_PYTHON3=false
-RUN if [ ${INSTALL_PYTHON3} = true ]; then \
-    apt-get install -y python3 \
-    python3-dev \
-    python3-pip \
-    default-libmysqlclient-dev \
-;fi
-
-#---------------------------------------------
-# PYTHON PACK
-#---------------------------------------------
-ARG INSTALL_PYTHON_PACK=false
-RUN if [ ${INSTALL_PYTHON_PACK} = true ]; then \
-    sed -i 's/unsigned long packet_length;/unsigned long packet_length;unsigned int reconnect;/' /usr/include/mysql/mysql.h && \
-    pip install jieba \
-    MySQL-python \
-    opencv-python \
-    image \
-    hanziconv \
-    lark-parser \
-    torndb \
-    imutils \
-;fi
-
-#---------------------------------------------
-# PHP_JIEBA
-#---------------------------------------------
-ARG INSTALL_JIEBA=false
+ARG INSTALL_JIEBA
 RUN if [ ${INSTALL_JIEBA} = true ]; then \
     git clone https://github.com/jonnywang/phpjieba.git /opt/phpjieba && \
     cd /opt/phpjieba/cjieba && \
@@ -117,24 +87,49 @@ RUN if [ ${INSTALL_JIEBA} = true ]; then \
     phpize && \
     ./configure && \
     make && \
-    make install \
+    make install && \
+    ln -s /usr/local/etc/php.conf/jieba.ini /usr/local/etc/php/conf.d/jieba.ini \
 ;fi
-COPY ./conf.d/jieba.ini /usr/local/etc/php/conf.d
 
 #---------------------------------------------
-# PHP_IMAGIC
+# Imagick
 #---------------------------------------------
-ARG INSTALL_IMAGIC=false
-RUN if [ ${INSTALL_IMAGIC} = true ]; then \
-    apt-get -y install imagemagick libmagick++-dev && \
-    pecl install imagick \
+ARG INSTALL_IMAGICK
+ARG IMAGICK_VERSION=latest
+RUN if [ ${INSTALL_IMAGICK} = true ]; then \
+    apt-get install -y libmagickwand-dev imagemagick && \
+    if [ $(php -r "echo PHP_MAJOR_VERSION;") = "8" ]; then \
+        cd /tmp && \
+        if [ ${IMAGICK_VERSION} = "latest" ]; then \
+            git clone https://github.com/Imagick/imagick; \
+        else \
+            git clone --branch ${IMAGICK_VERSION} https://github.com/Imagick/imagick; \
+        fi && \
+        cd imagick && \
+        phpize && \
+        ./configure && \
+        make && \
+        make install && \
+        rm -r /tmp/imagick; \
+    else \
+        pecl install imagick; \
+    fi && \
+    php -m | grep -q 'imagick'; \
+    ln -s /usr/local/etc/php.conf/imagick.ini /usr/local/etc/php/conf.d/imagick.ini \
 ;fi
-COPY ./conf.d/imagick.ini /usr/local/etc/php/conf.d
 
 #---------------------------------------------
-# Latex
+# Phalcon
 #---------------------------------------------
-ARG INSTALL_LATEX=false
-RUN if [ ${INSTALL_LATEX} = true ]; then\
-    apt-get -y --fix-missing install dvipng texlive\
+ARG INSTALL_PHALCON
+ARG PHALCON_VERSION
+RUN if [ ${INSTALL_PHALCON} = true ]; then \
+    apt-get install -y unzip libpcre3-dev re2c automake autoconf\
+    && pecl install psr \
+    && curl -L -o /tmp/cphalcon.zip https://github.com/phalcon/cphalcon/archive/v${PHALCON_VERSION}.zip \
+    && unzip -d /tmp/ /tmp/cphalcon.zip \
+    && cd /tmp/cphalcon-${PHALCON_VERSION}/build \
+    && ./install \
+    && ln -s /usr/local/etc/php.conf/phalcon.ini /usr/local/etc/php/conf.d/phalcon.ini \
+    && rm -rf /tmp/cphalcon* \
 ;fi

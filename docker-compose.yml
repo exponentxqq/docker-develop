@@ -1,4 +1,4 @@
-version: "3"
+version: "3.5"
 networks:
   backend:
     driver: bridge
@@ -10,6 +10,7 @@ services:
   mysql:
     build:
       context: ./mysql
+      dockerfile: ./Dockerfile
       args:
         - MYSQL_VERSION=${MYSQL_VERSION}
     container_name: mysql
@@ -27,7 +28,9 @@ services:
         ipv4_address: 172.20.0.4
 
   redis:
-    build: ./redis
+    build:
+      context: ./redis
+      dockerfile: ./Dockerfile
     container_name: redis
     ports:
       - "${REDIS_PORT}:6379"
@@ -42,17 +45,18 @@ services:
   fpm:
     build:
       context: fpm
+      dockerfile: ./Dockerfile
       args:
         - PHP_VERSION=${PHP_VERSION}
+        - INSTALL_COMPOSER=${PHP_INSTALL_COMPOSER}
         - INSTALL_XDEBUG=${PHP_INSTALL_XDEBUG}
         - INSTALL_REDIS=${PHP_INSTALL_REDIS}
         - INSTALL_JIEBA=${PHP_INSTALL_JIEBA}
         - INSTALL_SWOOLE=${PHP_INSTALL_SWOOLE}
-        - INSTALL_PYTHON2=${PHP_INSTALL_PYTHON2}
-        - INSTALL_PYTHON3=${PHP_INSTALL_PYTHON3}
-        - INSTALL_PYTHON_PACK=${PHP_INSTALL_PYTHON_PACK}
-        - INSTALL_IMAGIC=${PHP_INSTALL_IMAGIC}
-        - INSTALL_LATEX=${PHP_INSTALL_LATEX}
+        - INSTALL_IMAGICK=${PHP_INSTALL_IMAGICK}
+        - IMAGICK_VERSION=${PHP_IMAGICK_VERSION}
+        - INSTALL_PHALCON=${PHP_INSTALL_PHALCON}
+        - PHALCON_VERSION=${PHP_PHALCON_VERSION}
     container_name: fpm
     working_dir: ${CONTAINER_PROJECT_PATH}
     user: ${USER_ID}:${USER_ID}
@@ -69,10 +73,11 @@ services:
       - "mysql"
       - "redis"
     volumes:
-      - ./php/php.ini:/usr/local/etc/php/php.ini
-      - ./php/log/php-fpm.log:/var/log/php-fpm.log
+      - ./fpm/conf.d:/usr/local/etc/php.conf
+      - ./fpm/php.ini:/usr/local/etc/php/php.ini
+      - ./fpm/log/php-fpm.log:/var/log/php-fpm.log
       - ${HOST_PROJECT_PATH}:${CONTAINER_PROJECT_PATH}
-      - ./php/log/xdebug.log:/var/log/xdebug.log
+      - ./fpm/log/xdebug.log:/var/log/xdebug.log
     networks:
       backend:
         ipv4_address: 172.20.0.7
@@ -110,6 +115,7 @@ services:
       - ${HOST_PROJECT_PATH}:${CONTAINER_PROJECT_PATH}
       - /usr/bin/git:/usr/bin/git
       - ./common/.zshrc:/home/docker/.zshrc
+      - ./common/.vimrc:/home/docker/.vimrc
     tty: true
     networks:
       backend:
@@ -169,9 +175,9 @@ services:
     user: ${USER_ID}:${USER_ID}
     volumes:
       - ${HOST_PROJECT_PATH}:${CONTAINER_PROJECT_PATH}
-      - ${HOST_MAVEN_PATH}:/usr/local/maven
-      - ${HOST_GRADLE_PATH}:/usr/local/gradle
-      - ${HOST_JAVAFX_PATH}:/usr/local/lib/javafx
+      - ${JDK_HOST_MAVEN_PATH}:/usr/local/maven
+      - ${JDK_HOST_GRADLE_PATH}:/usr/local/gradle
+      - ${JDK_HOST_JAVAFX_PATH}:/usr/local/lib/javafx
       - ./cache/gradle-cache/:/home/docker/.gradle/
       - ./cache/maven-cache/:/home/docker/.m2/
       - ./cache/javafx-cache/:/home/docker/.openjfx/
