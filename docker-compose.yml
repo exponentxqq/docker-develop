@@ -14,6 +14,7 @@ services:
       args:
         - MYSQL_VERSION=${MYSQL_VERSION}
     container_name: mysql
+    user: ${USER_ID}:${USER_ID}
     environment:
       - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
       - TZ=${TIMEZONE}
@@ -94,10 +95,10 @@ services:
       - "fpm"
     volumes:
       - ${HOST_PROJECT_PATH}:${CONTAINER_PROJECT_PATH}
-      - ./nginx/site-enabled/:/etc/nginx/conf.d/
+      - ./nginx/site-enabled:/etc/nginx/conf.d
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf
-      - ./nginx/ssl/:/etc/nginx/ssl/
-      - ./nginx/log/:/nginx/log
+      - ./nginx/ssl:/etc/nginx/ssl
+      - ./nginx/log:/nginx/log
     extra_hosts:
       - "dockerhost:${DOCKER_HOST_IP}"
     networks:
@@ -159,7 +160,7 @@ services:
       - "www.qms.localhost:172.20.0.3"
     volumes:
       - ${HOST_PROJECT_PATH}:${CONTAINER_PROJECT_PATH}
-      - ./cache/npm-cache/:/home/node/.npm/
+      - ./cache/npm-cache:/home/node/.npm
     tty: true
     networks:
       backend:
@@ -178,9 +179,9 @@ services:
       - ${JDK_HOST_MAVEN_PATH}:/usr/local/maven
       - ${JDK_HOST_GRADLE_PATH}:/usr/local/gradle
       - ${JDK_HOST_JAVAFX_PATH}:/usr/local/lib/javafx
-      - ./cache/gradle-cache/:/home/docker/.gradle/
-      - ./cache/maven-cache/:/home/docker/.m2/
-      - ./cache/javafx-cache/:/home/docker/.openjfx/
+      - ./cache/gradle-cache:/home/docker/.gradle
+      - ./cache/maven-cache:/home/docker/.m2
+      - ./cache/javafx-cache:/home/docker/.openjfx
     extra_hosts:
       - "www.auth.localhost:172.20.0.3"
       - "dockerhost:${DOCKER_HOST_IP}"
@@ -198,7 +199,7 @@ services:
     container_name: go
     volumes:
       - ${HOST_PROJECT_PATH}:${CONTAINER_PROJECT_PATH}
-      - ./cache/go-cache/:/usr/local/go/
+      - ./cache/go-cache:/usr/local/go
     tty: true
     links:
       - "mysql"
@@ -218,6 +219,7 @@ services:
       args:
         - MONGO_VERSION=${MONGO_VERSION}
     container_name: mongo
+    user: ${USER_ID}:${USER_ID}
     environment:
       - MONGO_DATA_DIR=${MONGO_CONTAINER_DATA_DIR}
       - MONGO_LOG_DIR=${MONGO_CONTAINER_LOG_DIR}

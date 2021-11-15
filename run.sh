@@ -1,5 +1,9 @@
+DOCKER_ROOT_DIR=$(dirname $0)
+source $DOCKER_ROOT_DIR/.env
 project_path=$(pwd)
-container_names=$(cd /develop/docker && docker-compose ps | grep -v Exit | awk '{print $1}' | grep -v Name | grep -v "^-")
+project_path=${project_path/#$HOST_PROJECT_PATH/$CONTAINER_PROJECT_PATH}
+
+container_names=$(cd $DOCKER_ROOT_DIR && docker-compose ps | grep -v Exit | grep -v exited | awk '{print $1}' | grep -v Name | grep -v NAME | grep -v "^-")
 exists=false
 for container_name in $container_names
 do
@@ -9,10 +13,8 @@ do
 done
 
 if [ false == $exists ]; then
-    echo "$1 container not exists"
-    echo "current containers:"
-    echo "$container_names"
-    exit 1;
+    echo "start container[$1]..."
+    cd $DOCKER_ROOT_DIR && docker-compose up -d $1
 fi
 
 echo "[$1]current project_path: $project_path"
