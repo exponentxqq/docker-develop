@@ -6,7 +6,8 @@ RUN mkdir /usr/local/etc/php/pool.d/ && mkdir /www/
 RUN apt-get update
 RUN apt-get install -y libpng-dev && \
     apt-get install -y gdb && \
-    apt-get install -y git
+    apt-get install -y git && \
+    apt-get install -y zsh
 
 RUN docker-php-ext-install pdo_mysql && \
     docker-php-ext-install mysqli && \
@@ -24,6 +25,9 @@ ARG INSTALL_COMPOSER
 RUN curl -s http://getcomposer.org/installer | php && \
     echo "export PATH=${PATH}:/var/www/vendor/bin" >> ~/.bashrc && \
     mv composer.phar /usr/local/bin/composer
+
+ADD ./phpunit-7.1.5.phar /usr/local/bin/phpunit
+RUN chmod 755 /usr/local/bin/phpunit
 
 #---------------------------------------------
 # Xdebug
@@ -133,3 +137,8 @@ RUN if [ ${INSTALL_PHALCON} = true ]; then \
     && ln -s /usr/local/etc/php.conf/phalcon.ini /usr/local/etc/php/conf.d/phalcon.ini \
     && rm -rf /tmp/cphalcon* \
 ;fi
+
+ARG USER_ID
+RUN useradd docker -u ${USER_ID} -g root -m
+USER docker
+RUN wget https://github.com/robbyrussell/oh-my-zsh/raw/master/tools/install.sh -O - | sh

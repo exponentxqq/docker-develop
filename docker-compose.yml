@@ -79,6 +79,9 @@ services:
       - ./fpm/log/php-fpm.log:/var/log/php-fpm.log
       - ${HOST_PROJECT_PATH}:${CONTAINER_PROJECT_PATH}
       - ./fpm/log/xdebug.log:/var/log/xdebug.log
+      - ./cache/composer-cache:/home/docker/.composer
+      - ./common/.zshrc:/home/docker/.zshrc
+      - ./common/.vimrc:/home/docker/.vimrc
     networks:
       backend:
         ipv4_address: 172.20.0.7
@@ -122,28 +125,6 @@ services:
       backend:
         ipv4_address: 172.20.0.8
 
-  phpunit:
-    build:
-      context: ./phpunit
-      args:
-        - PHP_VERSION=${PHP_VERSION}
-        - INSTALL_LATEX=${PHP_INSTALL_LATEX}
-    container_name: phpunit
-    volumes:
-      - ./php/php.ini:/usr/local/etc/php/php.ini
-      - ${HOST_PROJECT_PATH}:${CONTAINER_PROJECT_PATH}
-    tty: true
-    extra_hosts:
-      - "dockerhost:${DOCKER_HOST_IP}"
-      - "www.benchmark.localhost:172.20.0.3"
-      - "www.qms.localhost:172.20.0.3"
-    links:
-      - mysql
-      - redis
-    networks:
-      backend:
-        ipv4_address: 172.20.0.9
-
   node:
     build:
       context: ./node
@@ -161,6 +142,8 @@ services:
     volumes:
       - ${HOST_PROJECT_PATH}:${CONTAINER_PROJECT_PATH}
       - ./cache/npm-cache:/home/node/.npm
+    ports:
+      - "8090-8099:8090-8099"
     tty: true
     networks:
       backend:
@@ -175,6 +158,7 @@ services:
     container_name: java
     user: ${USER_ID}:${USER_ID}
     volumes:
+      - ./java/conf:/usr/local/openjdk-11/conf
       - ${HOST_PROJECT_PATH}:${CONTAINER_PROJECT_PATH}
       - ${JDK_HOST_MAVEN_PATH}:/usr/local/maven
       - ${JDK_HOST_GRADLE_PATH}:/usr/local/gradle
