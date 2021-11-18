@@ -155,6 +155,7 @@ services:
       args:
         - JDK_VERSION=${JDK_VERSION}
         - USER_ID=${USER_ID}
+        - BUILD_OPENCV=${BUILD_OPENCV}
     container_name: java
     user: ${USER_ID}:${USER_ID}
     volumes:
@@ -232,7 +233,7 @@ services:
       - ./common/.vimrc:/home/docker/.vimrc
       - ${HOST_PROJECT_PATH}:${CONTAINER_PROJECT_PATH}
       - ./python/aws:/home/docker/.aws
-      - /data:/data
+      - /mnt/e:/data
     networks:
       backend:
         ipv4_address: 172.20.0.12

@@ -15,7 +15,8 @@ ENV PATH $PATH:$GRADLE_HOME/bin
 
 # build opencv
 COPY ./build.sh /opt
-RUN cd /opt && git config --global http.postBuffer 524288000 && sh build.sh
+ARG BUILD_OPENCV=false
+RUN if [ $BUILD_OPENCV = true ]; then cd /opt && git config --global http.postBuffer 524288000 && sh build.sh fi
 
 ARG USER_ID
 RUN echo ${USER_ID}

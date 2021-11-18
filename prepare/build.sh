@@ -2,8 +2,7 @@ set -eo pipefail
 BASEDIR=`cd $(dirname $0); pwd`
 
 if [ ! -f "$BASEDIR/../.env" ]; then
-    echo env file not exists
-    exit 1
+    cp $BASEDIR/../.env-example $BASEDIR/../.env
 fi
 
 docker -v

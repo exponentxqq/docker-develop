@@ -3,6 +3,7 @@ FROM tensorflow/tensorflow
 RUN apt-get update
 
 RUN apt-get install -y unzip vim wget zsh git python2.7 python3-pip && \
+    # you can use `aws configure` to generate the default configuration
     curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip" && \
     unzip awscliv2.zip && \
     ./aws/install && \
