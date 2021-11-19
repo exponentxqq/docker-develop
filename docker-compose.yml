@@ -67,18 +67,10 @@ services:
       - "dockerhost:${DOCKER_HOST_IP}"
       - "www.qms.localhost:172.20.0.3"
       - "www.auth.localhost:172.20.0.3"
-    links:
-      - "mysql"
-      - "redis"
-    depends_on:
-      - "mysql"
-      - "redis"
     volumes:
       - ./fpm/conf.d:/usr/local/etc/php.conf
       - ./fpm/php.ini:/usr/local/etc/php/php.ini
-      - ./fpm/log/php-fpm.log:/var/log/php-fpm.log
       - ${HOST_PROJECT_PATH}:${CONTAINER_PROJECT_PATH}
-      - ./fpm/log/xdebug.log:/var/log/xdebug.log
       - ./cache/composer-cache:/home/docker/.composer
       - ./common/.zshrc:/home/docker/.zshrc
       - ./common/.vimrc:/home/docker/.vimrc
@@ -157,6 +149,8 @@ services:
         - USER_ID=${USER_ID}
         - BUILD_OPENCV=${BUILD_OPENCV}
     container_name: java
+    environment:
+      - _JAVA_OPTIONS=-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5750 -Xmx256m -Xms128m
     user: ${USER_ID}:${USER_ID}
     volumes:
       - ./java/conf:/usr/local/openjdk-11/conf
@@ -171,9 +165,6 @@ services:
       - "www.auth.localhost:172.20.0.3"
       - "dockerhost:${DOCKER_HOST_IP}"
     tty: true
-    links:
-      - mysql
-      - redis
     networks:
       backend:
         ipv4_address: 172.20.0.6
@@ -186,12 +177,6 @@ services:
       - ${HOST_PROJECT_PATH}:${CONTAINER_PROJECT_PATH}
       - ./cache/go-cache:/usr/local/go
     tty: true
-    links:
-      - "mysql"
-      - "redis"
-    depends_on:
-      - "mysql"
-      - "redis"
     ports:
       - "3000:3000"
     networks:
@@ -233,7 +218,9 @@ services:
       - ./common/.vimrc:/home/docker/.vimrc
       - ${HOST_PROJECT_PATH}:${CONTAINER_PROJECT_PATH}
       - ./python/aws:/home/docker/.aws
-      - /mnt/e:/data
+      - ${DATA_PATH}:/data
+    extra_hosts:
+      - "dockerhost:${DOCKER_HOST_IP}"
     networks:
       backend:
         ipv4_address: 172.20.0.12
