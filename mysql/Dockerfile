@@ -1,5 +1,6 @@
 ARG MYSQL_VERSION=latest
-FROM mysql:${MYSQL_VERSION}
+ARG MYSQL_IMAGE=mysql
+FROM ${MYSQL_IMAGE}:${MYSQL_VERSION}
 
 #####################################
 # Set Timezone

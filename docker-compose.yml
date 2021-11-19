@@ -12,9 +12,9 @@ services:
       context: ./mysql
       dockerfile: ./Dockerfile
       args:
+        - MYSQL_IMAGE=${MYSQL_IMAGE}
         - MYSQL_VERSION=${MYSQL_VERSION}
     container_name: mysql
-    user: ${USER_ID}:${USER_ID}
     environment:
       - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
       - TZ=${TIMEZONE}
