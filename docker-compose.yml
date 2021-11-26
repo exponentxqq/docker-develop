@@ -16,10 +16,10 @@ services:
         - MYSQL_VERSION=${MYSQL_VERSION}
     container_name: mysql
     environment:
+      - MYSQL_USER=${MYSQL_USER}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
       - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
       - TZ=${TIMEZONE}
-      - MYSQL_USER=local
-      - MYSQL_PASSWORD=123456
     volumes:
       - ${MYSQL_HOST_DATA_PATH}:${MYSQL_CONTAINER_DATA_PATH}
       - ${MYSQL_ENTRYPOINT_INITDB}:/docker-entrypoint-initdb.d
