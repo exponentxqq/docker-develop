@@ -18,6 +18,8 @@ services:
     environment:
       - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
       - TZ=${TIMEZONE}
+      - MYSQL_USER=local
+      - MYSQL_PASSWORD=123456
     volumes:
       - ${MYSQL_HOST_DATA_PATH}:${MYSQL_CONTAINER_DATA_PATH}
       - ${MYSQL_ENTRYPOINT_INITDB}:/docker-entrypoint-initdb.d
@@ -149,8 +151,8 @@ services:
         - USER_ID=${USER_ID}
         - BUILD_OPENCV=${BUILD_OPENCV}
     container_name: java
-    environment:
-      - _JAVA_OPTIONS=-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5750 -Xmx256m -Xms128m
+    # environment:
+      # - _JAVA_OPTIONS=-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5750 -Xmx256m -Xms128m
     user: ${USER_ID}:${USER_ID}
     volumes:
       - ./java/conf:/usr/local/openjdk-11/conf
