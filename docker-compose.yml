@@ -114,6 +114,8 @@ services:
       - /usr/bin/git:/usr/bin/git
       - ./common/.zshrc:/home/docker/.zshrc
       - ./common/.vimrc:/home/docker/.vimrc
+    extra_hosts:
+      - "dockerhost:${DOCKER_HOST_IP}"
     tty: true
     networks:
       backend:

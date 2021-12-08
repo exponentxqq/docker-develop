@@ -70,7 +70,7 @@ ZSH_THEME="candy-kingdom"
 # Custom plugins may be added to $ZSH_CUSTOM/plugins/
 # Example format: plugins=(rails git textmate ruby lighthouse)
 # Add wisely, as too many plugins slow down shell startup.
-plugins=(git z vi-mode)
+plugins=(git z vi-mode aws sudo)
 
 source $ZSH/oh-my-zsh.sh
 
