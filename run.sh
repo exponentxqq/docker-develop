@@ -1,4 +1,4 @@
-DOCKER_ROOT_DIR=$(dirname $0)
+DOCKER_ROOT_DIR=$(dirname $(readlink -m $0))
 source $DOCKER_ROOT_DIR/.env
 project_path=$(pwd)
 project_path=${project_path/#$HOST_PROJECT_PATH/$CONTAINER_PROJECT_PATH}

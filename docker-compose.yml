@@ -24,6 +24,12 @@ services:
       - ${MYSQL_HOST_DATA_PATH}:${MYSQL_CONTAINER_DATA_PATH}
       - ${MYSQL_ENTRYPOINT_INITDB}:/docker-entrypoint-initdb.d
       - ./mysql/my.cnf:/etc/mysql/conf.d/my.cnf
+    # 降低mysql容器的内存占用
+    ulimits:
+      nproc: 65535
+      nofile:
+        soft: 26677
+        hard: 46677
     ports:
       - "${MYSQL_PORT}:3306"
     networks:
@@ -60,6 +66,7 @@ services:
         - IMAGICK_VERSION=${PHP_IMAGICK_VERSION}
         - INSTALL_PHALCON=${PHP_INSTALL_PHALCON}
         - PHALCON_VERSION=${PHP_PHALCON_VERSION}
+        - USER_ID=${USER_ID}
     container_name: fpm
     working_dir: ${CONTAINER_PROJECT_PATH}
     user: ${USER_ID}:${USER_ID}
@@ -76,6 +83,7 @@ services:
       - ./cache/composer-cache:/home/docker/.composer
       - ./common/.zshrc:/home/docker/.zshrc
       - ./common/.vimrc:/home/docker/.vimrc
+      - /var/run/docker.sock:/var/run/docker.sock
     networks:
       backend:
         ipv4_address: 172.20.0.7

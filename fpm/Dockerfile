@@ -1,13 +1,19 @@
 ARG PHP_VERSION
 FROM php:${PHP_VERSION}-fpm
 
-RUN mkdir /usr/local/etc/php/pool.d/ && mkdir /www/
+RUN apt-get update && apt-get install -y ca-certificates gnupg
+
+RUN mkdir /usr/local/etc/php/pool.d/ && mkdir /www/ && mkdir -m 0755 -p /etc/apt/keyrings && \
+    curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /etc/apt/keyrings/docker.gpg &&\
+    echo "deb [arch="$(dpkg --print-architecture)" signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/debian "$(. /etc/os-release && echo "$VERSION_CODENAME")" stable" | tee /etc/apt/sources.list.d/docker.list > /dev/null
 
 RUN apt-get update
 RUN apt-get install -y libpng-dev && \
     apt-get install -y gdb && \
     apt-get install -y git && \
-    apt-get install -y zsh
+    apt-get install -y zsh && \
+    apt-get install -y sudo && \
+    apt-get install -y docker-ce-cli
 
 RUN docker-php-ext-install pdo_mysql && \
     docker-php-ext-install mysqli && \
@@ -139,6 +145,8 @@ RUN if [ ${INSTALL_PHALCON} = true ]; then \
 ;fi
 
 ARG USER_ID
-RUN useradd docker -u ${USER_ID} -g root -m
+RUN useradd docker -u ${USER_ID} -g root -m && \
+    echo 'docker ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers && \
+    echo '%root ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
 USER docker
 RUN wget https://github.com/robbyrussell/oh-my-zsh/raw/master/tools/install.sh -O - | sh
