@@ -30,4 +30,6 @@ redis/data
 
 /python/aws
 
+/java/opencv-4.2.0
+
 .env

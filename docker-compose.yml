@@ -74,7 +74,7 @@ services:
       - "9000:9000"
     extra_hosts:
       - "dockerhost:${DOCKER_HOST_IP}"
-      - "www.qms.localhost:172.20.0.3"
+      - "www.qmsmain.localhost:172.20.0.3"
       - "www.auth.localhost:172.20.0.3"
     volumes:
       - ./fpm/conf.d:/usr/local/etc/php.conf
@@ -142,7 +142,7 @@ services:
       - "www.auth.localhost:172.20.0.3"
       - "www.miniqms.localhost:172.20.0.3"
       - "www.template.localhost:172.20.0.3"
-      - "www.qms.localhost:172.20.0.3"
+      - "www.qmsmain.localhost:172.20.0.3"
     volumes:
       - ${HOST_PROJECT_PATH}:${CONTAINER_PROJECT_PATH}
       - ./cache/npm-cache:/home/node/.npm

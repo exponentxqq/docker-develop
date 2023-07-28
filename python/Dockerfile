@@ -13,7 +13,8 @@ ADD ./scripts/get-pip.py /home/get-pip.py
 ADD ./my_config.h /usr/include/mysql/my_config.h
 ADD ./my_config_x86_64.h /usr/include/mysql/my_config_x86_64.h
 RUN pip install tqdm pillow boto3 oss2 chardet pymysql w3lib openpyxl pymongo && \
-    python2.7 /home/get-pip.py && python2.7 -m pip install --upgrade pip
+    python2.7 /home/get-pip.py && python2.7 -m pip install --upgrade pip && \
+    pip2 install pymysql pymongo tqdm pillow chardet
 
 RUN apt-get install -y libsm6 libxext6 libxrender-dev && \
     pip2 install --upgrade setuptools cryptography lxml && \

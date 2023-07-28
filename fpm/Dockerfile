@@ -9,6 +9,7 @@ RUN mkdir /usr/local/etc/php/pool.d/ && mkdir /www/ && mkdir -m 0755 -p /etc/apt
 
 RUN apt-get update
 RUN apt-get install -y libpng-dev && \
+    apt-get install -y libldap2-dev && \
     apt-get install -y gdb && \
     apt-get install -y git && \
     apt-get install -y zsh && \
@@ -22,7 +23,9 @@ RUN docker-php-ext-install pdo_mysql && \
     docker-php-ext-install pcntl && \
     docker-php-ext-install posix && \
     docker-php-ext-install exif && \
-    docker-php-ext-install gettext
+    docker-php-ext-install gettext && \
+    docker-php-ext-install sockets && \
+    docker-php-ext-install ldap
 
 #---------------------------------------------
 # Composer
