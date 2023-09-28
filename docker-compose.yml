@@ -15,6 +15,7 @@ services:
         - MYSQL_IMAGE=${MYSQL_IMAGE}
         - MYSQL_VERSION=${MYSQL_VERSION}
     container_name: mysql
+    image: docker-mysql:${MYSQL_VERSION}
     environment:
       - MYSQL_USER=${MYSQL_USER}
       - MYSQL_PASSWORD=${MYSQL_PASSWORD}
@@ -68,6 +69,7 @@ services:
         - PHALCON_VERSION=${PHP_PHALCON_VERSION}
         - USER_ID=${USER_ID}
     container_name: fpm
+    image: docker-fpm:${PHP_VERSION}
     working_dir: ${CONTAINER_PROJECT_PATH}
     user: ${USER_ID}:${USER_ID}
     ports:
@@ -136,6 +138,7 @@ services:
         - NODE_VERSION=${NODE_VERSION}
         - USER_ID=${USER_ID}
     container_name: node
+    image: docker-node:${NODE_VERSION}
     user: ${USER_ID}:${USER_ID}
     extra_hosts:
       - "dockerhost:${DOCKER_HOST_IP}"
@@ -161,6 +164,7 @@ services:
         - USER_ID=${USER_ID}
         - BUILD_OPENCV=${BUILD_OPENCV}
     container_name: java
+    image: docker-java:${JDK_VERSION}
     # environment:
       # - _JAVA_OPTIONS=-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5750 -Xmx256m -Xms128m
     user: ${USER_ID}:${USER_ID}
@@ -201,6 +205,7 @@ services:
       args:
         - MONGO_VERSION=${MONGO_VERSION}
     container_name: mongo
+    image: docker-mongo:${MONGO_VERSION}
     user: ${USER_ID}:${USER_ID}
     environment:
       - MONGO_DATA_DIR=${MONGO_CONTAINER_DATA_DIR}

@@ -30,6 +30,14 @@ RUN apt-get install -y libsm6 libxext6 libxrender-dev && \
     torndb \
     imutils==0.5.4
 
+RUN pip3 install \
+    # ymal解析库
+    pyyaml  \
+    # html爬虫库
+    requests-html \
+    # google文字转语音
+    google-cloud-texttospeech
+
 ARG USER_ID
 RUN useradd docker -u ${USER_ID} -g root -m
 USER docker
