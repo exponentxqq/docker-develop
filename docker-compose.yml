@@ -42,6 +42,7 @@ services:
       context: ./redis
       dockerfile: ./Dockerfile
     container_name: redis
+    image: redis
     ports:
       - "${REDIS_PORT}:6379"
     volumes:
@@ -93,6 +94,7 @@ services:
   nginx:
     build: ./nginx
     container_name: nginx
+    image: nginx
     ports:
       - "80:80"
       - "443:443"
@@ -118,6 +120,7 @@ services:
       args:
         - USER_ID=${USER_ID}
     container_name: workspace
+    image: workspace
     working_dir: ${CONTAINER_PROJECT_PATH}
     volumes:
       - ${HOST_PROJECT_PATH}:${CONTAINER_PROJECT_PATH}
@@ -147,8 +150,10 @@ services:
       - "www.template.localhost:172.20.0.3"
       - "www.qmsmain.localhost:172.20.0.3"
     volumes:
+      - ./node/npmrc:/etc/npmrc
       - ${HOST_PROJECT_PATH}:${CONTAINER_PROJECT_PATH}
       - ./cache/npm-cache:/home/node/.npm
+      - ./cache/pnpm-cache:/home/node/.local/share/pnpm/store
     ports:
       - "8090-8099:8090-8099"
     tty: true
@@ -189,6 +194,7 @@ services:
     build:
       context: ./go
     container_name: go
+    image: go
     volumes:
       - ${HOST_PROJECT_PATH}:${CONTAINER_PROJECT_PATH}
       - ./cache/go-cache:/usr/local/go
@@ -228,6 +234,7 @@ services:
       args:
         - USER_ID=${USER_ID}
     container_name: python
+    image: python
     tty: true
     user: ${USER_ID}:${USER_ID}
     volumes:
