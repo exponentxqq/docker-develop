@@ -1,6 +1,10 @@
 ARG NODE_VERSION
 FROM node:${NODE_VERSION}
+
 USER root
+
+ARG PNPM_VERSION
+RUN npm install -g typescript pnpm@${PNPM_VERSION}
 # RUN npm install -g typescript pnpm
 
 ARG USER_ID

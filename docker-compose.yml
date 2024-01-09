@@ -42,7 +42,7 @@ services:
       context: ./redis
       dockerfile: ./Dockerfile
     container_name: redis
-    image: redis
+    image: docker-redis
     ports:
       - "${REDIS_PORT}:6379"
     volumes:
@@ -94,7 +94,7 @@ services:
   nginx:
     build: ./nginx
     container_name: nginx
-    image: nginx
+    image: docker-nginx
     ports:
       - "80:80"
       - "443:443"
@@ -120,7 +120,7 @@ services:
       args:
         - USER_ID=${USER_ID}
     container_name: workspace
-    image: workspace
+    image: docker-workspace
     working_dir: ${CONTAINER_PROJECT_PATH}
     volumes:
       - ${HOST_PROJECT_PATH}:${CONTAINER_PROJECT_PATH}
@@ -139,6 +139,7 @@ services:
       context: ./node
       args:
         - NODE_VERSION=${NODE_VERSION}
+        - PNPM_VERSION=${PNPM_VERSION}
         - USER_ID=${USER_ID}
     container_name: node
     image: docker-node:${NODE_VERSION}
@@ -170,8 +171,8 @@ services:
         - BUILD_OPENCV=${BUILD_OPENCV}
     container_name: java
     image: docker-java:${JDK_VERSION}
-    # environment:
-      # - _JAVA_OPTIONS=-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5750 -Xmx256m -Xms128m
+    environment:
+      - JAVA_OPTS=-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5750 -Xmx256m -Xms128m
     user: ${USER_ID}:${USER_ID}
     volumes:
       - ./java/conf:/usr/local/openjdk-11/conf
@@ -185,6 +186,9 @@ services:
     extra_hosts:
       - "www.auth.localhost:172.20.0.3"
       - "dockerhost:${DOCKER_HOST_IP}"
+    ports:
+      - "5750:5750"
+      - "8000-8089:8000-8089"
     tty: true
     networks:
       backend:
@@ -194,7 +198,7 @@ services:
     build:
       context: ./go
     container_name: go
-    image: go
+    image: docker-go
     volumes:
       - ${HOST_PROJECT_PATH}:${CONTAINER_PROJECT_PATH}
       - ./cache/go-cache:/usr/local/go
@@ -234,7 +238,7 @@ services:
       args:
         - USER_ID=${USER_ID}
     container_name: python
-    image: python
+    image: docker-python
     tty: true
     user: ${USER_ID}:${USER_ID}
     volumes:
