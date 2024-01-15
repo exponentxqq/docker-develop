@@ -20,5 +20,6 @@ RUN if [ $BUILD_OPENCV = true ]; then cd /opt && git config --global http.postBu
 
 ARG USER_ID
 RUN echo ${USER_ID}
-RUN useradd docker -u ${USER_ID} -g root -m
+RUN useradd docker -u ${USER_ID} -g root -m && \
+    echo "alias java='java \$JAVA_OPTS'" >> /home/docker/.bashrc
 USER docker
