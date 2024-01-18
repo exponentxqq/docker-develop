@@ -1,4 +1,5 @@
-FROM ubuntu:20.04
+ARG UBUNTU_VERSION
+FROM ubuntu:${UBUNTU_VERSION}
 
 RUN apt-get update && \
     apt-get install -y sudo && \
@@ -7,11 +8,10 @@ RUN apt-get update && \
     # 多线程下载
     apt-get install -y axel && \
     apt-get install -y zsh && \
-    apt-get install -y git && \
     apt-get install -y neovim && \
-    apt-get install -y python && \
+    apt-get install -y python2 && \
     apt-get install -y python3 && \
-    apt-get install -y python-dev && \
+    apt-get install -y python2-dev && \
     apt-get install -y python3-dev && \
     apt-get install -y python3-pip && \
     apt-get install -y ranger && \
@@ -20,6 +20,18 @@ RUN apt-get update && \
     # 更人性化的mysql客户端
     apt-get install -y mycli && \
     apt-get clean
+
+ARG GIT_VERSION
+RUN apt-get install -y autoconf gettext libcurl4-openssl-dev && \
+    wget https://github.com/git/git/archive/v${GIT_VERSION}.tar.gz && \
+    tar -zxf v${GIT_VERSION}.tar.gz && \
+    cd git-${GIT_VERSION} && \
+    make configure && \
+    ./configure --without-tcltk --without-gui --prefix=/usr/local && \
+    make && make install && \
+    cd .. && \
+    rm -rf git-${GIT_VERSION} && \
+    rm -rf v${GIT_VERSION}.tar.gz
 
 ARG USER_ID
 RUN echo 'root:123456' | chpasswd &&\

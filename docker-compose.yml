@@ -119,8 +119,10 @@ services:
       context: ./workspace
       args:
         - USER_ID=${USER_ID}
+        - UBUNTU_VERSION=${UBUNTU_VERSION}
+        - GIT_VERSION=${GIT_VERSION}
     container_name: workspace
-    image: docker-workspace
+    image: docker-workspace:${UBUNTU_VERSION}
     working_dir: ${CONTAINER_PROJECT_PATH}
     volumes:
       - ${HOST_PROJECT_PATH}:${CONTAINER_PROJECT_PATH}
