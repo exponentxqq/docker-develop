@@ -12,9 +12,10 @@ RUN apt-get install -y unzip vim wget zsh git python2.7 python3-pip libmysqlclie
 ADD ./scripts/get-pip.py /home/get-pip.py
 ADD ./my_config.h /usr/include/mysql/my_config.h
 ADD ./my_config_x86_64.h /usr/include/mysql/my_config_x86_64.h
-RUN pip install tqdm pillow boto3 oss2 chardet pymysql w3lib openpyxl pymongo && \
+RUN python3 -m pip install --upgrade pip && \
+    pip3 install tqdm pillow boto3 oss2 chardet pymysql w3lib openpyxl pymongo && \
     python2.7 /home/get-pip.py && python2.7 -m pip install --upgrade pip && \
-    pip2 install pymysql pymongo tqdm pillow chardet
+    pip2 install pymysql pymongo tqdm pillow chardet oss2 threadpool multiprocessing
 
 RUN apt-get install -y libsm6 libxext6 libxrender-dev && \
     pip2 install --upgrade setuptools cryptography lxml && \
@@ -31,12 +32,17 @@ RUN apt-get install -y libsm6 libxext6 libxrender-dev && \
     imutils==0.5.4
 
 RUN pip3 install \
+    # 文本相似度
+    datasketch \
     # ymal解析库
     pyyaml  \
     # html爬虫库
     requests-html \
     # google文字转语音
-    google-cloud-texttospeech
+    google-cloud-texttospeech && \
+    # 解析HTML和XML文档 beautifulsoup4 镜像中已存在
+    # 阿里云oss
+    pip2 install python-dateutil==1.5
 
 ARG USER_ID
 RUN useradd docker -u ${USER_ID} -g root -m

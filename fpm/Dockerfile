@@ -7,8 +7,8 @@ RUN mkdir /usr/local/etc/php/pool.d/ && mkdir /www/ && mkdir -m 0755 -p /etc/apt
     curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /etc/apt/keyrings/docker.gpg &&\
     echo "deb [arch="$(dpkg --print-architecture)" signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/debian "$(. /etc/os-release && echo "$VERSION_CODENAME")" stable" | tee /etc/apt/sources.list.d/docker.list > /dev/null
 
-RUN apt-get update
-RUN apt-get install -y libpng-dev && \
+RUN apt-get update --fix-missing
+RUN apt-get install -y libwebp-dev libpng-dev libjpeg-dev libfreetype6-dev && \
     apt-get install -y libldap2-dev && \
     apt-get install -y gdb && \
     apt-get install -y git && \
@@ -18,6 +18,7 @@ RUN apt-get install -y libpng-dev && \
 
 RUN docker-php-ext-install pdo_mysql && \
     docker-php-ext-install mysqli && \
+    docker-php-ext-configure gd --with-webp-dir=/usr/include/webp --with-jpeg-dir=/usr/include --with-png-dir=/usr/include --with-freetype-dir=/usr/include/freetype2 && \
     docker-php-ext-install gd && \
     docker-php-ext-install zip && \
     docker-php-ext-install pcntl && \
