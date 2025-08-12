@@ -1,9 +1,9 @@
-DOCKER_ROOT_DIR=$(dirname $(readlink -m $0))
+DOCKER_ROOT_DIR=$(dirname $(readlink $0))
 source $DOCKER_ROOT_DIR/.env
 project_path=$(pwd)
 project_path=${project_path/#$HOST_PROJECT_PATH/$CONTAINER_PROJECT_PATH}
 
-container_names=$(cd $DOCKER_ROOT_DIR && docker-compose ps | grep -v Exit | grep -v exited | awk '{print $1}' | grep -v Name | grep -v NAME | grep -v "^-")
+container_names=$(cd $DOCKER_ROOT_DIR && docker compose ps | grep -v Exit | grep -v exited | awk '{print $1}' | grep -v Name | grep -v NAME | grep -v "^-")
 exists=false
 for container_name in $container_names
 do
@@ -14,7 +14,7 @@ done
 
 if [ false == $exists ]; then
     echo "start container[$1]..."
-    cd $DOCKER_ROOT_DIR && docker-compose up -d $1
+    cd $DOCKER_ROOT_DIR && docker compose up -d $1
 fi
 
 echo "[$1]current project_path: $project_path"

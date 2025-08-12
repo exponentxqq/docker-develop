@@ -40,8 +40,10 @@ services:
     build:
       context: ./redis
       dockerfile: ./Dockerfile
+      args:
+        - REDIS_VERSION=${REDIS_VERSION}
     container_name: redis
-    image: docker-redis
+    image: docker-redis:${REDIS_VERSION}
     ports:
       - "${REDIS_PORT}:6379"
     volumes:
@@ -194,7 +196,7 @@ services:
       - "dockerhost:${DOCKER_HOST_IP}"
     ports:
       - "5750:5750"
-      - "8000-8089:8000-8089"
+      - "8080-8089:8080-8089"
     tty: true
     networks:
       backend:
