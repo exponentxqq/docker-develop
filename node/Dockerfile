@@ -1,14 +1,13 @@
 ARG NODE_VERSION
 FROM node:${NODE_VERSION}
 
-USER root
-
 ARG PNPM_VERSION
-RUN npm install -g typescript pnpm@${PNPM_VERSION}
-# RUN npm install -g typescript pnpm
+RUN chown -R node:node /home/node && \
+    npm install -g typescript pnpm@${PNPM_VERSION}
 
 ARG USER_ID
-#RUN gpasswd -a node root
-RUN id && su && useradd docker -u ${USER_ID} -g root -m
 USER node
-RUN npm config set cache /home/docker/.npm
+
+RUN npm config set cache /home/node/.npm && \
+    mkdir /home/node/.pnpm && \
+    pnpm config set store-dir /home/node/.pnpm
