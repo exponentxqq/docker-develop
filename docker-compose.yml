@@ -95,7 +95,7 @@ services:
   nginx:
     build:
       context: nginx
-      dockerfile: Dockerfile
+      dockerfile: ./Dockerfile
       args:
         - NGINX_VERSION=${NGINX_VERSION}
     container_name: nginx
@@ -103,10 +103,10 @@ services:
     ports:
       - "80:80"
       - "443:443"
-#    links:
-#      - "fpm"
-#    depends_on:
-#      - "fpm"
+    links:
+      - "fpm"
+    depends_on:
+      - "fpm"
     volumes:
       - ${HOST_PROJECT_PATH}:${CONTAINER_PROJECT_PATH}
       - ./nginx/site-enabled:/etc/nginx/conf.d

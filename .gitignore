@@ -8,6 +8,7 @@
 .vscode
 
 mysql/data/*
+mysql/data8/*
 
 redis/data
 
