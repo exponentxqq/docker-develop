@@ -15,8 +15,8 @@ RUN sed -i "s/node:x:1000:1000/node:x:${USER_ID}:${USER_ID}/" /etc/passwd && \
 
 USER node
 
-RUN mkdir -p /home/node/.pnpm && mkdir -p /home/node/.pnpm-store && \
+RUN mkdir -p /home/node/.pnpm && mkdir -p /home/node/.pnpm && \
     npm config set cache /home/node/.npm && \
-    pnpm config set store-dir /home/node/.pnpm-store
+    pnpm config set store-dir /home/node/.pnpm
 
 ENV PNPM_TMPDIR=/home/node/.pnpm
