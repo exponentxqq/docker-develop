@@ -5,7 +5,7 @@ RUN apt-get update && \
     apt-get install -y sudo && \
     apt-get install -y wget && \
     apt-get install -y curl &&\
-    # 多线程下载
+    # 多线程下载 \
     apt-get install -y axel && \
     apt-get install -y zsh && \
     apt-get install -y neovim && \
@@ -15,10 +15,8 @@ RUN apt-get update && \
     apt-get install -y python3-dev && \
     apt-get install -y python3-pip && \
     apt-get install -y ranger && \
-    # 网速测试
+    # 网速测试 \
     apt-get install -y speedtest-cli && \
-    # 更人性化的mysql客户端
-    apt-get install -y mycli && \
     apt-get clean
 
 ARG GIT_VERSION

@@ -32,6 +32,8 @@ services:
         hard: 46677
     ports:
       - "${MYSQL_PORT}:3306"
+    extra_hosts:
+      - "dockerhost:${DOCKER_HOST_IP}"
     networks:
       backend:
         ipv4_address: 172.20.0.4
