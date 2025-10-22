@@ -7,6 +7,9 @@ RUN apt-get update && \
     apt-get install -y curl
 
 
+ARG LINK_FPM=false
 ARG PHP_FPM_PORT
-RUN echo "upstream php-upstream { server fpm:${PHP_FPM_PORT}; }" > /etc/nginx/conf.d/upstream.conf && \
+RUN if [ ${LINK_FPM} = true ]; then \
+      echo "upstream php-upstream { server fpm:${PHP_FPM_PORT}; }" > /etc/nginx/conf.d/upstream.conf; \
+    fi && \
     mkdir /nginx && mkdir /nginx/log

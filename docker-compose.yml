@@ -62,6 +62,7 @@ services:
       dockerfile: ./Dockerfile
       args:
         - PHP_VERSION=${PHP_VERSION}
+        - PHP_FPM_PORT=${PHP_FPM_PORT}
         - INSTALL_COMPOSER=${PHP_INSTALL_COMPOSER}
         - INSTALL_XDEBUG=${PHP_INSTALL_XDEBUG}
         - INSTALL_REDIS=${PHP_INSTALL_REDIS}
@@ -77,7 +78,7 @@ services:
     working_dir: ${CONTAINER_PROJECT_PATH}
     user: ${USER_ID}:${USER_ID}
     ports:
-      - "9000:9000"
+      - "${PHP_FPM_PORT}:9000"
     extra_hosts:
       - "dockerhost:${DOCKER_HOST_IP}"
       - "www.qmsmain.localhost:172.20.0.3"
@@ -100,15 +101,12 @@ services:
       dockerfile: ./Dockerfile
       args:
         - NGINX_VERSION=${NGINX_VERSION}
+        - PHP_FPM_PORT=${PHP_FPM_PORT}
     container_name: nginx
     image: docker-nginx:${NGINX_VERSION}
     ports:
       - "80:80"
       - "443:443"
-    links:
-      - "fpm"
-    depends_on:
-      - "fpm"
     volumes:
       - ${HOST_PROJECT_PATH}:${CONTAINER_PROJECT_PATH}
       - ./nginx/site-enabled:/etc/nginx/conf.d
