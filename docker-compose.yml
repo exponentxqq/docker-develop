@@ -260,3 +260,18 @@ services:
     networks:
       backend:
         ipv4_address: 172.20.0.12
+
+  kubectl:
+    build:
+      context: ./kubectl
+      args:
+        - UBUNTU_VERSION=${UBUNTU_VERSION}
+        - KUBECTL_VERSION=${KUBECTL_VERSION}
+    container_name: kubectl
+    image: docker-kubectl:${KUBECTL_VERSION}
+    tty: true
+    volumes:
+      - ./kubectl/config:/root/.kube
+    networks:
+      backend:
+        ipv4_address: 172.20.0.13

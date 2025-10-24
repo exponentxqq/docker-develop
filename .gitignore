@@ -34,3 +34,7 @@ redis/data
 /java/opencv-4.2.0
 
 .env
+
+# kubectl config files (ignore files but keep directory structure)
+kubectl/config/*
+!kubectl/config/.gitkeep
