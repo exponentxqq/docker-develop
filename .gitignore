@@ -38,3 +38,5 @@ redis/data
 # kubectl config files (ignore files but keep directory structure)
 kubectl/config/*
 !kubectl/config/.gitkeep
+
+openclaw/config

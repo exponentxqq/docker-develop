@@ -1,31 +1,37 @@
-FROM tensorflow/tensorflow
+ARG CONDA_VERSION
+FROM continuumio/miniconda3:${CONDA_VERSION}
 
+# 系统依赖（Python 由 conda 提供，不再通过 apt 安装）
 RUN apt-get update && \
-    apt-get install -y unzip vim git wget zsh python2.7 python3-pip libmysqlclient-dev build-essential libssl-dev libffi-dev python2-dev libreoffice poppler-utils && \
-    # you can use `aws configure` to generate the default configuration \
+    apt-get install -y unzip vim git wget zsh curl \
+        libmariadb-dev libpq-dev build-essential libssl-dev libffi-dev \
+        libreoffice poppler-utils && \
     curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip" && \
-    unzip awscliv2.zip && \
-    ./aws/install && \
-    rm -rf awscliv2.zip
+    unzip awscliv2.zip && ./aws/install && \
+    rm -rf awscliv2.zip aws && \
+    apt-get clean && rm -rf /var/lib/apt/lists/*
 
-ADD ./scripts/get-pip.py /home/get-pip.py
-RUN python3 -m pip install --upgrade pip && \
-    python2.7 /home/get-pip.py && python2.7 -m pip install --upgrade pip
+# 配置 conda：添加 conda-forge，创建 Python 2.7 环境
+RUN conda config --add channels conda-forge && \
+    conda config --set channel_priority flexible && \
+    conda create -n py27 -c conda-forge python=2.7 -y && \
+    conda clean -afy
 
-RUN pip3 install \
-    # 文本相似度 \
+# base 环境：安装通用 Python 包
+RUN pip install --no-cache-dir \
     datasketch \
-    # ymal解析库 \
-    pyyaml  \
-    # html爬虫库 \
+    pyyaml \
     requests-html \
-    # google文字转语音 \
-    google-cloud-texttospeech && \
-    # 解析HTML和XML文档 beautifulsoup4 镜像中已存在 \
-    # 阿里云oss \
-    pip2 install python-dateutil==1.5
+    google-cloud-texttospeech
+
+# py27 环境：安装 Python 2 专用包
+RUN conda run -n py27 pip install python-dateutil==1.5
 
 ARG USER_ID
 RUN useradd docker -u ${USER_ID} -g root -m
+
 USER docker
-RUN wget https://github.com/robbyrussell/oh-my-zsh/raw/master/tools/install.sh -O - | sh
+WORKDIR /home/docker
+
+# oh-my-zsh（使用 --unattended 避免交互）
+RUN wget https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh -O - | sh -s -- --unattended

@@ -1,0 +1,46 @@
+model_list:
+  # ── Haiku 档 → DeepSeek Chat ──────────────────────────────────────────
+  - model_name: haiku
+    litellm_params:
+      model: deepseek/deepseek-chat
+      api_key: os.environ/DEEPSEEK_API_KEY
+
+  - model_name: deepseek-chat
+    litellm_params:
+      model: deepseek/deepseek-chat
+      api_key: os.environ/DEEPSEEK_API_KEY
+
+  # ── Sonnet 档（默认）→ 千问 Max ────────────────────────────────────────
+  - model_name: sonnet
+    litellm_params:
+      model: openai/qwen-max
+      api_key: os.environ/QWEN_API_KEY
+      api_base: https://dashscope.aliyuncs.com/compatible-mode/v1
+
+  # ── Opus 档 → DeepSeek Reasoner ────────────────────────────────────────
+  - model_name: opus
+    litellm_params:
+      model: deepseek/deepseek-reasoner
+      api_key: os.environ/DEEPSEEK_API_KEY
+
+  - model_name: deepseek-reasoner
+    litellm_params:
+      model: deepseek/deepseek-reasoner
+      api_key: os.environ/DEEPSEEK_API_KEY
+
+router_settings:
+  model_group_alias:
+    # Claude Code 实际发出的展开模型名（随版本更新需同步维护）
+    claude-sonnet-4-6: sonnet
+    claude-sonnet-4-5: sonnet
+    claude-3-5-sonnet-20241022: sonnet
+    claude-opus-4-6: opus
+    claude-opus-4-5: opus
+    claude-3-opus-20240229: opus
+    claude-haiku-4-5: haiku
+    claude-3-5-haiku-20241022: haiku
+    claude-3-haiku-20240307: haiku
+
+litellm_settings:
+  drop_params: true
+  request_timeout: 600
