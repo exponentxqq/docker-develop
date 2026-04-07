@@ -346,6 +346,7 @@ services:
     environment:
       - DEEPSEEK_API_KEY=${DEEPSEEK_API_KEY}
       - QWEN_API_KEY=${QWEN_API_KEY}
+      - DASHSCOPE_API_KEY=${DASHSCOPE_API_KEY}
     command: ["--config", "/app/config.yaml", "--port", "4000"]
     ports:
       - "4000:4000"

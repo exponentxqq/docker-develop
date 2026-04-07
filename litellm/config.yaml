@@ -2,26 +2,43 @@ model_list:
   # ── Haiku 档 → DeepSeek Chat ──────────────────────────────────────────
   - model_name: haiku
     litellm_params:
-      model: deepseek/deepseek-chat
-      api_key: os.environ/DEEPSEEK_API_KEY
+      model: dashscope/qwen3-coder-next
+      api_key: os.environ/DASHSCOPE_API_KEY
 
   - model_name: deepseek-chat
     litellm_params:
       model: deepseek/deepseek-chat
       api_key: os.environ/DEEPSEEK_API_KEY
 
-  # ── Sonnet 档（默认）→ 千问 Max ────────────────────────────────────────
+  # ── Sonnet 档（默认）→ Qwen3-Max 普通模式（agentic 编码推荐）──────────
   - model_name: sonnet
     litellm_params:
-      model: openai/qwen-max
-      api_key: os.environ/QWEN_API_KEY
-      api_base: https://dashscope.aliyuncs.com/compatible-mode/v1
+      model: dashscope/qwen3-coder-plus
+      api_key: os.environ/DASHSCOPE_API_KEY
 
+  # ── Thinking 模式（单轮问答/分析，不适合 agentic 多轮工具调用）─────────
+  - model_name: qwen3-max-thinking
+    litellm_params:
+      model: dashscope/qwen3-max
+      api_key: os.environ/DASHSCOPE_API_KEY
+      extra_body:
+        enable_thinking: true
+
+  # ── Qwen3-Coder-Plus（大项目/长上下文，1M tokens）─────────────────────
+  - model_name: qwen3-coder
+    litellm_params:
+      model: dashscope/qwen3-coder-plus
+      api_key: os.environ/DASHSCOPE_API_KEY
+
+  - model_name: glm-5
+    litellm_params:
+      model: dashscope/glm-5
+      api_key: os.environ/DASHSCOPE_API_KEY
   # ── Opus 档 → DeepSeek Reasoner ────────────────────────────────────────
   - model_name: opus
     litellm_params:
-      model: deepseek/deepseek-reasoner
-      api_key: os.environ/DEEPSEEK_API_KEY
+      model: dashscope/glm-5
+      api_key: os.environ/DASHSCOPE_API_KEY
 
   - model_name: deepseek-reasoner
     litellm_params:
@@ -43,4 +60,5 @@ router_settings:
 
 litellm_settings:
   drop_params: true
+  modify_params: true
   request_timeout: 600
