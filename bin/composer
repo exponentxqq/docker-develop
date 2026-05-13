@@ -1,0 +1,6 @@
+#!/bin/bash
+cleanup() {
+    docker exec fpm pkill -TERM -f "composer $*" 2>/dev/null
+}
+trap cleanup INT TERM HUP
+docker-run fpm composer "$@"

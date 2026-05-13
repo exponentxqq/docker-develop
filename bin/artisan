@@ -1,0 +1,6 @@
+#!/bin/bash
+cleanup() {
+    docker exec fpm pkill -TERM -f "php artisan $*" 2>/dev/null
+}
+trap cleanup INT TERM HUP
+docker-run fpm php artisan "$@"

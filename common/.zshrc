@@ -99,3 +99,9 @@ source $ZSH/oh-my-zsh.sh
 # Example aliases
 alias zshconfig="vim ~/.zshrc"
 # alias ohmyzsh="mate ~/.oh-my-zsh"
+
+# Conda 初始化（仅 python 容器存在 /opt/conda 时生效）
+if [ -f "/opt/conda/etc/profile.d/conda.sh" ]; then
+  . "/opt/conda/etc/profile.d/conda.sh"
+  conda activate base
+fi

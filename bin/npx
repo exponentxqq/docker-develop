@@ -1,0 +1,6 @@
+#!/bin/bash
+cleanup() {
+    docker exec node pkill -TERM -f "npx $*" 2>/dev/null
+}
+trap cleanup INT TERM HUP
+docker-run node npx "$@"

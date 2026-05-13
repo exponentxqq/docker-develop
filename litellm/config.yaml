@@ -1,49 +1,70 @@
 model_list:
-  # ── Haiku 档 → DeepSeek Chat ──────────────────────────────────────────
+  # ── Haiku 档 → Z.AI glm-5-turbo（需 ZAI_API_KEY）──────────────────────
   - model_name: haiku
+    litellm_params:
+      model: deepseek/deepseek-v4-flash
+      api_key: os.environ/DEEPSEEK_API_KEY
+
+  # ── Sonnet 档 → Z.AI glm-5（需 ZAI_API_KEY）────────────────────────────
+  - model_name: sonnet
+    litellm_params:
+      model: deepseek/deepseek-v4-pro
+      api_key: os.environ/DEEPSEEK_API_KEY
+
+  # ── Opus 档 → Z.AI glm-5.1（需 ZAI_API_KEY）────────────────────────────
+  - model_name: opus
+    litellm_params:
+      model: deepseek/deepseek-v4-pro
+      api_key: os.environ/DEEPSEEK_API_KEY
+
+  # ── 智谱 Z.AI 国际版：ZAI_API_KEY；ZAI_API_BASE 由 compose 默认 coding 网关（订阅编码额度），按量见 docker-compose 注释 ──
+  - model_name: zai-glm-4.7
+    litellm_params:
+      model: zai/glm-4.7
+      api_key: os.environ/ZAI_API_KEY
+
+  - model_name: zai-glm-5
+    litellm_params:
+      model: zai/glm-5
+      api_key: os.environ/ZAI_API_KEY
+
+  - model_name: zai-glm-5.1
+    litellm_params:
+      model: zai/glm-5.1
+      api_key: os.environ/ZAI_API_KEY
+
+  # ── DeepSeek（独立 model_name，走 DEEPSEEK_API_KEY）────────────────────
+  - model_name: deepseek-v4-flash
+    litellm_params:
+      model: deepseek/deepseek-v4-flash
+      api_key: os.environ/DEEPSEEK_API_KEY
+
+  - model_name: deepseek-v4-pro
+    litellm_params:
+      model: deepseek/deepseek-v4-pro
+      api_key: os.environ/DEEPSEEK_API_KEY
+
+  - model_name: qwen3-coder-next
     litellm_params:
       model: dashscope/qwen3-coder-next
       api_key: os.environ/DASHSCOPE_API_KEY
 
-  - model_name: deepseek-chat
-    litellm_params:
-      model: deepseek/deepseek-chat
-      api_key: os.environ/DEEPSEEK_API_KEY
-
-  # ── Sonnet 档（默认）→ Qwen3-Max 普通模式（agentic 编码推荐）──────────
-  - model_name: sonnet
+  - model_name: qwen3-coder-plus
     litellm_params:
       model: dashscope/qwen3-coder-plus
       api_key: os.environ/DASHSCOPE_API_KEY
 
-  # ── Thinking 模式（单轮问答/分析，不适合 agentic 多轮工具调用）─────────
+  - model_name: qwen-glm-5
+    litellm_params:
+      model: dashscope/glm-5
+      api_key: os.environ/DASHSCOPE_API_KEY
+
   - model_name: qwen3-max-thinking
     litellm_params:
       model: dashscope/qwen3-max
       api_key: os.environ/DASHSCOPE_API_KEY
       extra_body:
         enable_thinking: true
-
-  # ── Qwen3-Coder-Plus（大项目/长上下文，1M tokens）─────────────────────
-  - model_name: qwen3-coder
-    litellm_params:
-      model: dashscope/qwen3-coder-plus
-      api_key: os.environ/DASHSCOPE_API_KEY
-
-  - model_name: glm-5
-    litellm_params:
-      model: dashscope/glm-5
-      api_key: os.environ/DASHSCOPE_API_KEY
-  # ── Opus 档 → DeepSeek Reasoner ────────────────────────────────────────
-  - model_name: opus
-    litellm_params:
-      model: dashscope/glm-5
-      api_key: os.environ/DASHSCOPE_API_KEY
-
-  - model_name: deepseek-reasoner
-    litellm_params:
-      model: deepseek/deepseek-reasoner
-      api_key: os.environ/DEEPSEEK_API_KEY
 
 router_settings:
   model_group_alias:
@@ -62,3 +83,8 @@ litellm_settings:
   drop_params: true
   modify_params: true
   request_timeout: 600
+  # Z.AI 欠费/无资源包/429 等失败时，按顺序降级到 DashScope（需 DASHSCOPE_API_KEY）
+  fallbacks:
+    - haiku: [qwen3-coder-next]
+    - sonnet: [qwen3-coder-plus]
+    - opus: [qwen-glm-5]

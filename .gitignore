@@ -40,3 +40,7 @@ kubectl/config/*
 !kubectl/config/.gitkeep
 
 openclaw/config
+# Added by code-review-graph
+.code-review-graph/
+.claude
+.mcp.json

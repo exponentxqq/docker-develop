@@ -1,0 +1,6 @@
+#!/bin/bash
+cleanup() {
+    docker exec python pkill -TERM -f "aws $*" 2>/dev/null
+}
+trap cleanup INT TERM HUP
+docker-run python aws "$@"

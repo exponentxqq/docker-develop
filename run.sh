@@ -21,10 +21,13 @@ command=$*
 echo "$command"
 command=${command#* }
 
+tty_flag=""
+[ -t 0 ] && tty_flag="-t"
+
 if [ "$1" == "redis" ]; then
-  exec docker exec -it "$1" /bin/bash -c "$command"
+  exec docker exec -i $tty_flag "$1" /bin/bash -c "$command"
 elif [ "$1" == "workspace" ]; then
-  exec docker exec -it "$1" /bin/zsh -c "[ -d $project_path ] && (cd $project_path && $command) || $command"
+  exec docker exec -i $tty_flag "$1" /bin/zsh -c "[ -d $project_path ] && (cd $project_path && $command) || $command"
 else
-  exec docker exec -it "$1" /bin/bash -c "[ -d $project_path ] && (cd $project_path && $command) || $command"
+  exec docker exec -i $tty_flag "$1" /bin/bash -c "[ -d $project_path ] && (cd $project_path && $command) || $command"
 fi

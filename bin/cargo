@@ -1,0 +1,6 @@
+#!/bin/bash
+cleanup() {
+    docker exec rust pkill -TERM -f "cargo $*" 2>/dev/null
+}
+trap cleanup INT TERM HUP
+docker-run rust cargo "$@"
