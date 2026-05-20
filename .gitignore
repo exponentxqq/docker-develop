@@ -25,6 +25,7 @@ redis/data
 /cache/gradle-cache/*
 /cache/maven-cache/*
 /cache
+/rust/cargo-cache
 
 /mongo/data
 /mongo/log
