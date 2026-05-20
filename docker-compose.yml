@@ -320,6 +320,8 @@ services:
         - RUST_VERSION=${RUST_VERSION}
         - USER_ID=${USER_ID}
     container_name: rust
+    environment:
+      - DEEPSEEK_API_KEY=${DEEPSEEK_API_KEY}
     image: docker-rust:${RUST_VERSION}
     working_dir: ${CONTAINER_PROJECT_PATH}
     user: ${USER_ID}:${USER_ID}
@@ -338,6 +340,21 @@ services:
       backend:
         ipv4_address: 172.20.0.15
 
+  lsp:
+    build:
+      context: ./lsp
+      dockerfile: ./Dockerfile
+    container_name: lsp
+    image: docker-lsp:latest
+    user: ${USER_ID}:${USER_ID}
+    tty: true
+    stdin_open: true
+    volumes:
+      - ${HOST_PROJECT_PATH}:${HOST_PROJECT_PATH}:ro
+    networks:
+      backend:
+        ipv4_address: 172.20.0.17
+
   litellm:
     image: ghcr.io/berriai/litellm:main-latest
     container_name: litellm
@@ -347,6 +364,9 @@ services:
       - DEEPSEEK_API_KEY=${DEEPSEEK_API_KEY}
       - QWEN_API_KEY=${QWEN_API_KEY}
       - DASHSCOPE_API_KEY=${DASHSCOPE_API_KEY}
+      - ZAI_API_KEY=${ZAI_API_KEY}
+      # GLM Coding Plan 等「编码订阅」走 coding 网关；按量/通用 API 在 .env 覆盖为 https://api.z.ai/api/paas/v4
+      - ZAI_API_BASE=${ZAI_API_BASE:-https://api.z.ai/api/coding/paas/v4}
     command: ["--config", "/app/config.yaml", "--port", "4000"]
     ports:
       - "4000:4000"
