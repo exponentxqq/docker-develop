@@ -13,6 +13,8 @@ RUN npm install -g --prefix /opt/lsp/node \
     pyright \
     basedpyright \
     @vue/language-server \
+    @vtsls/language-server \
+    typescript \
     vscode-langservers-extracted \
     yaml-language-server \
     @tailwindcss/language-server \
@@ -33,7 +35,7 @@ ARG JDTLS_BUILD=202604151538
 RUN mkdir -p /opt/lsp/jdtls && \
     curl -fSL "https://download.eclipse.org/jdtls/milestones/${JDTLS_VERSION}/jdt-language-server-${JDTLS_VERSION}-${JDTLS_BUILD}.tar.gz" \
     -o /tmp/jdtls.tar.gz && \
-    tar xzf /tmp/jdtls.tar.gz -C /opt/lsp/jdtls --strip-components=1 && \
+    tar xzf /tmp/jdtls.tar.gz -C /opt/lsp/jdtls && \
     rm /tmp/jdtls.tar.gz
 
 # ---------------------------------------------------------------------------
@@ -97,6 +99,13 @@ RUN apk add --no-cache curl && \
     -o /opt/lsp/marksman/bin/marksman && \
     chmod +x /opt/lsp/marksman/bin/marksman
 
+# ---------------------------------------------------------------------------
+# Stage 8: Rust toolchain (for rust-analyzer project analysis)
+# ---------------------------------------------------------------------------
+FROM rust:1.95-slim AS rust-toolchain-provider
+
+RUN rustup component add rust-src
+
 # ==============================================================================
 # Final stage: runtime image with all language servers
 # ==============================================================================
@@ -108,7 +117,10 @@ RUN apt-get update && \
         ca-certificates \
         curl \
         gnupg \
-        libicu70 && \
+        libicu70 \
+        build-essential \
+        pkg-config \
+        libssl-dev && \
     rm -rf /var/lib/apt/lists/*
 
 # ---- Install Node.js 22 runtime (NodeSource) ----
@@ -130,10 +142,21 @@ COPY --from=rust-builder /opt/lsp/rust /opt/lsp/rust
 COPY --from=lua-builder /opt/lsp/lua  /opt/lsp/lua
 COPY --from=ruff-builder /opt/lsp/ruff /opt/lsp/ruff
 COPY --from=marksman-builder /opt/lsp/marksman /opt/lsp/marksman
+COPY --from=rust-toolchain-provider /usr/local/cargo /opt/lsp/rust-toolchain
+COPY --from=rust-toolchain-provider /usr/local/rustup /opt/lsp/rustup-toolchain
+
+# ---- Create writable directories for LSP caches ----
+RUN mkdir -p /opt/lsp/lua/log /home/xuqinqin && \
+    chown -R 1000:1000 /opt/lsp/lua/log /home/xuqinqin /opt/lsp/rust-toolchain /opt/lsp/rustup-toolchain
 
 # ---- Environment ----
+ENV HOME="/home/xuqinqin"
 ENV JAVA_HOME="/opt/java/openjdk"
-ENV PATH="/opt/lsp/node/bin:/opt/lsp/lua/bin:/opt/lsp/go/bin:/opt/lsp/rust/bin:/opt/lsp/jdtls:/opt/lsp/ruff/bin:/opt/lsp/marksman/bin:${JAVA_HOME}/bin:${PATH}"
+ENV GRADLE_USER_HOME="/home/xuqinqin/.gradle"
+ENV RUSTUP_HOME="/opt/lsp/rustup-toolchain"
+ENV CARGO_HOME="/opt/lsp/rust-toolchain"
+ENV NODE_PATH="/opt/lsp/node/lib/node_modules"
+ENV PATH="/opt/lsp/bin:/opt/lsp/rust-toolchain/bin:/opt/lsp/node/bin:/opt/lsp/lua/bin:/opt/lsp/go/bin:/opt/lsp/rust/bin:/opt/lsp/jdtls/bin:/opt/lsp/ruff/bin:/opt/lsp/marksman/bin:${JAVA_HOME}/bin:${PATH}"
 
 # ---- Security: run as non-root ----
 USER 1000:1000

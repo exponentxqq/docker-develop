@@ -16,9 +16,9 @@ if [ false == $exists ]; then
   cd $DOCKER_ROOT_DIR && docker compose up -d $1
 fi
 
-echo "[$1]current project_path: $project_path"
+echo "[$1]current project_path: $project_path" >&2
 command=$*
-echo "$command"
+echo "$command" >&2
 command=${command#* }
 
 tty_flag=""
