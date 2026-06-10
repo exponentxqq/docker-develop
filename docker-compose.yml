@@ -21,6 +21,7 @@ services:
       - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
       - TZ=${TIMEZONE}
     volumes:
+      - ${HOST_PROJECT_PATH}:${CONTAINER_PROJECT_PATH}
       - ${MYSQL_HOST_DATA_PATH}:${MYSQL_CONTAINER_DATA_PATH}
       - ${MYSQL_ENTRYPOINT_INITDB}:/docker-entrypoint-initdb.d
       - ./mysql/my.cnf:/etc/mysql/conf.d/my.cnf
@@ -327,6 +328,7 @@ services:
     user: ${USER_ID}:${USER_ID}
     volumes:
       - ${HOST_PROJECT_PATH}:${CONTAINER_PROJECT_PATH}
+      - ${HOST_PROJECT_PATH}:${HOST_PROJECT_PATH}
       - ./rust/cargo-cache:/home/docker/.cargo
       - ./common/.zshrc:/home/docker/.zshrc
       - ./common/.vimrc:/home/docker/.vimrc
@@ -347,10 +349,15 @@ services:
     container_name: lsp
     image: docker-lsp:latest
     user: ${USER_ID}:${USER_ID}
+    init: true
     tty: true
     stdin_open: true
     volumes:
-      - ${HOST_PROJECT_PATH}:${HOST_PROJECT_PATH}:ro
+      - ${HOST_PROJECT_PATH}:${HOST_PROJECT_PATH}
+      - ${HOST_HOME_PATH}/.local/share/nvim:${HOST_HOME_PATH}/.local/share/nvim:ro
+      - ${HOST_HOME_PATH}/.local/share/nvim/mason/share/jdtls/lombok.jar:/opt/lsp/jdtls/lombok.jar:ro
+      - ${HOST_HOME_PATH}/.cache/nvim:${HOST_HOME_PATH}/.cache/nvim
+      - ${HOST_HOME_PATH}/.gradle:${HOST_HOME_PATH}/.gradle
     networks:
       backend:
         ipv4_address: 172.20.0.17
