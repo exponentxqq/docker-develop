@@ -16,8 +16,11 @@ services:
         ipv4_address: 172.20.0.13
 
   litellm:
-    image: ghcr.io/berriai/litellm:main-latest
+    build:
+      context: ../containers/tools/litellm
+      dockerfile: Dockerfile
     container_name: litellm
+    image: docker-litellm:latest
     volumes:
       - ../containers/tools/litellm/config.yaml:/app/config.yaml
     environment:
