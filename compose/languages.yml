@@ -1,0 +1,201 @@
+services:
+  fpm:
+    build:
+      context: ../fpm
+      dockerfile: ./Dockerfile
+      args:
+        - PHP_VERSION=${PHP_VERSION}
+        - PHP_FPM_PORT=${PHP_FPM_PORT}
+        - INSTALL_COMPOSER=${PHP_INSTALL_COMPOSER}
+        - INSTALL_XDEBUG=${PHP_INSTALL_XDEBUG}
+        - INSTALL_REDIS=${PHP_INSTALL_REDIS}
+        - INSTALL_JIEBA=${PHP_INSTALL_JIEBA}
+        - INSTALL_SWOOLE=${PHP_INSTALL_SWOOLE}
+        - INSTALL_IMAGICK=${PHP_INSTALL_IMAGICK}
+        - IMAGICK_VERSION=${PHP_IMAGICK_VERSION}
+        - INSTALL_PHALCON=${PHP_INSTALL_PHALCON}
+        - PHALCON_VERSION=${PHP_PHALCON_VERSION}
+        - USER_ID=${USER_ID}
+    container_name: fpm
+    image: docker-fpm:${PHP_VERSION}
+    working_dir: ${CONTAINER_PROJECT_PATH}
+    user: ${USER_ID}:${USER_ID}
+    ports:
+      - "${PHP_FPM_PORT}:9000"
+    extra_hosts:
+      - "dockerhost:${DOCKER_HOST_IP}"
+      - "www.qmsmain.localhost:172.20.0.3"
+      - "www.auth.localhost:172.20.0.3"
+    volumes:
+      - ../fpm/conf.d:/usr/local/etc/php.conf
+      - ../fpm/php.ini:/usr/local/etc/php/php.ini
+      - ${HOST_PROJECT_PATH}:${CONTAINER_PROJECT_PATH}
+      - ../cache/composer-cache:/home/docker/.composer
+      - ../common/.zshrc:/home/docker/.zshrc
+      - ../common/.vimrc:/home/docker/.vimrc
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      backend:
+        ipv4_address: 172.20.0.7
+
+  node:
+    build:
+      context: ../node
+      dockerfile: Dockerfile
+      args:
+        - NODE_VERSION=${NODE_VERSION}
+        - PNPM_VERSION=${PNPM_VERSION}
+        - USER_ID=${USER_ID}
+    environment:
+      - DISPLAY=${DISPLAY}
+    container_name: node
+    image: docker-node:${NODE_VERSION}
+    user: ${USER_ID}:${USER_ID}
+    extra_hosts:
+      - "dockerhost:${DOCKER_HOST_IP}"
+      - "www.auth.localhost:172.20.0.3"
+      - "www.miniqms.localhost:172.20.0.3"
+      - "www.template.localhost:172.20.0.3"
+      - "www.qmsmain.localhost:172.20.0.3"
+    volumes:
+      - ../node/npmrc:/etc/npmrc
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw
+      - /dev/shm:/dev/shm
+      - ${HOST_PROJECT_PATH}:${CONTAINER_PROJECT_PATH}
+      - ../cache/npm-cache:/home/node/.npm
+      - ../cache/pnpm-cache:/home/node/.local/share/pnpm/store
+    ports:
+      - "8090-8099:8090-8099"
+    devices:
+      - /dev/dri:/dev/dri
+    tty: true
+    networks:
+      backend:
+        ipv4_address: 172.20.0.2
+
+  node-old:
+    build:
+      context: ../node
+      dockerfile: Dockerfile
+      args:
+        - NODE_VERSION=16.20.2
+        - PNPM_VERSION=8.15.9
+        - USER_ID=${USER_ID}
+    container_name: node-old
+    image: docker-node-old:16.20.2
+    user: ${USER_ID}:${USER_ID}
+    volumes:
+      - ${HOST_PROJECT_PATH}:${CONTAINER_PROJECT_PATH}
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw
+      - /dev/shm:/dev/shm
+    ports:
+      - "9090-9099:9090-9099"
+    tty: true
+    ipc: host
+    networks:
+      backend:
+        ipv4_address: 172.20.0.14
+
+  java:
+    build:
+      context: ../java
+      dockerfile: Dockerfile
+      args:
+        - JDK_VERSION=${JDK_VERSION}
+        - USER_ID=${USER_ID}
+        - BUILD_OPENCV=${BUILD_OPENCV}
+    container_name: java
+    image: docker-java:${JDK_VERSION}
+    environment:
+      - JAVA_OPTS=-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5750 -Xmx256m -Xms128m
+    user: ${USER_ID}:${USER_ID}
+    volumes:
+      - ../java/run.sh:/usr/bin/run
+      - ../java/conf:/usr/local/openjdk-11/conf
+      - ${HOST_PROJECT_PATH}:${CONTAINER_PROJECT_PATH}
+      - ${JDK_HOST_MAVEN_PATH}:/usr/local/maven
+      - ${JDK_HOST_GRADLE_PATH}:/usr/local/gradle
+      - ${JDK_HOST_JAVAFX_PATH}:/usr/local/lib/javafx
+      - ../cache/gradle-cache:/home/docker/.gradle
+      - ../cache/maven-cache:/home/docker/.m2
+      - ../cache/javafx-cache:/home/docker/.openjfx
+    extra_hosts:
+      - "www.auth.localhost:172.20.0.3"
+      - "dockerhost:${DOCKER_HOST_IP}"
+    ports:
+      - "5750:5750"
+      - "8080-8089:8080-8089"
+    tty: true
+    networks:
+      backend:
+        ipv4_address: 172.20.0.9
+
+  go:
+    build:
+      context: ../go
+      dockerfile: Dockerfile
+    container_name: go
+    image: docker-go
+    volumes:
+      - ${HOST_PROJECT_PATH}:${CONTAINER_PROJECT_PATH}
+      - ../cache/go-cache:/usr/local/go
+    tty: true
+    ports:
+      - "3000:3000"
+    networks:
+      backend:
+        ipv4_address: 172.20.0.10
+
+  python:
+    build:
+      context: ../python
+      dockerfile: Dockerfile
+      args:
+        - USER_ID=${USER_ID}
+        - CONDA_VERSION=${CONDA_VERSION}
+    container_name: python
+    image: docker-python:${CONDA_VERSION}
+    tty: true
+    user: ${USER_ID}:${USER_ID}
+    volumes:
+      - ../common/.zshrc:/home/docker/.zshrc
+      - ../common/.vimrc:/home/docker/.vimrc
+      - ${HOST_PROJECT_PATH}:${CONTAINER_PROJECT_PATH}
+      - ../python/aws:/home/docker/.aws
+      - ${DATA_PATH}:/data
+    ports:
+      - "5000:5000"
+    extra_hosts:
+      - "dockerhost:${DOCKER_HOST_IP}"
+    networks:
+      backend:
+        ipv4_address: 172.20.0.12
+
+  rust:
+    build:
+      context: ../rust
+      dockerfile: ./Dockerfile
+      args:
+        - RUST_VERSION=${RUST_VERSION}
+        - USER_ID=${USER_ID}
+    container_name: rust
+    environment:
+      - DEEPSEEK_API_KEY=${DEEPSEEK_API_KEY}
+    image: docker-rust:${RUST_VERSION}
+    working_dir: ${CONTAINER_PROJECT_PATH}
+    user: ${USER_ID}:${USER_ID}
+    volumes:
+      - ${HOST_PROJECT_PATH}:${CONTAINER_PROJECT_PATH}
+      - ${HOST_PROJECT_PATH}:${HOST_PROJECT_PATH}
+      - ../rust/cargo-cache:/home/docker/.cargo
+      - ../common/.zshrc:/home/docker/.zshrc
+      - ../common/.vimrc:/home/docker/.vimrc
+    extra_hosts:
+      - "dockerhost:${DOCKER_HOST_IP}"
+    ports:
+      - "3001:3001"
+      - "9999:9999"
+    tty: true
+    networks:
+      backend:
+        ipv4_address: 172.20.0.15
