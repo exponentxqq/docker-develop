@@ -64,6 +64,7 @@ services:
       - volta-cache:/home/docker/.volta
       - ../cache/pnpm-cache:/home/docker/.local/share/pnpm/store
       - ../cache/npm-cache:/home/docker/.npm
+      - ../cache/yarn-cache:/home/docker/.cache/yarn
     ports:
       - "8090-8099:8090-8099"
     devices:
