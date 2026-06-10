@@ -1,7 +1,7 @@
 services:
   fpm:
     build:
-      context: ../fpm
+      context: ../containers/languages/fpm
       dockerfile: ./Dockerfile
       args:
         - PHP_VERSION=${PHP_VERSION}
@@ -27,8 +27,8 @@ services:
       - "www.qmsmain.localhost:172.20.0.3"
       - "www.auth.localhost:172.20.0.3"
     volumes:
-      - ../fpm/conf.d:/usr/local/etc/php.conf
-      - ../fpm/php.ini:/usr/local/etc/php/php.ini
+      - ../containers/languages/fpm/conf.d:/usr/local/etc/php.conf
+      - ../containers/languages/fpm/php.ini:/usr/local/etc/php/php.ini
       - ${HOST_PROJECT_PATH}:${CONTAINER_PROJECT_PATH}
       - ../cache/composer-cache:/home/docker/.composer
       - ../common/.zshrc:/home/docker/.zshrc
@@ -40,7 +40,7 @@ services:
 
   node:
     build:
-      context: ../node
+      context: ../containers/languages/node
       dockerfile: Dockerfile
       args:
         - NODE_VERSION=${NODE_VERSION}
@@ -57,7 +57,7 @@ services:
       - "www.template.localhost:172.20.0.3"
       - "www.qmsmain.localhost:172.20.0.3"
     volumes:
-      - ../node/npmrc:/home/docker/.npmrc
+      - ../containers/languages/node/npmrc:/home/docker/.npmrc
       - /tmp/.X11-unix:/tmp/.X11-unix:rw
       - /dev/shm:/dev/shm
       - ${HOST_PROJECT_PATH}:${CONTAINER_PROJECT_PATH}
@@ -77,7 +77,7 @@ services:
 
   java:
     build:
-      context: ../java
+      context: ../containers/languages/java
       dockerfile: Dockerfile
       args:
         - JDK_VERSION=${JDK_VERSION}
@@ -89,8 +89,8 @@ services:
       - JAVA_OPTS=-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5750 -Xmx256m -Xms128m
     user: ${USER_ID}:${USER_ID}
     volumes:
-      - ../java/run.sh:/usr/bin/run
-      - ../java/conf:/usr/local/openjdk-11/conf
+      - ../containers/languages/java/run.sh:/usr/bin/run
+      - ../containers/languages/java/conf:/usr/local/openjdk-11/conf
       - ${HOST_PROJECT_PATH}:${CONTAINER_PROJECT_PATH}
       - ${JDK_HOST_MAVEN_PATH}:/usr/local/maven
       - ${JDK_HOST_GRADLE_PATH}:/usr/local/gradle
@@ -111,7 +111,7 @@ services:
 
   go:
     build:
-      context: ../go
+      context: ../containers/languages/go
       dockerfile: Dockerfile
     container_name: go
     image: docker-go
@@ -127,7 +127,7 @@ services:
 
   python:
     build:
-      context: ../python
+      context: ../containers/languages/python
       dockerfile: Dockerfile
       args:
         - USER_ID=${USER_ID}
@@ -140,7 +140,7 @@ services:
       - ../common/.zshrc:/home/docker/.zshrc
       - ../common/.vimrc:/home/docker/.vimrc
       - ${HOST_PROJECT_PATH}:${CONTAINER_PROJECT_PATH}
-      - ../python/aws:/home/docker/.aws
+      - ../containers/languages/python/aws:/home/docker/.aws
       - ${DATA_PATH}:/data
       - conda-envs:/home/docker/.conda/envs
       - ../cache/conda-pkgs:/home/docker/.conda/pkgs
@@ -155,7 +155,7 @@ services:
 
   rust:
     build:
-      context: ../rust
+      context: ../containers/languages/rust
       dockerfile: ./Dockerfile
       args:
         - RUST_VERSION=${RUST_VERSION}
@@ -169,7 +169,7 @@ services:
     volumes:
       - ${HOST_PROJECT_PATH}:${CONTAINER_PROJECT_PATH}
       - ${HOST_PROJECT_PATH}:${HOST_PROJECT_PATH}
-      - ../rust/cargo-cache:/home/docker/.cargo
+      - ../containers/languages/rust/cargo-cache:/home/docker/.cargo
       - ../common/.zshrc:/home/docker/.zshrc
       - ../common/.vimrc:/home/docker/.vimrc
     extra_hosts:

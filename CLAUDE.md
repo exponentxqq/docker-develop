@@ -24,7 +24,7 @@ docker compose config --no-path-resolution
 
 ## Architecture
 
-Multi-service Docker dev environment, 16 services on a single `backend` bridge network (subnet `172.20.0.0/16`). Each service has a static IP.
+Multi-service Docker dev environment, 13 services on a single `backend` bridge network (subnet `172.20.0.0/16`). Each service has a static IP.
 
 **Compose split via `include` (Compose v2.20+):**
 
@@ -32,10 +32,15 @@ Multi-service Docker dev environment, 16 services on a single `backend` bridge n
 docker-compose.yml          → networks + include directives
 compose/services.yml        → mysql, postgres, redis, mongo, nginx
 compose/languages.yml       → fpm, node, java, go, python, rust
-compose/tools.yml           → workspace, kubectl, lsp, litellm
+compose/tools.yml           → kubectl, litellm
 ```
 
-All paths in sub-files are relative to the **including file** (`docker-compose.yml`), not the sub-file itself. Paths use `../` prefix to reach the repo root (e.g., `context: ../node`, `../cache/pnpm-cache`).
+**Container directories** are organized under `containers/` mirroring the compose split:
+- `containers/services/` — mysql, postgres, redis, mongo, nginx
+- `containers/languages/` — fpm, node, java, go, python, rust
+- `containers/tools/` — kubectl, litellm
+
+All paths in sub-files are relative to the **including file** (`docker-compose.yml`), not the sub-file itself. Paths use `../` prefix to reach the repo root (e.g., `context: ../containers/languages/node`, `../cache/pnpm-cache`).
 
 ## Environment Variables
 

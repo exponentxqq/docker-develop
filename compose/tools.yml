@@ -1,7 +1,7 @@
 services:
   kubectl:
     build:
-      context: ../kubectl
+      context: ../containers/tools/kubectl
       dockerfile: Dockerfile
       args:
         - UBUNTU_VERSION=${UBUNTU_VERSION}
@@ -10,7 +10,7 @@ services:
     image: docker-kubectl:${KUBECTL_VERSION}
     tty: true
     volumes:
-      - ../kubectl/config:/root/.kube
+      - ../containers/tools/kubectl/config:/root/.kube
     networks:
       backend:
         ipv4_address: 172.20.0.13
@@ -19,7 +19,7 @@ services:
     image: ghcr.io/berriai/litellm:main-latest
     container_name: litellm
     volumes:
-      - ../litellm/config.yaml:/app/config.yaml
+      - ../containers/tools/litellm/config.yaml:/app/config.yaml
     environment:
       - DEEPSEEK_API_KEY=${DEEPSEEK_API_KEY}
       - QWEN_API_KEY=${QWEN_API_KEY}

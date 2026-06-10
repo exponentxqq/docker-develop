@@ -7,34 +7,34 @@
 # vscode auto generated
 .vscode
 
-mysql/data/*
-mysql/data8/*
+containers/services/mysql/data/*
+containers/services/mysql/data8/*
 
-redis/data
+containers/services/redis/data
 
 /**/log/*
 
 /**/*.log
 
-/nginx/site-enabled/*
+/containers/services/nginx/site-enabled/*
 
-/nginx/ssl/*
+/containers/services/nginx/ssl/*
 
 /cache
-/rust/cargo-cache
+/containers/languages/rust/cargo-cache
 
-/mongo/data
-/mongo/log
+/containers/services/mongo/data
+/containers/services/mongo/log
 
-/python/aws
+/containers/languages/python/aws
 
-/java/opencv-4.2.0
+/containers/languages/java/opencv-4.2.0
 
 .env
 
 # kubectl config files (ignore files but keep directory structure)
-kubectl/config/*
-!kubectl/config/.gitkeep
+containers/tools/kubectl/config/*
+!containers/tools/kubectl/config/.gitkeep
 
 openclaw/config
 

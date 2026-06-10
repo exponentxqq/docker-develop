@@ -1,7 +1,7 @@
 services:
   mysql:
     build:
-      context: ../mysql
+      context: ../containers/services/mysql
       dockerfile: ./Dockerfile
       args:
         - MYSQL_IMAGE=${MYSQL_IMAGE}
@@ -17,7 +17,7 @@ services:
       - ${HOST_PROJECT_PATH}:${CONTAINER_PROJECT_PATH}
       - ${MYSQL_HOST_DATA_PATH}:${MYSQL_CONTAINER_DATA_PATH}
       - ${MYSQL_ENTRYPOINT_INITDB}:/docker-entrypoint-initdb.d
-      - ../mysql/my.cnf:/etc/mysql/conf.d/my.cnf
+      - ../containers/services/mysql/my.cnf:/etc/mysql/conf.d/my.cnf
     # 降低mysql容器的内存占用
     ulimits:
       nproc: 65535
@@ -34,7 +34,7 @@ services:
 
   postgres:
     build:
-      context: ../postgres
+      context: ../containers/services/postgres
       dockerfile: ./Dockerfile
       args:
         - POSTGRES_VERSION=${POSTGRES_VERSION}
@@ -49,7 +49,7 @@ services:
       - "${POSTGRES_PORT}:5432"
     volumes:
       - ${POSTGRES_HOST_DATA_PATH}:/var/lib/postgresql
-      - ../postgres/log:/var/log/postgresql
+      - ../containers/services/postgres/log:/var/log/postgresql
     logging:
       options:
         max-size: "10m"
@@ -60,7 +60,7 @@ services:
 
   redis:
     build:
-      context: ../redis
+      context: ../containers/services/redis
       dockerfile: ./Dockerfile
       args:
         - REDIS_VERSION=${REDIS_VERSION}
@@ -69,16 +69,16 @@ services:
     ports:
       - "${REDIS_PORT}:6379"
     volumes:
-      - ../redis/log/redis.log:/var/log/redis/redis-server.log
+      - ../containers/services/redis/log/redis.log:/var/log/redis/redis-server.log
       - ${REDIS_HOST_DATA_PATH}:${REDIS_CONTAINER_DATA_PATH}
-      - ../redis/redis.conf:/usr/local/etc/redis/redis.conf
+      - ../containers/services/redis/redis.conf:/usr/local/etc/redis/redis.conf
     networks:
       backend:
         ipv4_address: 172.20.0.5
 
   mongo:
     build:
-      context: ../mongo
+      context: ../containers/services/mongo
       dockerfile: Dockerfile
       args:
         - MONGO_VERSION=${MONGO_VERSION}
@@ -102,7 +102,7 @@ services:
 
   nginx:
     build:
-      context: ../nginx
+      context: ../containers/services/nginx
       dockerfile: ./Dockerfile
       args:
         - NGINX_VERSION=${NGINX_VERSION}
@@ -115,10 +115,10 @@ services:
       - "443:443"
     volumes:
       - ${HOST_PROJECT_PATH}:${CONTAINER_PROJECT_PATH}
-      - ../nginx/site-enabled:/etc/nginx/conf.d
-      - ../nginx/nginx.conf:/etc/nginx/nginx.conf
-      - ../nginx/ssl:/etc/nginx/ssl
-      - ../nginx/log:/nginx/log
+      - ../containers/services/nginx/site-enabled:/etc/nginx/conf.d
+      - ../containers/services/nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ../containers/services/nginx/ssl:/etc/nginx/ssl
+      - ../containers/services/nginx/log:/nginx/log
     extra_hosts:
       - "dockerhost:${DOCKER_HOST_IP}"
     networks:

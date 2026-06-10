@@ -39,7 +39,10 @@ docker/
 ├── .env-example                 # 环境变量模板
 ├── run.sh                       # 容器命令执行脚本
 ├── build.sh                     # 镜像构建脚本（带代理）
-└── */                           # 各服务目录（含 Dockerfile + README.md）
+└── containers/                  # 容器目录（按 compose 分类）
+    ├── services/                # 基础服务
+    ├── languages/               # 语言运行时
+    └── tools/                   # 辅助工具
 ```
 
 ## 服务一览
@@ -48,29 +51,29 @@ docker/
 
 | 服务                           | 容器名   | 镜像           | 说明                           |
 | ------------------------------ | -------- | -------------- | ------------------------------ |
-| [mysql](mysql/README.md)       | mysql    | `mysql:5.7`    | MySQL 5.7 + mycli + XtraBackup |
-| [postgres](postgres/README.md) | postgres | `postgres:13`  | PostgreSQL 13                  |
-| [redis](redis/README.md)       | redis    | `redis:7`      | Redis 7 + 持久化               |
-| [mongo](mongo/README.md)       | mongo    | `mongo:latest` | MongoDB + 认证                 |
-| [nginx](nginx/README.md)       | nginx    | `nginx:1.28`   | 反向代理 + HTTPS               |
+| [mysql](containers/services/mysql/README.md)       | mysql    | `mysql:5.7`    | MySQL 5.7 + mycli + XtraBackup |
+| [postgres](containers/services/postgres/README.md) | postgres | `postgres:13`  | PostgreSQL 13                  |
+| [redis](containers/services/redis/README.md)       | redis    | `redis:7`      | Redis 7 + 持久化               |
+| [mongo](containers/services/mongo/README.md)       | mongo    | `mongo:latest` | MongoDB + 认证                 |
+| [nginx](containers/services/nginx/README.md)       | nginx    | `nginx:1.28`   | 反向代理 + HTTPS               |
 
 ### 语言运行时
 
 | 服务                       | 容器名 | 镜像              | 说明                         |
 | -------------------------- | ------ | ----------------- | ---------------------------- |
-| [node](node/README.md)     | node   | `debian:bookworm` | Node.js + Volta 多版本管理   |
-| [fpm](fpm/README.md)       | fpm    | `php:7.2-fpm`     | PHP-FPM + Composer + Xdebug  |
-| [java](java/README.md)     | java   | `openjdk:11`      | JDK 11 + Maven/Gradle/Flyway |
-| [go](go/README.md)         | go     | `golang:latest`   | Go 工具链                    |
-| [python](python/README.md) | python | `miniconda3`      | Conda + UV 双工具链          |
-| [rust](rust/README.md)     | rust   | `rust:1.83`       | Rust + Cargo + gdb           |
+| [node](containers/languages/node/README.md)     | node   | `debian:bookworm` | Node.js + Volta 多版本管理   |
+| [fpm](containers/languages/fpm/README.md)       | fpm    | `php:7.2-fpm`     | PHP-FPM + Composer + Xdebug  |
+| [java](containers/languages/java/README.md)     | java   | `openjdk:11`      | JDK 11 + Maven/Gradle/Flyway |
+| [go](containers/languages/go/README.md)         | go     | `golang:latest`   | Go 工具链                    |
+| [python](containers/languages/python/README.md) | python | `miniconda3`      | Conda + UV 双工具链          |
+| [rust](containers/languages/rust/README.md)     | rust   | `rust:1.83`       | Rust + Cargo + gdb           |
 
 ### 辅助工具
 
 | 服务                             | 容器名    | 镜像           | 说明              |
 | -------------------------------- | --------- | -------------- | ----------------- |
-| [kubectl](kubectl/README.md)     | kubectl   | `ubuntu:22.04` | Kubernetes CLI    |
-| [litellm](litellm/README.md)     | litellm   | `litellm:main` | LLM API 网关      |
+| [kubectl](containers/tools/kubectl/README.md)     | kubectl   | `ubuntu:22.04` | Kubernetes CLI    |
+| [litellm](containers/tools/litellm/README.md)     | litellm   | `litellm:main` | LLM API 网关      |
 
 > 每个服务的详细说明、配置参数、使用方式见对应目录下的 `README.md`。
 
