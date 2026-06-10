@@ -142,8 +142,8 @@ services:
       - ${HOST_PROJECT_PATH}:${CONTAINER_PROJECT_PATH}
       - ../python/aws:/home/docker/.aws
       - ${DATA_PATH}:/data
-      - conda-envs:/opt/conda/envs
-      - ../cache/conda-pkgs:/opt/conda/pkgs
+      - conda-envs:/home/docker/.conda/envs
+      - ../cache/conda-pkgs:/home/docker/.conda/pkgs
       - ../cache/uv-cache:/home/docker/.cache/uv
     ports:
       - "5000:5000"

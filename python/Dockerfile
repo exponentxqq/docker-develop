@@ -25,7 +25,7 @@ COPY --from=ghcr.io/astral-sh/uv:latest /uv /usr/local/bin/uv
 # 用户
 ARG USER_ID
 RUN useradd docker -u ${USER_ID} -g root -m && \
-    mkdir -p /home/docker/.cache /home/docker/.conda && \
+    mkdir -p /home/docker/.cache/uv /home/docker/.conda/envs /home/docker/.conda/pkgs && \
     chown -R docker:root /home/docker
 
 USER docker
