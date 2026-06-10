@@ -44,12 +44,11 @@ services:
       dockerfile: Dockerfile
       args:
         - NODE_VERSION=${NODE_VERSION}
-        - PNPM_VERSION=${PNPM_VERSION}
         - USER_ID=${USER_ID}
     environment:
       - DISPLAY=${DISPLAY}
     container_name: node
-    image: docker-node:${NODE_VERSION}
+    image: docker-node:bookworm
     user: ${USER_ID}:${USER_ID}
     extra_hosts:
       - "dockerhost:${DOCKER_HOST_IP}"
@@ -58,43 +57,22 @@ services:
       - "www.template.localhost:172.20.0.3"
       - "www.qmsmain.localhost:172.20.0.3"
     volumes:
-      - ../node/npmrc:/etc/npmrc
+      - ../node/npmrc:/home/docker/.npmrc
       - /tmp/.X11-unix:/tmp/.X11-unix:rw
       - /dev/shm:/dev/shm
       - ${HOST_PROJECT_PATH}:${CONTAINER_PROJECT_PATH}
-      - ../cache/npm-cache:/home/node/.npm
-      - ../cache/pnpm-cache:/home/node/.local/share/pnpm/store
+      - volta-cache:/home/docker/.volta
+      - ../cache/pnpm-cache:/home/docker/.local/share/pnpm/store
+      - ../cache/npm-cache:/home/docker/.npm
     ports:
       - "8090-8099:8090-8099"
     devices:
       - /dev/dri:/dev/dri
+    ipc: host
     tty: true
     networks:
       backend:
         ipv4_address: 172.20.0.2
-
-  node-old:
-    build:
-      context: ../node
-      dockerfile: Dockerfile
-      args:
-        - NODE_VERSION=16.20.2
-        - PNPM_VERSION=8.15.9
-        - USER_ID=${USER_ID}
-    container_name: node-old
-    image: docker-node-old:16.20.2
-    user: ${USER_ID}:${USER_ID}
-    volumes:
-      - ${HOST_PROJECT_PATH}:${CONTAINER_PROJECT_PATH}
-      - /tmp/.X11-unix:/tmp/.X11-unix:rw
-      - /dev/shm:/dev/shm
-    ports:
-      - "9090-9099:9090-9099"
-    tty: true
-    ipc: host
-    networks:
-      backend:
-        ipv4_address: 172.20.0.14
 
   java:
     build:
@@ -199,3 +177,6 @@ services:
     networks:
       backend:
         ipv4_address: 172.20.0.15
+
+volumes:
+  volta-cache:
