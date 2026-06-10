@@ -19,6 +19,6 @@ alias mvn="docker-run java mvn"
 alias gradle="docker-run java gradle"
 alias flyway="docker-run java flyway"
 
-alias mysql="docker-run workspace mysql -hmysql"
+alias mysql="docker-run mysql mysql"
 alias redis="docker-run redis redis-cli"
 alias python="docker-run phpunit python"

@@ -1,6 +1,6 @@
 # docker-develop
 
-开发环境的 Docker 编排，17 个服务覆盖数据库、缓存、Web 服务器和各语言运行时。
+个人开发环境的 Docker 编排，13 个容器覆盖数据库、缓存、Web 代理、语言运行时和辅助工具。
 
 ## 快速开始
 
@@ -26,39 +26,53 @@ pnpm add react                     # 等价于 ./run.sh node "pnpm add react"
 
 ```
 docker/
-├── docker-compose.yml          # 入口：networks + include
+├── README.md                    # 本文件（汇总）
+├── docker-compose.yml           # 入口：networks + include
 ├── compose/
-│   ├── services.yml            # mysql, postgres, redis, mongo, nginx
-│   ├── languages.yml           # fpm, node, java, go, python, rust
-│   └── tools.yml               # workspace, kubectl, lsp, litellm
-├── bin/                        # 宿主机快捷命令
-├── cache/                      # 包管理器缓存
-├── .env                        # 环境变量（需自行创建）
-├── .env-example                # 环境变量模板
-├── run.sh                      # 容器命令执行脚本
-├── build.sh                    # 镜像构建脚本（带代理）
-└── */                          # 各服务 Dockerfile 和配置
+│   ├── services.yml             # 基础服务
+│   ├── languages.yml            # 语言运行时
+│   └── tools.yml                # 辅助工具
+├── bin/                         # 宿主机快捷命令
+├── cache/                       # 包管理器缓存目录
+├── common/                      # 共享配置（.zshrc, .vimrc）
+├── .env                         # 环境变量（需自行创建）
+├── .env-example                 # 环境变量模板
+├── run.sh                       # 容器命令执行脚本
+├── build.sh                     # 镜像构建脚本（带代理）
+└── */                           # 各服务目录（含 Dockerfile + README.md）
 ```
 
 ## 服务一览
 
-| 服务      | 分类      | 容器名    | 说明                        |
-| --------- | --------- | --------- | --------------------------- |
-| mysql     | services  | mysql     | MySQL 5.7                   |
-| postgres  | services  | postgres  | PostgreSQL 13               |
-| redis     | services  | redis     | Redis 7                     |
-| mongo     | services  | mongo     | MongoDB                     |
-| nginx     | services  | nginx     | Nginx 反向代理              |
-| node      | languages | node      | Node.js（Volta 多版本管理） |
-| fpm       | languages | fpm       | PHP 7.2                     |
-| java      | languages | java      | JDK 11 + Maven/Gradle       |
-| go        | languages | go        | Go                          |
-| python    | languages | python    | Python（Conda）             |
-| rust      | languages | rust      | Rust                        |
-| workspace | tools     | workspace | Ubuntu 通用工作区           |
-| kubectl   | tools     | kubectl   | Kubernetes CLI              |
-| lsp       | tools     | lsp       | Neovim/Claude Code LSP 服务 |
-| litellm   | tools     | litellm   | LLM API 网关                |
+### 基础服务
+
+| 服务                           | 容器名   | 镜像           | 说明                           |
+| ------------------------------ | -------- | -------------- | ------------------------------ |
+| [mysql](mysql/README.md)       | mysql    | `mysql:5.7`    | MySQL 5.7 + mycli + XtraBackup |
+| [postgres](postgres/README.md) | postgres | `postgres:13`  | PostgreSQL 13                  |
+| [redis](redis/README.md)       | redis    | `redis:7`      | Redis 7 + 持久化               |
+| [mongo](mongo/README.md)       | mongo    | `mongo:latest` | MongoDB + 认证                 |
+| [nginx](nginx/README.md)       | nginx    | `nginx:1.28`   | 反向代理 + HTTPS               |
+
+### 语言运行时
+
+| 服务                       | 容器名 | 镜像              | 说明                         |
+| -------------------------- | ------ | ----------------- | ---------------------------- |
+| [node](node/README.md)     | node   | `debian:bookworm` | Node.js + Volta 多版本管理   |
+| [fpm](fpm/README.md)       | fpm    | `php:7.2-fpm`     | PHP-FPM + Composer + Xdebug  |
+| [java](java/README.md)     | java   | `openjdk:11`      | JDK 11 + Maven/Gradle/Flyway |
+| [go](go/README.md)         | go     | `golang:latest`   | Go 工具链                    |
+| [python](python/README.md) | python | `miniconda3`      | Conda + UV 双工具链          |
+| [rust](rust/README.md)     | rust   | `rust:1.83`       | Rust + Cargo + gdb           |
+
+### 辅助工具
+
+| 服务                             | 容器名    | 镜像           | 说明              |
+| -------------------------------- | --------- | -------------- | ----------------- |
+| [kubectl](kubectl/README.md)     | kubectl   | `ubuntu:22.04` | Kubernetes CLI    |
+| [litellm](litellm/README.md)     | litellm   | `litellm:main` | LLM API 网关      |
+
+> 每个服务的详细说明、配置参数、使用方式见对应目录下的 `README.md`。
 
 ## run.sh 用法
 
@@ -66,10 +80,9 @@ docker/
 ./run.sh <服务名> "<命令>"
 ./run.sh node "pnpm install"
 ./run.sh mysql "mysql -uroot -p -e 'SHOW DATABASES'"
-./run.sh workspace "ls -la"
 ```
 
-`run.sh` 会自动：检测容器是否运行 → 未运行则启动 → 映射工作目录后执行命令。
+`run.sh` 自动检测容器是否运行 → 未运行则启动 → 映射工作目录后执行命令。同时自动传递 tab 补全所需的 `COMP_*` 环境变量。
 
 ## Compose 文件拆分
 
@@ -78,44 +91,18 @@ docker/
 | 文件                    | 服务                                 |
 | ----------------------- | ------------------------------------ |
 | `docker-compose.yml`    | networks + include                   |
-| `compose/services.yml`  | 基础服务（数据库 + 缓存 + 反向代理） |
-| `compose/languages.yml` | 语言运行时                           |
-| `compose/tools.yml`     | 辅助工具                             |
+| `compose/services.yml`  | mysql, postgres, redis, mongo, nginx |
+| `compose/languages.yml` | fpm, node, java, go, python, rust    |
+| `compose/tools.yml`     | kubectl, litellm                |
 
 所有文件由入口 `docker-compose.yml` 通过 `include` 自动合并，`run.sh`、`build.sh` 无需任何改动。
-
-## Node 服务
-
-Node 服务基于 `debian:bookworm-slim` + **Volta**，一个容器覆盖所有版本：
-
-```bash
-# 日常开发
-run.sh node "pnpm dev"
-
-# 版本管理
-volta list              # 查看已安装版本
-volta install node@20   # 安装其他版本
-```
-
-项目在 `package.json` 中通过 `volta` 字段锁定版本：
-
-```json
-{
-  "volta": {
-    "node": "16.20.2",
-    "pnpm": "8.15.9"
-  }
-}
-```
-
-`cd` 进项目目录后 Volta 自动切换，无需手动操作。
 
 ## 常用命令
 
 ```bash
 # 构建镜像
 docker compose build <服务名>
-./build.sh node          # 构建时使用代理
+./build.sh node          # 构建时使用代理（HTTP_PROXY）
 
 # 启动/停止
 docker compose up -d <服务名>

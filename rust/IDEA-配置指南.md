@@ -55,9 +55,11 @@ IDEA 会自动检测。若未检测到：**Settings → Languages & Frameworks �
 2. 配置：
    - **Name:** `cargo run (Docker)`
    - **Script text:**
+
      ```bash
      docker compose -f /home/xuqinqin/develop/docker/docker-compose.yml run --rm rust cargo run
      ```
+
    - **Working directory:** `$HOST_PROJECT_PATH` 或你的项目路径
 
 ### 方式 2：使用 Cargo 配置（需宿主机有 Rust）
@@ -111,7 +113,7 @@ gdbserver :9999 target/debug/你的程序名
 ```yaml
 ports:
   - "3001:3001"
-  - "9999:9999"   # gdbserver
+  - "9999:9999" # gdbserver
 ```
 
 ---
@@ -136,7 +138,7 @@ ports:
 }
 ```
 
-2. 在 RustRover 中：**Remote Development → Create Dev Containers**，选择该 devcontainer 配置
+1. 在 RustRover 中：**Remote Development → Create Dev Containers**，选择该 devcontainer 配置
 
 > 注意：此方式依赖 RustRover 的 Dev Container 支持，可能需在 RustRover 中操作。
 
