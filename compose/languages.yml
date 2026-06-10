@@ -169,7 +169,7 @@ services:
     volumes:
       - ${HOST_PROJECT_PATH}:${CONTAINER_PROJECT_PATH}
       - ${HOST_PROJECT_PATH}:${HOST_PROJECT_PATH}
-      - ../containers/languages/rust/cargo-cache:/home/docker/.cargo
+      - ../cache/cargo-cache:/home/docker/.cargo
       - ../common/.zshrc:/home/docker/.zshrc
       - ../common/.vimrc:/home/docker/.vimrc
     extra_hosts:

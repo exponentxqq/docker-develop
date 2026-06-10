@@ -22,7 +22,6 @@ containers/services/redis/data
 /containers/services/nginx/ssl/*
 
 /cache
-/containers/languages/rust/cargo-cache
 
 /containers/services/mongo/data
 /containers/services/mongo/log
