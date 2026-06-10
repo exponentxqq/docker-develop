@@ -9,6 +9,7 @@
 
 containers/services/mysql/data/*
 containers/services/mysql/data8/*
+containers/services/postgres/data
 
 containers/services/redis/data
 
