@@ -42,3 +42,32 @@ services:
     networks:
       backend:
         ipv4_address: 172.20.0.16
+
+  hermes:
+    build:
+      context: ../containers/tools/hermes
+      dockerfile: ./Dockerfile
+      args:
+        - HERMES_VERSION=${HERMES_VERSION}
+    container_name: hermes
+    image: docker-hermes:${HERMES_VERSION}
+    restart: unless-stopped
+    command: gateway run
+    shm_size: "1gb"
+    ports:
+      - "${HERMES_API_PORT}:8642"
+      - "${HERMES_DASHBOARD_PORT}:9119"
+    volumes:
+      - ${HERMES_HOST_DATA_PATH}:/opt/data
+    environment:
+      - HERMES_DASHBOARD=${HERMES_DASHBOARD}
+      - HERMES_DASHBOARD_HOST=0.0.0.0
+      - HERMES_DASHBOARD_PORT=9119
+      - HERMES_DASHBOARD_BASIC_AUTH_USERNAME=${HERMES_DASHBOARD_BASIC_AUTH_USERNAME}
+      - HERMES_DASHBOARD_BASIC_AUTH_PASSWORD=${HERMES_DASHBOARD_BASIC_AUTH_PASSWORD}
+      - HERMES_DASHBOARD_BASIC_AUTH_SECRET=7bddb36db790f0a871bbe803a2229e773d68c510ea069182f72af35ee5dec413
+      - PUID=${USER_ID}
+      - PGID=${USER_ID}
+    networks:
+      backend:
+        ipv4_address: 172.20.0.20

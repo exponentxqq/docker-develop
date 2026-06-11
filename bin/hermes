@@ -1,0 +1,6 @@
+#!/bin/bash
+cleanup() {
+    docker exec hermes pkill -TERM -f "hermes $*" 2>/dev/null
+}
+trap cleanup INT TERM HUP
+docker-run hermes hermes "$@"

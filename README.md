@@ -74,6 +74,7 @@ docker/
 | -------------------------------- | --------- | -------------- | ----------------- |
 | [kubectl](containers/tools/kubectl/README.md)     | kubectl   | `ubuntu:22.04` | Kubernetes CLI    |
 | [litellm](containers/tools/litellm/README.md)     | litellm   | `litellm:main` | LLM API 网关      |
+| [hermes](containers/tools/hermes/README.md)       | hermes    | `hermes-agent:v2026.6.5` | AI 自学习代理 |
 
 > 每个服务的详细说明、配置参数、使用方式见对应目录下的 `README.md`。
 
@@ -96,7 +97,7 @@ docker/
 | `docker-compose.yml`    | networks + include                   |
 | `compose/services.yml`  | mysql, postgres, redis, mongo, nginx |
 | `compose/languages.yml` | fpm, node, java, go, python, rust    |
-| `compose/tools.yml`     | kubectl, litellm                |
+| `compose/tools.yml`     | kubectl, litellm, hermes          |
 
 所有文件由入口 `docker-compose.yml` 通过 `include` 自动合并，`run.sh`、`build.sh` 无需任何改动。
 
