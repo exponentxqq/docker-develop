@@ -1,32 +1,21 @@
 ARG PHP_VERSION
 FROM php:${PHP_VERSION}-fpm
 
-RUN apt-get update && apt-get install -y ca-certificates gnupg
-
-RUN mkdir /usr/local/etc/php/pool.d/ && mkdir /www/ && mkdir -m 0755 -p /etc/apt/keyrings && \
-    curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /etc/apt/keyrings/docker.gpg &&\
-    echo "deb [arch="$(dpkg --print-architecture)" signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/debian "$(. /etc/os-release && echo "$VERSION_CODENAME")" stable" | tee /etc/apt/sources.list.d/docker.list > /dev/null
-
-RUN apt-get update --fix-missing
-RUN apt-get install -y libwebp-dev libpng-dev libjpeg-dev libfreetype6-dev && \
-    apt-get install -y libldap2-dev && \
-    apt-get install -y gdb && \
-    apt-get install -y git && \
-    apt-get install -y zsh && \
-    apt-get install -y sudo && \
-    apt-get install -y docker-ce-cli
-
-RUN docker-php-ext-install pdo_mysql && \
-    docker-php-ext-install mysqli && \
-    docker-php-ext-configure gd --with-webp-dir=/usr/include/webp --with-jpeg-dir=/usr/include --with-png-dir=/usr/include --with-freetype-dir=/usr/include/freetype2 && \
-    docker-php-ext-install gd && \
-    docker-php-ext-install zip && \
-    docker-php-ext-install pcntl && \
-    docker-php-ext-install posix && \
-    docker-php-ext-install exif && \
-    docker-php-ext-install gettext && \
-    docker-php-ext-install sockets && \
-    docker-php-ext-install ldap
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    ca-certificates gnupg \
+    libwebp-dev libpng-dev libjpeg-dev libfreetype6-dev \
+    libldap2-dev libzip-dev \
+    gdb git zsh sudo \
+    && mkdir /usr/local/etc/php/pool.d/ && mkdir /www/ \
+    && mkdir -m 0755 -p /etc/apt/keyrings \
+    && curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /etc/apt/keyrings/docker.gpg \
+    && echo "deb [arch="$(dpkg --print-architecture)" signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/debian "$(. /etc/os-release && echo "$VERSION_CODENAME")" stable" | tee /etc/apt/sources.list.d/docker.list > /dev/null \
+    && apt-get update \
+    && apt-get install -y docker-ce-cli \
+    && docker-php-ext-install pdo_mysql mysqli \
+    && docker-php-ext-configure gd \
+    && docker-php-ext-install gd zip pcntl posix exif gettext sockets ldap \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 #---------------------------------------------
 # Composer
@@ -46,7 +35,9 @@ ARG INSTALL_XDEBUG
 RUN if [ ${INSTALL_XDEBUG} = true ]; then \
     # Install the xdebug extension
     # https://xdebug.org/docs/compat
-    if [ $(php -r "echo PHP_MAJOR_VERSION;") = "8" ] || { [ $(php -r "echo PHP_MAJOR_VERSION;") = "7" ] && { [ $(php -r "echo PHP_MINOR_VERSION;") = "4" ] || [ $(php -r "echo PHP_MINOR_VERSION;") = "3" ] ;} ;}; then \
+    if [ $(php -r "echo PHP_MAJOR_VERSION;") = "8" ]; then \
+        pecl install xdebug; \
+    elif [ $(php -r "echo PHP_MAJOR_VERSION;") = "7" ] && { [ $(php -r "echo PHP_MINOR_VERSION;") = "4" ] || [ $(php -r "echo PHP_MINOR_VERSION;") = "3" ] ;}; then \
         pecl install xdebug-3.1.1; \
     else \
         if [ $(php -r "echo PHP_MAJOR_VERSION;") = "5" ]; then \
