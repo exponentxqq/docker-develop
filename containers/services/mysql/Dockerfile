@@ -19,6 +19,11 @@ RUN if command -v microdnf >/dev/null 2>&1; then \
   elif command -v apt-get >/dev/null 2>&1; then \
   apt-get update && apt-get install -y python3 python3-pip less \
   && pip3 install mycli && apt-get clean && rm -rf /var/lib/apt/lists/*; \
+  elif command -v yum >/dev/null 2>&1; then \
+  yum install -y python3 python3-pip less \
+  && pip3 install --upgrade pip \
+  && pip3 install "sqlglot<15" "mycli>=1.24" \
+  && yum clean all; \
   fi
 
 #####################################
