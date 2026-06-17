@@ -16,8 +16,7 @@ services:
         max-size: "10m"
         max-file: "3"
     networks:
-      backend:
-        ipv4_address: 172.20.0.13
+      - backend
 
   litellm:
     build:
@@ -48,8 +47,7 @@ services:
         max-size: "10m"
         max-file: "3"
     networks:
-      backend:
-        ipv4_address: 172.20.0.16
+      - backend
 
   hermes:
     build:
@@ -83,5 +81,4 @@ services:
         max-size: "10m"
         max-file: "3"
     networks:
-      backend:
-        ipv4_address: 172.20.0.20
+      - backend

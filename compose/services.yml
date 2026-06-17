@@ -34,8 +34,7 @@ services:
         max-size: "10m"
         max-file: "3"
     networks:
-      backend:
-        ipv4_address: 172.20.0.4
+      - backend
 
   postgres:
     build:
@@ -60,8 +59,7 @@ services:
         max-size: "10m"
         max-file: "3"
     networks:
-      backend:
-        ipv4_address: 172.20.0.6
+      - backend
 
   redis:
     build:
@@ -82,8 +80,7 @@ services:
         max-size: "10m"
         max-file: "3"
     networks:
-      backend:
-        ipv4_address: 172.20.0.5
+      - backend
 
   mongo:
     build:
@@ -110,8 +107,7 @@ services:
         max-size: "10m"
         max-file: "3"
     networks:
-      backend:
-        ipv4_address: 172.20.0.11
+      - backend
 
   nginx:
     build:
@@ -139,5 +135,4 @@ services:
         max-size: "10m"
         max-file: "3"
     networks:
-      backend:
-        ipv4_address: 172.20.0.3
+      - backend

@@ -24,8 +24,6 @@ services:
       - "${PHP_FPM_PORT}:9000"
     extra_hosts:
       - "dockerhost:${DOCKER_HOST_IP}"
-      - "www.qmsmain.localhost:172.20.0.3"
-      - "www.auth.localhost:172.20.0.3"
     volumes:
       - ../containers/languages/fpm/conf.d:/usr/local/etc/php.conf
       - ../containers/languages/fpm/php.ini:/usr/local/etc/php/php.ini
@@ -39,8 +37,7 @@ services:
         max-size: "10m"
         max-file: "3"
     networks:
-      backend:
-        ipv4_address: 172.20.0.7
+      - backend
 
   node:
     build:
@@ -56,10 +53,6 @@ services:
     user: ${HOST_UID}:${HOST_GID}
     extra_hosts:
       - "dockerhost:${DOCKER_HOST_IP}"
-      - "www.auth.localhost:172.20.0.3"
-      - "www.miniqms.localhost:172.20.0.3"
-      - "www.template.localhost:172.20.0.3"
-      - "www.qmsmain.localhost:172.20.0.3"
     volumes:
       - ../containers/languages/node/npmrc:/home/docker/.npmrc
       - /tmp/.X11-unix:/tmp/.X11-unix:rw
@@ -80,8 +73,7 @@ services:
         max-size: "10m"
         max-file: "3"
     networks:
-      backend:
-        ipv4_address: 172.20.0.2
+      - backend
 
   java:
     build:
@@ -107,7 +99,6 @@ services:
       - ../cache/maven-cache:/home/docker/.m2
       - ../cache/javafx-cache:/home/docker/.openjfx
     extra_hosts:
-      - "www.auth.localhost:172.20.0.3"
       - "dockerhost:${DOCKER_HOST_IP}"
     ports:
       - "5750:5750"
@@ -118,8 +109,7 @@ services:
         max-size: "10m"
         max-file: "3"
     networks:
-      backend:
-        ipv4_address: 172.20.0.9
+      - backend
 
   go:
     build:
@@ -143,8 +133,7 @@ services:
         max-size: "10m"
         max-file: "3"
     networks:
-      backend:
-        ipv4_address: 172.20.0.10
+      - backend
 
   python:
     build:
@@ -175,8 +164,7 @@ services:
         max-size: "10m"
         max-file: "3"
     networks:
-      backend:
-        ipv4_address: 172.20.0.12
+      - backend
 
   rust:
     build:
@@ -209,8 +197,7 @@ services:
         max-size: "10m"
         max-file: "3"
     networks:
-      backend:
-        ipv4_address: 172.20.0.15
+      - backend
 
 volumes:
   volta-cache:

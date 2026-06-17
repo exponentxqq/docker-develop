@@ -1,9 +1,6 @@
 networks:
   backend:
     driver: bridge
-    ipam:
-      config:
-        - subnet: 172.20.0.0/16
 
 include:
   - compose/services.yml
