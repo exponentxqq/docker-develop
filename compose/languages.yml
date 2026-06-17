@@ -124,6 +124,7 @@ services:
     mem_limit: ${GO_MEM_LIMIT:-4g}
     volumes:
       - ${HOST_PROJECT_PATH}:${CONTAINER_PROJECT_PATH}
+      - ${HOST_PROJECT_PATH}:${HOST_PROJECT_PATH}
       - ../cache/go-cache:/go
     tty: true
     ports:
