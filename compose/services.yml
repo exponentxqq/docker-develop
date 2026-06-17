@@ -82,6 +82,32 @@ services:
     networks:
       - backend
 
+  rabbitmq:
+    build:
+      context: ../containers/services/rabbitmq
+      dockerfile: ./Dockerfile
+      args:
+        - RABBITMQ_VERSION=${RABBITMQ_VERSION}
+    container_name: rabbitmq
+    image: docker-rabbitmq:${RABBITMQ_VERSION}
+    mem_limit: ${RABBITMQ_MEM_LIMIT:-512m}
+    environment:
+      - RABBITMQ_DEFAULT_USER=${RABBITMQ_DEFAULT_USER}
+      - RABBITMQ_DEFAULT_PASS=${RABBITMQ_DEFAULT_PASS}
+      - RABBITMQ_DEFAULT_VHOST=${RABBITMQ_DEFAULT_VHOST}
+    ports:
+      - "${RABBITMQ_AMQP_PORT}:5672"
+      - "${RABBITMQ_MANAGEMENT_PORT}:15672"
+    volumes:
+      - ${RABBITMQ_HOST_DATA_PATH}:${RABBITMQ_CONTAINER_DATA_PATH}
+      - ../containers/services/rabbitmq/rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf
+    logging:
+      options:
+        max-size: "10m"
+        max-file: "3"
+    networks:
+      - backend
+
   mongo:
     build:
       context: ../containers/services/mongo
