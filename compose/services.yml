@@ -8,6 +8,7 @@ services:
         - MYSQL_VERSION=${MYSQL_VERSION}
     container_name: mysql
     image: docker-mysql:${MYSQL_VERSION}
+    mem_limit: ${MYSQL_MEM_LIMIT:-2g}
     environment:
       - MYSQL_USER=${MYSQL_USER}
       - MYSQL_PASSWORD=${MYSQL_PASSWORD}
@@ -28,6 +29,10 @@ services:
       - "${MYSQL_PORT}:3306"
     extra_hosts:
       - "dockerhost:${DOCKER_HOST_IP}"
+    logging:
+      options:
+        max-size: "10m"
+        max-file: "3"
     networks:
       backend:
         ipv4_address: 172.20.0.4
@@ -72,6 +77,10 @@ services:
       - ../containers/services/redis/log/redis.log:/var/log/redis/redis-server.log
       - ${REDIS_HOST_DATA_PATH}:${REDIS_CONTAINER_DATA_PATH}
       - ../containers/services/redis/redis.conf:/usr/local/etc/redis/redis.conf
+    logging:
+      options:
+        max-size: "10m"
+        max-file: "3"
     networks:
       backend:
         ipv4_address: 172.20.0.5
@@ -96,6 +105,10 @@ services:
       - ${MONGO_HOST_LOG_DIR}:${MONGO_CONTAINER_LOG_DIR}
     ports:
       - "${MONGO_PORT}:27017"
+    logging:
+      options:
+        max-size: "10m"
+        max-file: "3"
     networks:
       backend:
         ipv4_address: 172.20.0.11
@@ -121,6 +134,10 @@ services:
       - ../containers/services/nginx/log:/nginx/log
     extra_hosts:
       - "dockerhost:${DOCKER_HOST_IP}"
+    logging:
+      options:
+        max-size: "10m"
+        max-file: "3"
     networks:
       backend:
         ipv4_address: 172.20.0.3

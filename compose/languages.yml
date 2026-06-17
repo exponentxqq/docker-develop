@@ -34,6 +34,10 @@ services:
       - ../common/.zshrc:/home/docker/.zshrc
       - ../common/.vimrc:/home/docker/.vimrc
       - /var/run/docker.sock:/var/run/docker.sock
+    logging:
+      options:
+        max-size: "10m"
+        max-file: "3"
     networks:
       backend:
         ipv4_address: 172.20.0.7
@@ -71,6 +75,10 @@ services:
       - /dev/dri:/dev/dri
     ipc: host
     tty: true
+    logging:
+      options:
+        max-size: "10m"
+        max-file: "3"
     networks:
       backend:
         ipv4_address: 172.20.0.2
@@ -105,6 +113,10 @@ services:
       - "5750:5750"
       - "8080-8089:8080-8089"
     tty: true
+    logging:
+      options:
+        max-size: "10m"
+        max-file: "3"
     networks:
       backend:
         ipv4_address: 172.20.0.9
@@ -119,12 +131,17 @@ services:
     container_name: go
     image: docker-go
     user: ${HOST_UID}:${HOST_GID}
+    mem_limit: ${GO_MEM_LIMIT:-4g}
     volumes:
       - ${HOST_PROJECT_PATH}:${CONTAINER_PROJECT_PATH}
       - ../cache/go-cache:/go
     tty: true
     ports:
       - "3000:3000"
+    logging:
+      options:
+        max-size: "10m"
+        max-file: "3"
     networks:
       backend:
         ipv4_address: 172.20.0.10
@@ -153,6 +170,10 @@ services:
       - "5000:5000"
     extra_hosts:
       - "dockerhost:${DOCKER_HOST_IP}"
+    logging:
+      options:
+        max-size: "10m"
+        max-file: "3"
     networks:
       backend:
         ipv4_address: 172.20.0.12
@@ -168,6 +189,7 @@ services:
     environment:
       - DEEPSEEK_API_KEY=${DEEPSEEK_API_KEY}
     image: docker-rust:${RUST_VERSION}
+    mem_limit: ${RUST_MEM_LIMIT:-8g}
     working_dir: ${CONTAINER_PROJECT_PATH}
     user: ${HOST_UID}:${HOST_GID}
     volumes:
@@ -182,6 +204,10 @@ services:
       - "3001:3001"
       - "9999:9999"
     tty: true
+    logging:
+      options:
+        max-size: "10m"
+        max-file: "3"
     networks:
       backend:
         ipv4_address: 172.20.0.15
