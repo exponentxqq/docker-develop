@@ -15,11 +15,11 @@ services:
         - IMAGICK_VERSION=${PHP_IMAGICK_VERSION}
         - INSTALL_PHALCON=${PHP_INSTALL_PHALCON}
         - PHALCON_VERSION=${PHP_PHALCON_VERSION}
-        - USER_ID=${USER_ID}
+        - USER_ID=${HOST_UID}
     container_name: fpm
     image: docker-fpm:${PHP_VERSION}
     working_dir: ${CONTAINER_PROJECT_PATH}
-    user: ${USER_ID}:${USER_ID}
+    user: ${HOST_UID}:${HOST_GID}
     ports:
       - "${PHP_FPM_PORT}:9000"
     extra_hosts:
@@ -44,12 +44,12 @@ services:
       dockerfile: Dockerfile
       args:
         - NODE_VERSION=${NODE_VERSION}
-        - USER_ID=${USER_ID}
+        - USER_ID=${HOST_UID}
     environment:
       - DISPLAY=${DISPLAY}
     container_name: node
     image: docker-node:bookworm
-    user: ${USER_ID}:${USER_ID}
+    user: ${HOST_UID}:${HOST_GID}
     extra_hosts:
       - "dockerhost:${DOCKER_HOST_IP}"
       - "www.auth.localhost:172.20.0.3"
@@ -81,13 +81,13 @@ services:
       dockerfile: Dockerfile
       args:
         - JDK_VERSION=${JDK_VERSION}
-        - USER_ID=${USER_ID}
+        - USER_ID=${HOST_UID}
         - BUILD_OPENCV=${BUILD_OPENCV}
     container_name: java
     image: docker-java:${JDK_VERSION}
     environment:
       - JAVA_OPTS=-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5750 -Xmx256m -Xms128m
-    user: ${USER_ID}:${USER_ID}
+    user: ${HOST_UID}:${HOST_GID}
     volumes:
       - ../containers/languages/java/run.sh:/usr/bin/run
       - ../containers/languages/java/conf:/usr/local/openjdk-11/conf
@@ -113,11 +113,15 @@ services:
     build:
       context: ../containers/languages/go
       dockerfile: Dockerfile
+      args:
+        - GO_VERSION=${GO_VERSION}
+        - USER_ID=${HOST_UID}
     container_name: go
     image: docker-go
+    user: ${HOST_UID}:${HOST_GID}
     volumes:
       - ${HOST_PROJECT_PATH}:${CONTAINER_PROJECT_PATH}
-      - ../cache/go-cache:/usr/local/go
+      - ../cache/go-cache:/go
     tty: true
     ports:
       - "3000:3000"
@@ -130,12 +134,12 @@ services:
       context: ../containers/languages/python
       dockerfile: Dockerfile
       args:
-        - USER_ID=${USER_ID}
+        - USER_ID=${HOST_UID}
         - CONDA_VERSION=${CONDA_VERSION}
     container_name: python
     image: docker-python:${CONDA_VERSION}
     tty: true
-    user: ${USER_ID}:${USER_ID}
+    user: ${HOST_UID}:${HOST_GID}
     volumes:
       - ../common/.zshrc:/home/docker/.zshrc
       - ../common/.vimrc:/home/docker/.vimrc
@@ -159,13 +163,13 @@ services:
       dockerfile: ./Dockerfile
       args:
         - RUST_VERSION=${RUST_VERSION}
-        - USER_ID=${USER_ID}
+        - USER_ID=${HOST_UID}
     container_name: rust
     environment:
       - DEEPSEEK_API_KEY=${DEEPSEEK_API_KEY}
     image: docker-rust:${RUST_VERSION}
     working_dir: ${CONTAINER_PROJECT_PATH}
-    user: ${USER_ID}:${USER_ID}
+    user: ${HOST_UID}:${HOST_GID}
     volumes:
       - ${HOST_PROJECT_PATH}:${CONTAINER_PROJECT_PATH}
       - ${HOST_PROJECT_PATH}:${HOST_PROJECT_PATH}

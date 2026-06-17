@@ -84,7 +84,7 @@ services:
         - MONGO_VERSION=${MONGO_VERSION}
     container_name: mongo
     image: docker-mongo:${MONGO_VERSION}
-    user: ${USER_ID}:${USER_ID}
+    user: ${HOST_UID}:${HOST_GID}
     environment:
       - MONGO_DATA_DIR=${MONGO_CONTAINER_DATA_DIR}
       - MONGO_LOG_DIR=${MONGO_CONTAINER_LOG_DIR}
@@ -107,7 +107,7 @@ services:
       args:
         - NGINX_VERSION=${NGINX_VERSION}
         - PHP_FPM_PORT=${PHP_FPM_PORT}
-        - USER_ID=${USER_ID}
+        - USER_ID=${HOST_UID}
     container_name: nginx
     image: docker-nginx:${NGINX_VERSION}
     ports:
