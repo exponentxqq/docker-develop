@@ -19,7 +19,7 @@ services:
       - ${MYSQL_HOST_DATA_PATH}:${MYSQL_CONTAINER_DATA_PATH}
       - ${MYSQL_ENTRYPOINT_INITDB}:/docker-entrypoint-initdb.d
       - ../containers/services/mysql/my.cnf:/etc/mysql/conf.d/my.cnf
-    # 降低mysql容器的内存占用
+    # 放宽进程数和文件句柄限制，避免高并发时 mysql 连接/临时表耗尽默认配额
     ulimits:
       nproc: 65535
       nofile:
