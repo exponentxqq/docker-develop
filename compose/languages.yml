@@ -174,9 +174,11 @@ services:
       args:
         - RUST_VERSION=${RUST_VERSION}
         - USER_ID=${HOST_UID}
+        - HOST_USER=${HOST_USER}
     container_name: rust
     environment:
       - DEEPSEEK_API_KEY=${DEEPSEEK_API_KEY}
+      - RUSTC_BOOTSTRAP=1
     image: docker-rust:${RUST_VERSION}
     mem_limit: ${RUST_MEM_LIMIT:-8g}
     working_dir: ${CONTAINER_PROJECT_PATH}
@@ -184,9 +186,10 @@ services:
     volumes:
       - ${HOST_PROJECT_PATH}:${CONTAINER_PROJECT_PATH}
       - ${HOST_PROJECT_PATH}:${HOST_PROJECT_PATH}
-      - ../cache/cargo-cache:/home/docker/.cargo
-      - ../common/.zshrc:/home/docker/.zshrc
-      - ../common/.vimrc:/home/docker/.vimrc
+      - /home/${HOST_USER}/.cargo:/home/${HOST_USER}/.cargo
+      - /usr/local/rustup:/usr/local/rustup
+      - ../common/.zshrc:/home/${HOST_USER}/.zshrc
+      - ../common/.vimrc:/home/${HOST_USER}/.vimrc
     extra_hosts:
       - "dockerhost:${DOCKER_HOST_IP}"
     ports:

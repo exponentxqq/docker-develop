@@ -1,0 +1,6 @@
+#!/bin/bash
+cleanup() {
+    docker exec mysql pkill -TERM -f "mysqldump $*" 2>/dev/null
+}
+trap cleanup INT TERM HUP
+docker-run mysql mysqldump
