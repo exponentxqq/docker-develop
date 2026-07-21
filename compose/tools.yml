@@ -18,33 +18,23 @@ services:
     networks:
       - backend
 
-  litellm:
+  dbx:
     build:
-      context: ../containers/tools/litellm
+      context: ../containers/tools/dbx
       dockerfile: Dockerfile
-    container_name: litellm
-    image: docker-litellm:latest
-    volumes:
-      - ../containers/tools/litellm/config.yaml:/app/config.yaml
+      pull: true
+    container_name: dbx
+    image: docker-dbx
+    mem_limit: ${DBX_MEM_LIMIT:-512m}
+    restart: unless-stopped
+    pull_policy: build
     environment:
-      - DEEPSEEK_API_KEY=${DEEPSEEK_API_KEY}
-      - QWEN_API_KEY=${QWEN_API_KEY}
-      - DASHSCOPE_API_KEY=${DASHSCOPE_API_KEY}
-      - ZAI_API_KEY=${ZAI_API_KEY}
-      # GLM Coding Plan 等「编码订阅」走 coding 网关；按量/通用 API 在 .env 覆盖为 https://api.z.ai/api/paas/v4
-      - ZAI_API_BASE=${ZAI_API_BASE:-https://api.z.ai/api/coding/paas/v4}
-    command: ["--config", "/app/config.yaml", "--port", "4000"]
+      - DBX_DISABLE_PASSWORD=${DBX_DISABLE_PASSWORD}
     ports:
-      - "4000:4000"
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:4000/health/liveliness"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-    logging:
-      options:
-        max-size: "10m"
-        max-file: "3"
+      - "${DBX_WEB_PORT}:4224"
+    volumes:
+      - dbx-data:/app/data
+      - ${HOST_HOME}/.ssh:/root/.ssh
     networks:
       - backend
 
@@ -81,3 +71,6 @@ services:
         max-file: "3"
     networks:
       - backend
+
+volumes:
+  dbx-data:

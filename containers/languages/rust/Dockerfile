@@ -11,7 +11,7 @@ RUN apt-get update && \
   git curl wget zsh vim \
   build-essential pkg-config \
   ca-certificates \
-  libssl-dev libpq-dev default-libmysqlclient-dev \
+  libssl-dev libpq-dev default-libmysqlclient-dev libevdev-dev \
   gdb gdbserver \
   && apt-get clean && rm -rf /var/lib/apt/lists/*
 
