@@ -162,3 +162,63 @@ services:
         max-file: "3"
     networks:
       - backend
+
+  rocketmq-namesrv:
+    build:
+      context: ../containers/services/rocketmq
+      dockerfile: ./Dockerfile
+      args:
+        - ROCKETMQ_VERSION=${ROCKETMQ_VERSION}
+        - HOST_UID=${HOST_UID}
+        - HOST_GID=${HOST_GID}
+        - HOST_USER=${HOST_USER}
+    container_name: rocketmq-namesrv
+    image: docker-rocketmq:${ROCKETMQ_VERSION}
+    user: ${HOST_UID}:${HOST_GID}
+    mem_limit: ${ROCKETMQ_NAMESRV_MEM_LIMIT:-384m}
+    command:
+      - /home/rocketmq/start.sh
+      - namesrv
+    ports:
+      - "${ROCKETMQ_NAMESRV_PORT}:9876"
+    volumes:
+      - ${ROCKETMQ_HOST_LOG_PATH}/namesrv:/home/${HOST_USER}/logs
+      - ../containers/services/rocketmq/start.sh:/home/rocketmq/start.sh:ro
+    logging:
+      options:
+        max-size: "10m"
+        max-file: "3"
+    networks:
+      - backend
+
+  rocketmq-broker:
+    build:
+      context: ../containers/services/rocketmq
+      dockerfile: ./Dockerfile
+      args:
+        - ROCKETMQ_VERSION=${ROCKETMQ_VERSION}
+        - HOST_UID=${HOST_UID}
+        - HOST_GID=${HOST_GID}
+        - HOST_USER=${HOST_USER}
+    container_name: rocketmq-broker
+    image: docker-rocketmq:${ROCKETMQ_VERSION}
+    user: ${HOST_UID}:${HOST_GID}
+    mem_limit: ${ROCKETMQ_BROKER_MEM_LIMIT:-768m}
+    command:
+      - /home/rocketmq/start.sh
+      - broker
+    ports:
+      - "${ROCKETMQ_BROKER_PORT}:10911"
+    volumes:
+      - ${ROCKETMQ_HOST_DATA_PATH}:/home/${HOST_USER}/store
+      - ${ROCKETMQ_HOST_LOG_PATH}/broker:/home/${HOST_USER}/logs
+      - ../containers/services/rocketmq/start.sh:/home/rocketmq/start.sh:ro
+      - ../containers/services/rocketmq/broker.conf:/etc/rocketmq/broker.conf:ro
+    depends_on:
+      - rocketmq-namesrv
+    logging:
+      options:
+        max-size: "10m"
+        max-file: "3"
+    networks:
+      - backend
