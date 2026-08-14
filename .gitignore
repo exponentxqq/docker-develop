@@ -7,7 +7,8 @@
 # vscode auto generated
 .vscode
 
-containers/services/mysql/data/*
+compose/containers/services/mysql/data*
+containers/services/mysql/data5.7/*
 containers/services/mysql/data8/*
 containers/services/postgres/data
 
