@@ -45,7 +45,9 @@ services:
       dockerfile: Dockerfile
       args:
         - NODE_VERSION=${NODE_VERSION}
-        - USER_ID=${HOST_UID}
+        - HOST_UID=${HOST_UID}
+        - HOST_GID=${HOST_GID}
+        - HOST_USER=${HOST_USER}
     environment:
       - DISPLAY=${DISPLAY}
     container_name: node
@@ -64,8 +66,6 @@ services:
       - ../cache/yarn-cache:/home/docker/.cache/yarn
     ports:
       - "8090-8099:8090-8099"
-    devices:
-      - /dev/dri:/dev/dri
     ipc: host
     tty: true
     logging:
@@ -80,24 +80,25 @@ services:
       context: ../containers/languages/java
       dockerfile: Dockerfile
       args:
+        - HOST_UID=${HOST_UID}
+        - HOST_GID=${HOST_GID}
+        - HOST_USER=${HOST_USER}
         - JDK_VERSION=${JDK_VERSION}
-        - USER_ID=${HOST_UID}
-        - BUILD_OPENCV=${BUILD_OPENCV}
     container_name: java
     image: docker-java:${JDK_VERSION}
     environment:
       - JAVA_OPTS=-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5750 -Xmx256m -Xms128m
     user: ${HOST_UID}:${HOST_GID}
     volumes:
-      - ../containers/languages/java/run.sh:/usr/bin/run
-      - ../containers/languages/java/conf:/usr/local/openjdk-11/conf
-      - ${HOST_PROJECT_PATH}:${CONTAINER_PROJECT_PATH}
+      - ../common/.zshrc:/home/${HOST_USER}/.zshrc
+      - ../common/.vimrc:/home/${HOST_USER}/.vimrc
+      - ${HOST_PROJECT_PATH}:${HOST_PROJECT_PATH}
       - ${JDK_HOST_MAVEN_PATH}:/usr/local/maven
       - ${JDK_HOST_GRADLE_PATH}:/usr/local/gradle
       - ${JDK_HOST_JAVAFX_PATH}:/usr/local/lib/javafx
-      - ../cache/gradle-cache:/home/docker/.gradle
-      - ../cache/maven-cache:/home/docker/.m2
-      - ../cache/javafx-cache:/home/docker/.openjfx
+      - ../cache/gradle-cache:/home/${HOST_USER}/.gradle
+      - ../cache/maven-cache:/home/${HOST_USER}/.m2
+      - ../cache/javafx-cache:/home/${HOST_USER}/.openjfx
     extra_hosts:
       - "dockerhost:${DOCKER_HOST_IP}"
     ports:

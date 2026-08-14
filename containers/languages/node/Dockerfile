@@ -12,12 +12,15 @@ RUN apt-get update && \
     git \
     && rm -rf /var/lib/apt/lists/*
 
-ARG USER_ID=1000
-RUN useradd -m -u ${USER_ID} -s /bin/bash docker
+ARG HOST_UID HOST_GID HOST_USER
+RUN groupadd -g ${HOST_GID} ${HOST_USER} && \
+    useradd -m -u ${HOST_UID} -g ${HOST_GID} -s /bin/bash ${HOST_USER}
 
-USER docker
+USER ${HOST_USER}
+WORKDIR /home/${HOST_USER}
+
 RUN curl https://get.volta.sh | bash
-ENV VOLTA_HOME=/home/docker/.volta
+ENV VOLTA_HOME=/home/${HOST_USER}/.volta
 ENV PATH=$VOLTA_HOME/bin:$PATH
 
 ARG NODE_VERSION=22

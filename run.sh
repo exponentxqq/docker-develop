@@ -38,5 +38,5 @@ done
 if [ "$1" == "redis" ]; then
   exec docker exec -i $tty_flag $env_args "$1" /bin/bash -c "$command"
 else
-  exec docker exec -i $tty_flag $env_args "$1" /bin/bash -c "[ -d $project_path ] && (cd $project_path && $command) || $command"
+  exec docker exec -i $tty_flag $env_args "$1" /bin/bash --login -c "[ -d $project_path ] && (cd $project_path && $command) || $command"
 fi
