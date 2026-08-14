@@ -8,6 +8,7 @@
 .vscode
 
 compose/containers/services/mysql/data*
+containers/services/rocketmq/data*
 containers/services/mysql/data5.7/*
 containers/services/mysql/data8/*
 containers/services/postgres/data
