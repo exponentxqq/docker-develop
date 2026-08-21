@@ -46,6 +46,7 @@ services:
         - HERMES_VERSION=${HERMES_VERSION}
     container_name: hermes
     image: docker-hermes:${HERMES_VERSION}
+    profiles: ["manual"]
     restart: unless-stopped
     command: gateway run
     shm_size: "1gb"
