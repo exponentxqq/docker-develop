@@ -19,7 +19,7 @@ services:
         - HOST_GID=${HOST_GID}
     container_name: fpm
     image: docker-fpm:${PHP_VERSION}
-    working_dir: ${CONTAINER_PROJECT_PATH}
+    working_dir: ${HOST_PROJECT_PATH}
     user: ${HOST_UID}:${HOST_GID}
     ports:
       - "${PHP_FPM_PORT}:9000"
@@ -28,7 +28,7 @@ services:
     volumes:
       - ../containers/languages/fpm/conf.d:/usr/local/etc/php.conf
       - ../containers/languages/fpm/php.ini:/usr/local/etc/php/php.ini
-      - ${HOST_PROJECT_PATH}:${CONTAINER_PROJECT_PATH}
+      - ${HOST_PROJECT_PATH}:${HOST_PROJECT_PATH}
       - ../cache/composer-cache:/home/docker/.composer
       - ../common/.zshrc:/home/docker/.zshrc
       - ../common/.vimrc:/home/docker/.vimrc
@@ -82,13 +82,15 @@ services:
     build:
       context: ../containers/languages/java
       dockerfile: Dockerfile
+      network: host
       args:
         - HOST_UID=${HOST_UID}
         - HOST_GID=${HOST_GID}
         - HOST_USER=${HOST_USER}
-        - JDK_VERSION=${JDK_VERSION}
+        - MISE_VERSION=${MISE_VERSION}
+        - BUILD_OPENCV=${BUILD_OPENCV}
     container_name: java
-    image: docker-java:${JDK_VERSION}
+    image: docker-java:${MISE_VERSION}
     environment:
       - JAVA_OPTS=-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5750 -Xmx256m -Xms128m
     user: ${HOST_UID}:${HOST_GID}
@@ -96,17 +98,14 @@ services:
       - ../common/.zshrc:/home/docker/.zshrc
       - ../common/.vimrc:/home/docker/.vimrc
       - ${HOST_PROJECT_PATH}:${HOST_PROJECT_PATH}
-      - ${JDK_HOST_MAVEN_PATH}:/usr/local/maven
-      - ${JDK_HOST_GRADLE_PATH}:/usr/local/gradle
-      - ${JDK_HOST_JAVAFX_PATH}:/usr/local/lib/javafx
+      - mise-cache:/home/docker/.local/share/mise
       - ../cache/gradle-cache:/home/docker/.gradle
       - ../cache/maven-cache:/home/docker/.m2
-      - ../cache/javafx-cache:/home/docker/.openjfx
     extra_hosts:
       - "dockerhost:${DOCKER_HOST_IP}"
     ports:
       - "5750:5750"
-      - "8080-8089:8080-8089"
+      - "8081-8089:8081-8089"
     tty: true
     logging:
       options:
@@ -156,7 +155,7 @@ services:
     volumes:
       - ../common/.zshrc:/home/docker/.zshrc
       - ../common/.vimrc:/home/docker/.vimrc
-      - ${HOST_PROJECT_PATH}:${CONTAINER_PROJECT_PATH}
+      - ${HOST_PROJECT_PATH}:${HOST_PROJECT_PATH}
       - ../containers/languages/python/aws:/home/docker/.aws
       - ${DATA_PATH}:/data
       - conda-envs:/home/docker/.conda/envs
@@ -187,7 +186,7 @@ services:
       - RUSTC_BOOTSTRAP=1
     image: docker-rust:${RUST_VERSION}
     mem_limit: ${RUST_MEM_LIMIT:-8g}
-    working_dir: ${CONTAINER_PROJECT_PATH}
+    working_dir: ${HOST_PROJECT_PATH}
     user: ${HOST_UID}:${HOST_GID}
     volumes:
       - ${HOST_PROJECT_PATH}:${HOST_PROJECT_PATH}
@@ -211,3 +210,4 @@ services:
 volumes:
   volta-cache:
   conda-envs:
+  mise-cache:
