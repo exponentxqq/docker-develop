@@ -123,7 +123,6 @@ services:
       - MONGO_INITDB_ROOT_USERNAME=${MONGO_ROOT_USERNAME}
       - MONGO_INITDB_ROOT_PASSWORD=${MONGO_ROOT_PASSWORD}
     volumes:
-      - ${HOST_PROJECT_PATH}:${CONTAINER_PROJECT_PATH}
       - ${MONGO_HOST_DATA_DIR}:${MONGO_CONTAINER_DATA_DIR}
       - ${MONGO_HOST_LOG_DIR}:${MONGO_CONTAINER_LOG_DIR}
     ports:
@@ -142,7 +141,8 @@ services:
       args:
         - NGINX_VERSION=${NGINX_VERSION}
         - PHP_FPM_PORT=${PHP_FPM_PORT}
-        - USER_ID=${HOST_UID}
+        - HOST_UID=${HOST_UID}
+        - HOST_GID=${HOST_GID}
     container_name: nginx
     image: docker-nginx:${NGINX_VERSION}
     ports:

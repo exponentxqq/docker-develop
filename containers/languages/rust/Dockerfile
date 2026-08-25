@@ -16,9 +16,9 @@ RUN apt-get update && \
   && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # 先创建用户（后续需要 chown）
-ARG USER_ID
-ARG HOST_USER
-RUN useradd -m -u ${USER_ID} -g root ${HOST_USER}
+ARG HOST_UID HOST_GID HOST_USER
+RUN groupadd -g ${HOST_GID} docker && \
+  useradd -m -u ${HOST_UID} -g ${HOST_GID} -s /bin/bash docker
 
 # rustup 环境变量（全局安装路径）
 ENV RUSTUP_HOME=/usr/local/rustup \
@@ -28,19 +28,22 @@ ENV RUSTUP_HOME=/usr/local/rustup \
 # 通过 rustup 安装 Rust（root 执行）
 # - 默认 toolchain 为 RUST_VERSION（stable）
 # - 额外预装 nightly 和常用组件
-# - chown 确保 docker 用户可以同步 toolchain 更新
-RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs \
-  | sh -s -- -y --default-toolchain ${RUST_VERSION} --profile default \
-  && rustup component add rust-analyzer clippy rustfmt \
-  && rustup toolchain install nightly \
-  && rustup component add rust-src rust-analyzer --toolchain nightly \
-  && rustup update \
-  && chown -R ${HOST_USER}:root /usr/local/rustup
+RUN set -eux; \
+  curl --proto '=https' --tlsv1.2 -sSf --retry 5 --retry-delay 2 --retry-all-errors -o /tmp/rustup-init.sh https://sh.rustup.rs; \
+  sh /tmp/rustup-init.sh -y --default-toolchain ${RUST_VERSION} --profile default; \
+  rustup component add rust-analyzer clippy rustfmt; \
+  rustup toolchain install nightly; \
+  rustup component add rust-src rust-analyzer --toolchain nightly; \
+  chown -R docker:root /usr/local/rustup
+
+# login shell 下 /etc/profile 会重置 PATH，此脚本确保 cargo 工具链在 PATH 中
+RUN echo 'export PATH="$HOME/.cargo/bin:/usr/local/cargo/bin:$PATH"' > /etc/profile.d/rust.sh
 
 
-USER ${HOST_USER}
+USER docker
+WORKDIR /home/docker
 
-# .cargo 通过 identity mount 与宿主机共享；RUSTUP_HOME 指向全局 toolchain
+# .cargo 挂载 cache 目录隔离缓存；RUSTUP_HOME 指向全局 toolchain
 ENV RUSTUP_HOME=/usr/local/rustup \
-  CARGO_HOME=/home/${HOST_USER}/.cargo \
-  PATH=/home/${HOST_USER}/.cargo/bin:/usr/local/cargo/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+  CARGO_HOME=/home/docker/.cargo \
+  PATH=/home/docker/.cargo/bin:/usr/local/cargo/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin

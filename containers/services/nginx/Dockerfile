@@ -15,5 +15,6 @@ RUN if [ ${LINK_FPM} = true ]; then \
     fi && \
     mkdir /nginx && mkdir /nginx/log
 
-ARG USER_ID
-RUN useradd docker -u ${USER_ID} -g root -m
+ARG HOST_UID HOST_GID
+RUN groupadd -g ${HOST_GID} docker && \
+    useradd -m -u ${HOST_UID} -g ${HOST_GID} -s /bin/bash docker

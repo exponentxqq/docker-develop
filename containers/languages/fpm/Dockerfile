@@ -139,8 +139,9 @@ RUN if [ ${INSTALL_PHALCON} = true ]; then \
     && rm -rf /tmp/cphalcon* \
 ;fi
 
-ARG USER_ID
-RUN useradd docker -u ${USER_ID} -g root -m && \
+ARG HOST_UID HOST_GID
+RUN groupadd -g ${HOST_GID} docker && \
+    useradd -m -u ${HOST_UID} -g ${HOST_GID} -s /bin/bash docker && \
     echo 'docker ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers && \
     echo '%root ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
 USER docker

@@ -3,30 +3,34 @@ FROM continuumio/miniconda3:${CONDA_VERSION}
 
 # 系统依赖
 RUN apt-get update && \
-    apt-get install -y --no-install-recommends \
-        unzip vim git wget zsh curl \
-        build-essential libssl-dev libffi-dev \
-        libmariadb-dev libpq-dev \
-        libreoffice poppler-utils \
-        libopenblas-dev liblapack-dev \
-    && curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip" \
-    && unzip awscliv2.zip && ./aws/install \
-    && rm -rf awscliv2.zip aws \
-    && apt-get clean && rm -rf /var/lib/apt/lists/*
+  apt-get install -y --no-install-recommends \
+  unzip vim git wget zsh curl \
+  build-essential libssl-dev libffi-dev \
+  libmariadb-dev libpq-dev \
+  libreoffice poppler-utils \
+  libopenblas-dev liblapack-dev \
+  && curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip" \
+  && unzip awscliv2.zip && ./aws/install \
+  && rm -rf awscliv2.zip aws \
+  && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # conda：配置 conda-forge channel
 RUN conda config --add channels conda-forge \
-    && conda config --set channel_priority flexible \
-    && conda clean -afy
+  && conda config --set channel_priority flexible \
+  && conda clean -afy
 
 # uv：独立二进制安装（多阶段 COPY）
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /usr/local/bin/uv
 
 # 用户
-ARG USER_ID
-RUN useradd docker -u ${USER_ID} -g root -m && \
-    mkdir -p /home/docker/.cache/uv /home/docker/.conda/envs /home/docker/.conda/pkgs && \
-    chown -R docker:root /home/docker
+ARG HOST_UID HOST_GID HOST_USER
+RUN groupadd -g ${HOST_GID} docker && \
+  useradd -m -u ${HOST_UID} -g ${HOST_GID} -s /bin/bash docker && \
+  mkdir -p /home/docker/.cache/uv /home/docker/.conda/envs /home/docker/.conda/pkgs && \
+  chown -R ${HOST_UID}:${HOST_GID} /home/docker
+
+# login shell 下 /etc/profile 会重置 PATH，此脚本确保 conda 在 PATH 中
+RUN echo 'export PATH="/opt/conda/bin:$PATH"' > /etc/profile.d/conda.sh
 
 USER docker
 WORKDIR /home/docker

@@ -48,7 +48,7 @@ All configuration driven by `.env` (copy from `.env-example`). Key variables:
 
 - `HOST_PROJECT_PATH` / `CONTAINER_PROJECT_PATH` — project directory mapping
 - `DOCKER_HOST_IP` — host IP for xdebug/extra_hosts
-- `USER_ID` — should match host user id for file permissions
+- `HOST_UID` / `HOST_GID` — should match host user id/group for file permissions
 - Service-specific variables: `MYSQL_VERSION`, `PHP_VERSION`, `JDK_VERSION`, etc.
 
 ## run.sh

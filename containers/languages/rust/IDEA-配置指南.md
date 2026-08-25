@@ -20,7 +20,7 @@ HOST_PROJECT_PATH=/home/xuqinqin/develop/person/os
 CONTAINER_PROJECT_PATH=/develop
 
 # 宿主机 user id，与宿主机一致以保证文件权限
-USER_ID=1000
+HOST_UID=1000
 ```
 
 ---
@@ -154,7 +154,7 @@ ports:
 
 ### 容器内文件权限
 
-- 确保 `USER_ID` 与宿主机 `id -u` 一致
+- 确保 `HOST_UID` 与宿主机 `id -u` 一致
 - 容器内创建的文件应属主正确
 
 ### 调试断点不生效

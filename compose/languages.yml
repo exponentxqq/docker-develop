@@ -15,7 +15,8 @@ services:
         - IMAGICK_VERSION=${PHP_IMAGICK_VERSION}
         - INSTALL_PHALCON=${PHP_INSTALL_PHALCON}
         - PHALCON_VERSION=${PHP_PHALCON_VERSION}
-        - USER_ID=${HOST_UID}
+        - HOST_UID=${HOST_UID}
+        - HOST_GID=${HOST_GID}
     container_name: fpm
     image: docker-fpm:${PHP_VERSION}
     working_dir: ${CONTAINER_PROJECT_PATH}
@@ -43,15 +44,17 @@ services:
     build:
       context: ../containers/languages/node
       dockerfile: Dockerfile
+      network: host
       args:
         - NODE_VERSION=${NODE_VERSION}
+        - VOLTA_VERSION=${VOLTA_VERSION}
         - HOST_UID=${HOST_UID}
         - HOST_GID=${HOST_GID}
         - HOST_USER=${HOST_USER}
     environment:
       - DISPLAY=${DISPLAY}
     container_name: node
-    image: docker-node:bookworm
+    image: docker-node:${VOLTA_VERSION}
     user: ${HOST_UID}:${HOST_GID}
     extra_hosts:
       - "dockerhost:${DOCKER_HOST_IP}"
@@ -59,7 +62,7 @@ services:
       - ../containers/languages/node/npmrc:/home/docker/.npmrc
       - /tmp/.X11-unix:/tmp/.X11-unix:rw
       - /dev/shm:/dev/shm
-      - ${HOST_PROJECT_PATH}:${CONTAINER_PROJECT_PATH}
+      - ${HOST_HOME}:${HOST_HOME}
       - volta-cache:/home/docker/.volta
       - ../cache/pnpm-cache:/home/docker/.local/share/pnpm/store
       - ../cache/npm-cache:/home/docker/.npm
@@ -90,15 +93,15 @@ services:
       - JAVA_OPTS=-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5750 -Xmx256m -Xms128m
     user: ${HOST_UID}:${HOST_GID}
     volumes:
-      - ../common/.zshrc:/home/${HOST_USER}/.zshrc
-      - ../common/.vimrc:/home/${HOST_USER}/.vimrc
+      - ../common/.zshrc:/home/docker/.zshrc
+      - ../common/.vimrc:/home/docker/.vimrc
       - ${HOST_PROJECT_PATH}:${HOST_PROJECT_PATH}
       - ${JDK_HOST_MAVEN_PATH}:/usr/local/maven
       - ${JDK_HOST_GRADLE_PATH}:/usr/local/gradle
       - ${JDK_HOST_JAVAFX_PATH}:/usr/local/lib/javafx
-      - ../cache/gradle-cache:/home/${HOST_USER}/.gradle
-      - ../cache/maven-cache:/home/${HOST_USER}/.m2
-      - ../cache/javafx-cache:/home/${HOST_USER}/.openjfx
+      - ../cache/gradle-cache:/home/docker/.gradle
+      - ../cache/maven-cache:/home/docker/.m2
+      - ../cache/javafx-cache:/home/docker/.openjfx
     extra_hosts:
       - "dockerhost:${DOCKER_HOST_IP}"
     ports:
@@ -118,14 +121,15 @@ services:
       dockerfile: Dockerfile
       args:
         - GO_VERSION=${GO_VERSION}
-        - USER_ID=${HOST_UID}
+        - HOST_UID=${HOST_UID}
+        - HOST_GID=${HOST_GID}
+        - HOST_USER=${HOST_USER}
     container_name: go
-    image: docker-go
+    image: docker-go:${GO_VERSION}
     user: ${HOST_UID}:${HOST_GID}
     mem_limit: ${GO_MEM_LIMIT:-4g}
     volumes:
-      - ${HOST_PROJECT_PATH}:${CONTAINER_PROJECT_PATH}
-      - ${HOST_PROJECT_PATH}:${HOST_PROJECT_PATH}
+      - ${HOST_HOME}:${HOST_HOME}
       - ../cache/go-cache:/go
     tty: true
     ports:
@@ -142,7 +146,8 @@ services:
       context: ../containers/languages/python
       dockerfile: Dockerfile
       args:
-        - USER_ID=${HOST_UID}
+        - HOST_UID=${HOST_UID}
+        - HOST_GID=${HOST_GID}
         - CONDA_VERSION=${CONDA_VERSION}
     container_name: python
     image: docker-python:${CONDA_VERSION}
@@ -174,8 +179,8 @@ services:
       dockerfile: ./Dockerfile
       args:
         - RUST_VERSION=${RUST_VERSION}
-        - USER_ID=${HOST_UID}
-        - HOST_USER=${HOST_USER}
+        - HOST_UID=${HOST_UID}
+        - HOST_GID=${HOST_GID}
     container_name: rust
     environment:
       - DEEPSEEK_API_KEY=${DEEPSEEK_API_KEY}
@@ -185,12 +190,11 @@ services:
     working_dir: ${CONTAINER_PROJECT_PATH}
     user: ${HOST_UID}:${HOST_GID}
     volumes:
-      - ${HOST_PROJECT_PATH}:${CONTAINER_PROJECT_PATH}
       - ${HOST_PROJECT_PATH}:${HOST_PROJECT_PATH}
-      - /home/${HOST_USER}/.cargo:/home/${HOST_USER}/.cargo
+      - ../cache/cargo-cache:/home/docker/.cargo
       - /usr/local/rustup:/usr/local/rustup
-      - ../common/.zshrc:/home/${HOST_USER}/.zshrc
-      - ../common/.vimrc:/home/${HOST_USER}/.vimrc
+      - ../common/.zshrc:/home/docker/.zshrc
+      - ../common/.vimrc:/home/docker/.vimrc
     extra_hosts:
       - "dockerhost:${DOCKER_HOST_IP}"
     ports:
