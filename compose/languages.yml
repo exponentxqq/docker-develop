@@ -48,6 +48,7 @@ services:
       args:
         - NODE_VERSION=${NODE_VERSION}
         - VOLTA_VERSION=${VOLTA_VERSION}
+        - OCR_VERSION=${OCR_VERSION}
         - HOST_UID=${HOST_UID}
         - HOST_GID=${HOST_GID}
         - HOST_USER=${HOST_USER}
