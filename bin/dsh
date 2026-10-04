@@ -1,0 +1,6 @@
+#!/bin/bash
+cleanup() {
+    docker exec dsh pkill -TERM -f "dsh $*" 2>/dev/null
+}
+trap cleanup INT TERM HUP
+docker-run dsh dsh "$@"

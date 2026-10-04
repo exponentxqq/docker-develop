@@ -73,5 +73,32 @@ services:
     networks:
       - backend
 
+  dsh:
+    build:
+      context: ../containers/tools/dsh
+      dockerfile: Dockerfile
+      args:
+        - NODE_VERSION=${DSH_NODE_VERSION}
+        - DSH_VERSION=${DSH_VERSION}
+        - HOST_UID=${HOST_UID}
+        - HOST_GID=${HOST_GID}
+        - HOST_USER=${HOST_USER}
+    container_name: dsh
+    image: docker-dsh:${DSH_VERSION}
+    restart: unless-stopped
+    mem_limit: ${DSH_MEM_LIMIT:-4g}
+    working_dir: ${CONTAINER_PROJECT_PATH}
+    ports:
+      - "${DSH_WEB_PORT}:3081"
+    volumes:
+      - ${HOST_PROJECT_PATH}:${CONTAINER_PROJECT_PATH}
+      - ${DSH_HOST_DATA_PATH}:/home/docker/.dsh
+    logging:
+      options:
+        max-size: "10m"
+        max-file: "3"
+    networks:
+      - backend
+
 volumes:
   dbx-data:
