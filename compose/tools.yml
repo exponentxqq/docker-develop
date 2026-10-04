@@ -95,6 +95,8 @@ services:
       - ${HOST_PROJECT_PATH}:${CONTAINER_PROJECT_PATH}
       - ${DSH_HOST_DATA_PATH}:/home/docker/.dsh
       - ${DSH_HOST_PROFILES_PATH}:/home/docker/.dsh/profiles
+      # skctl 聚合的 agent skills（自写=symlink 指 dotfiles，外部=git 拷贝），只读挂载
+      - ${SKCTL_STORE_PATH}/skills:/home/docker/.agents/skills:ro
     logging:
       options:
         max-size: "10m"

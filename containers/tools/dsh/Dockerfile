@@ -20,8 +20,13 @@ RUN userdel -r node 2>/dev/null || true; \
 # 全局安装需要写 /usr/local，必须在切换用户前以 root 执行
 ARG DSH_VERSION=latest
 ARG PNPM_VERSION=10
-RUN npm install -g pnpm@${PNPM_VERSION} @deepseek-ai/dsh@${DSH_VERSION} && \
-  dsh --version
+# openspec: spec 驱动开发 CLI（agent/skills 中的 openspec-* skill 依赖）
+# @dbx-app/mcp-server: dbx MCP server（dsh-mcp-client 经 npx 启动，预装免下载）
+ARG OPENSPEC_VERSION=latest
+ARG DBX_MCP_VERSION=latest
+RUN npm install -g pnpm@${PNPM_VERSION} @deepseek-ai/dsh@${DSH_VERSION} \
+    @fission-ai/openspec@${OPENSPEC_VERSION} @dbx-app/mcp-server@${DBX_MCP_VERSION} && \
+  dsh --version && openspec --version
 
 USER docker
 WORKDIR /home/docker
