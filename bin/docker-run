@@ -1,0 +1,7 @@
+#!/bin/bash
+# docker-run <service> <command...>：在指定服务容器内执行命令。
+# bin/ 下所有 wrapper（npm/pnpm/volta/ocr 等）的公共入口。
+# 自包含实现：直接 exec 同仓库的 run.sh，不依赖 zsh 函数或其它 PATH 上的脚本，
+# 因此 opencode/nvim 等非交互进程 spawn wrapper 时也能正常工作。
+docker_root="$(cd "$(dirname "$(readlink -f "$0")")/.." && pwd)"
+exec "$docker_root/run.sh" "$@"
