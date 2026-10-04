@@ -10,6 +10,10 @@ DeepSeek 官方开源 agent harness（开发预览版），基于 Cordis「一�
 
 ## 快速开始
 
+> profile 配置（patch 层与插件依赖）由 `~/develop/dotfiles/dsh/` 统一管理（见其 README）。
+> 首次构建/启动前确保该目录存在（`sh ~/develop/dotfiles/dsh/install.sh`），
+> 否则 compose 会以 root 属主自动创建空的挂载源目录。
+
 ### 启动服务
 
 ```bash
@@ -65,16 +69,24 @@ dsh 官方出于安全考虑**拒绝绑定 0.0.0.0**（防止远程 RCE 暴露�
 | `DSH_NODE_VERSION`    | `24.21.0`    | Node 基础镜像版本（官方要求 ^22.19 或 >=24.2） |
 | `DSH_WEB_PORT`        | `3080`       | Web UI 宿主机端口                           |
 | `DSH_HOST_DATA_PATH`  | `/data/dsh`  | 持久化数据目录（映射容器 `~/.dsh`）         |
+| `DSH_HOST_PROFILES_PATH` | （必填）  | dotfiles 的 profile 目录，映射容器 `~/.dsh/profiles` |
 | `DSH_MEM_LIMIT`       | `4g`         | 内存上限                                    |
 
-API Key、模型、会话等配置均存储在 `/data/dsh` 中，不写入 docker 仓库。
+API Key、模型、会话等运行时数据存储在 `/data/dsh` 中；profile 配置（patch 层、插件依赖）
+由 dotfiles 仓库（`dotfiles/dsh/`）管理，均不写入 docker 仓库。
 
 ## 数据与工作区
 
 | 宿主路径              | 容器路径              | 说明                          |
 | --------------------- | --------------------- | ----------------------------- |
-| `/data/dsh`           | `/home/docker/.dsh`   | 配置、会话、插件、profile     |
+| `/data/dsh`           | `/home/docker/.dsh`   | credentials、sessions、storages 运行时数据 |
+| `${DSH_HOST_PROFILES_PATH}` | `/home/docker/.dsh/profiles` | profile 配置（由 dotfiles/dsh 管理） |
 | `${HOST_PROJECT_PATH}` | 同路径                | 项目工作区（Web UI 中选择）   |
+
+> `profiles` 是嵌套于 `/home/docker/.dsh` 的子路径挂载，会遮蔽数据目录内的同名子目录；
+> compose 中必须列在 `/data/dsh` 挂载行之后，否则会被父挂载覆盖。
+> `/data/dsh/profiles` 是容器内的挂载点，**运行期间请勿删除**（删除会使容器内挂载失效）；
+> Docker 会在容器启动时自动创建。
 
 ## 升级
 

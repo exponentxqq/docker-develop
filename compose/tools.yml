@@ -91,8 +91,10 @@ services:
     ports:
       - "${DSH_WEB_PORT}:3081"
     volumes:
+      # profiles 子路径挂载必须位于 ${DSH_HOST_DATA_PATH} 之后，否则会被父挂载遮蔽
       - ${HOST_PROJECT_PATH}:${CONTAINER_PROJECT_PATH}
       - ${DSH_HOST_DATA_PATH}:/home/docker/.dsh
+      - ${DSH_HOST_PROFILES_PATH}:/home/docker/.dsh/profiles
     logging:
       options:
         max-size: "10m"
