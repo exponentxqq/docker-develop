@@ -36,8 +36,8 @@ ENV HOME=/home/docker
 COPY --chown=docker:docker entrypoint.sh /home/docker/entrypoint.sh
 RUN chmod +x /home/docker/entrypoint.sh
 
-# 容器内对外的 socat 转发口；dsh 自身固定监听 127.0.0.1:3080（官方安全限制）
-EXPOSE 3081
+# 容器内对外的 socat 转发口；dsh 自身 3080（仅 loopback）、dsh-pocket 代理 3081（隧道回源）均不直接对外
+EXPOSE 3090
 
 ENTRYPOINT ["/home/docker/entrypoint.sh"]
 CMD ["dsh", "web", "--no-open"]

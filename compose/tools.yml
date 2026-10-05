@@ -89,7 +89,14 @@ services:
     mem_limit: ${DSH_MEM_LIMIT:-4g}
     working_dir: ${CONTAINER_PROJECT_PATH}
     ports:
-      - "${DSH_WEB_PORT}:3081"
+      # 只绑宿主 loopback（SSH 隧道/本机访问）；手机公网走 Cloudflare 隧道，不经此口
+      - "127.0.0.1:${DSH_WEB_PORT}:3090"
+    environment:
+      # dsh-pocket 新机器初始化参数（见 entrypoint.sh；settings.json 已存在时不覆盖）
+      - DSH_POCKET_TUNNEL_TOKEN=${DSH_POCKET_TUNNEL_TOKEN:-}
+      - DSH_POCKET_TUNNEL_HOSTNAME=${DSH_POCKET_TUNNEL_HOSTNAME:-}
+      - DSH_POCKET_PROXY_PORT=${DSH_POCKET_PROXY_PORT:-3081}
+      - DSH_POCKET_PIN=${DSH_POCKET_PIN:-}
     volumes:
       # profiles 子路径挂载必须位于 ${DSH_HOST_DATA_PATH} 之后，否则会被父挂载遮蔽
       - ${HOST_PROJECT_PATH}:${CONTAINER_PROJECT_PATH}
