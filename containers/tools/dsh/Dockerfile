@@ -3,12 +3,11 @@
 ARG NODE_VERSION=24.21.0
 FROM node:${NODE_VERSION}-slim
 
-# socat: dsh 官方拒绝绑定 0.0.0.0，需在容器内做端口转发（见 entrypoint.sh）
 # python3/make/g++: node-pty 等原生模块编译
 # procps: 提供 pkill，供 bin/ 包装脚本的清理逻辑使用
 RUN apt-get update && \
   apt-get install -y --no-install-recommends \
-  curl wget socat ca-certificates git python3 make g++ procps \
+  curl wget ca-certificates git python3 make g++ procps \
   && rm -rf /var/lib/apt/lists/*
 
 ARG HOST_UID HOST_GID HOST_USER
@@ -36,8 +35,9 @@ ENV HOME=/home/docker
 COPY --chown=docker:docker entrypoint.sh /home/docker/entrypoint.sh
 RUN chmod +x /home/docker/entrypoint.sh
 
-# 容器内对外的 socat 转发口；dsh 自身 3080（仅 loopback）、dsh-pocket 代理 3081（隧道回源）均不直接对外
-EXPOSE 3090
+# 容器唯一对外口：dsh-pocket 代理（本机/局域网/公网入口统一由此进出，含 PIN 认证）
+# dsh web 自身固定监听 127.0.0.1:3080（官方安全限制），不经此口暴露
+EXPOSE 3081
 
 ENTRYPOINT ["/home/docker/entrypoint.sh"]
 CMD ["dsh", "web", "--no-open"]

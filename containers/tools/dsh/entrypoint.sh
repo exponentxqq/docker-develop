@@ -3,15 +3,15 @@ set -e
 
 # 容器内端口布局：
 #   3080  dsh web（官方安全限制：固定监听 127.0.0.1，拒绝绑定 0.0.0.0）
-#   3081  dsh-pocket 代理（改写 Host/Origin 过 /api 信任栅栏 + PIN 认证；
-#         Cloudflare 命名隧道的回源目标，见 CF Published application 的 Service 配置）
-#   3090  socat（0.0.0.0:3090 → 127.0.0.1:3080，供宿主机/SSH 隧道访问，
-#         由 compose 映射 127.0.0.1:${DSH_WEB_PORT}:3090 收紧到 loopback）
+#   3081  dsh-pocket 代理（改写 Host/Origin 过 /api 信任栅栏 + PIN 认证）
+#         —— 容器唯一对外口，统一承载三类入口：
+#           本机    浏览器 → 宿主 127.0.0.1:3081 → 代理
+#           局域网  手机/台式机 → 宿主 <DSH_POCKET_LAN_IP>:3081 → 代理
+#           公网    手机 → CF 边缘(HTTPS) → cloudflared 隧道 → 127.0.0.1:3081 → 代理
+#         经 compose 映射 ${DSH_POCKET_LAN_PORT}:${DSH_POCKET_PROXY_PORT} 暴露。
 #
-# 访问链路：
-#   本机/SSH:  浏览器 → 宿主 127.0.0.1:3080 → socat(3090) → dsh(3080)
-#   手机公网:  手机 → CF 边缘(HTTPS) → cloudflared 隧道 → dsh-pocket(3081) → dsh(3080)
-socat TCP-LISTEN:3090,fork,reuseaddr TCP:127.0.0.1:3080 &
+# 容器内网卡是 Docker bridge 网段（172.x），手机可达的是宿主物理网卡 IP，
+# 由 DSH_POCKET_LAN_IP 写入 lanIpOverride（见下方第 3 步）。
 
 POCKET_DIR="$HOME/.dsh/dsh-pocket"
 
@@ -34,6 +34,7 @@ EOF
 fi
 
 # 2) 预置固定公网 PIN（仅首次：写 token 文件 + settings 标记自定义，避免开启公网时被轮换覆盖）
+#    注意格式限制：恰好 8 位英文字母或数字（插件 PIN_RE 校验，不合规值会被忽略并重新随机）
 if [ -n "$DSH_POCKET_PIN" ] && [ ! -f "$POCKET_DIR/token" ]; then
   mkdir -p "$POCKET_DIR"
   printf '%s' "$DSH_POCKET_PIN" > "$POCKET_DIR/token"
@@ -49,7 +50,24 @@ if [ -n "$DSH_POCKET_PIN" ] && [ ! -f "$POCKET_DIR/token" ]; then
   echo "[entrypoint] 已预置 dsh-pocket 公网 PIN"
 fi
 
-# 3) profiles 依赖恢复：dotfiles 新 clone 后 node_modules 缺失时按 lockfile 安装
+# 3) 局域网 IP 覆盖同步（拓扑参数：DSH_POCKET_LAN_IP 非空时每次启动以 .env 为准；
+#    为空则不管理该键，交由设置页手动选择。IP 变化时改 .env 重建容器即可）
+if [ -n "$DSH_POCKET_LAN_IP" ]; then
+  DSH_POCKET_LAN_IP="$DSH_POCKET_LAN_IP" POCKET_DIR="$POCKET_DIR" node -e '
+    const fs = require("fs"), path = require("path");
+    const p = path.join(process.env.POCKET_DIR, "settings.json");
+    let s = {};
+    try { s = JSON.parse(fs.readFileSync(p, "utf8")); } catch { /* 无文件 → 新建 */ }
+    if (s.lanIpOverride !== process.env.DSH_POCKET_LAN_IP) {
+      s.lanIpOverride = process.env.DSH_POCKET_LAN_IP;
+      fs.mkdirSync(process.env.POCKET_DIR, { recursive: true });
+      fs.writeFileSync(p, JSON.stringify(s, null, 2), { mode: 0o600 });
+      console.log("[entrypoint] 已同步 lanIpOverride = " + s.lanIpOverride);
+    }
+  '
+fi
+
+# 4) profiles 依赖恢复：dotfiles 新 clone 后 node_modules 缺失时按 lockfile 安装
 for prof in "$HOME"/.dsh/profiles/*/; do
   [ -f "${prof}package.json" ] && [ ! -d "${prof}node_modules" ] || continue
   if grep -q '"dependencies"' "${prof}package.json"; then

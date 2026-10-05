@@ -89,14 +89,18 @@ services:
     mem_limit: ${DSH_MEM_LIMIT:-4g}
     working_dir: ${CONTAINER_PROJECT_PATH}
     ports:
-      # 只绑宿主 loopback（SSH 隧道/本机访问）；手机公网走 Cloudflare 隧道，不经此口
-      - "127.0.0.1:${DSH_WEB_PORT}:3090"
+      # 唯一对外端口：本机/局域网/公网(CF 隧道回源) 三类入口统一走 dsh-pocket 代理（PIN 认证）
+      # 宿主端口须与代理端口一致（局域网链接按 proxyPort 拼接，映射后原样可用）
+      - "${DSH_POCKET_LAN_PORT:-3081}:${DSH_POCKET_PROXY_PORT:-3081}"
     environment:
-      # dsh-pocket 新机器初始化参数（见 entrypoint.sh；settings.json 已存在时不覆盖）
+      # dsh-pocket 初始化参数（见 entrypoint.sh）
+      #   settings.json 不存在时按 TUNNEL_*/PROXY_PORT 生成；已存在则不覆盖
+      #   LAN_IP 是拓扑参数：非空时每次启动同步 lanIpOverride（IP 变化改 .env 重建即可）
       - DSH_POCKET_TUNNEL_TOKEN=${DSH_POCKET_TUNNEL_TOKEN:-}
       - DSH_POCKET_TUNNEL_HOSTNAME=${DSH_POCKET_TUNNEL_HOSTNAME:-}
       - DSH_POCKET_PROXY_PORT=${DSH_POCKET_PROXY_PORT:-3081}
       - DSH_POCKET_PIN=${DSH_POCKET_PIN:-}
+      - DSH_POCKET_LAN_IP=${DSH_POCKET_LAN_IP:-}
     volumes:
       # profiles 子路径挂载必须位于 ${DSH_HOST_DATA_PATH} 之后，否则会被父挂载遮蔽
       - ${HOST_PROJECT_PATH}:${CONTAINER_PROJECT_PATH}
