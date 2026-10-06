@@ -101,6 +101,10 @@ services:
       - DSH_POCKET_PROXY_PORT=${DSH_POCKET_PROXY_PORT:-3081}
       - DSH_POCKET_PIN=${DSH_POCKET_PIN:-}
       - DSH_POCKET_LAN_IP=${DSH_POCKET_LAN_IP:-}
+    env_file:
+      # 宿主统一密钥文件（DEEPSEEK_API_KEY / ZAI_API_KEY / OPENCODE_GO_API_KEY 等）。
+      # dsh 凭据解析优先级：容器环境变量 > credentials.yaml > dotenv，故由此注入的 key 压过 UI 写入的值。
+      - /home/xuqinqin/.secrets
     volumes:
       # profiles 子路径挂载必须位于 ${DSH_HOST_DATA_PATH} 之后，否则会被父挂载遮蔽
       - ${HOST_PROJECT_PATH}:${CONTAINER_PROJECT_PATH}
