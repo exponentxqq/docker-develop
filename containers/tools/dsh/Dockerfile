@@ -21,11 +21,14 @@ ARG DSH_VERSION=latest
 ARG PNPM_VERSION=10
 # openspec: spec 驱动开发 CLI（agent/skills 中的 openspec-* skill 依赖）
 # @dbx-app/mcp-server: dbx MCP server（dsh-mcp-client 经 npx 启动，预装免下载）
+# codebase-memory-mcp: 代码知识图谱 MCP（agent 指令要求检索优先；postinstall 从 GitHub Releases 下载原生二进制，镜像 +~300MB）
 ARG OPENSPEC_VERSION=latest
 ARG DBX_MCP_VERSION=latest
+ARG CBM_MCP_VERSION=0.11.0
 RUN npm install -g pnpm@${PNPM_VERSION} @deepseek-ai/dsh@${DSH_VERSION} \
-    @fission-ai/openspec@${OPENSPEC_VERSION} @dbx-app/mcp-server@${DBX_MCP_VERSION} && \
-  dsh --version && openspec --version
+    @fission-ai/openspec@${OPENSPEC_VERSION} @dbx-app/mcp-server@${DBX_MCP_VERSION} \
+    codebase-memory-mcp@${CBM_MCP_VERSION} && \
+  dsh --version && openspec --version && codebase-memory-mcp --version
 
 USER docker
 WORKDIR /home/docker

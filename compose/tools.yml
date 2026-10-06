@@ -80,6 +80,7 @@ services:
       args:
         - NODE_VERSION=${DSH_NODE_VERSION}
         - DSH_VERSION=${DSH_VERSION}
+        - CBM_MCP_VERSION=${CBM_MCP_VERSION}
         - HOST_UID=${HOST_UID}
         - HOST_GID=${HOST_GID}
         - HOST_USER=${HOST_USER}
@@ -110,6 +111,8 @@ services:
       - ${HOST_PROJECT_PATH}:${CONTAINER_PROJECT_PATH}
       - ${DSH_HOST_DATA_PATH}:/home/docker/.dsh
       - ${DSH_HOST_PROFILES_PATH}:/home/docker/.dsh/profiles
+      # 用户级 AGENTS.md（dsh-agent-instructions 读取 $DSH_HOME/AGENTS.md 注入会话基线），源文件由 dotfiles 管理
+      - ${DSH_HOST_AGENTS_PATH}:/home/docker/.dsh/AGENTS.md:ro
       # skctl 聚合的 agent skills（自写=symlink 指 dotfiles，外部=git 拷贝），只读挂载
       - ${SKCTL_STORE_PATH}/skills:/home/docker/.agents/skills:ro
     logging:
