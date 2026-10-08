@@ -11,9 +11,9 @@ DeepSeek 官方开源 agent harness（开发预览版），基于 Cordis「一�
 
 ## 端口布局（容器内）
 
-| 端口 | 进程 | 说明 |
-| ---- | ---- | ---- |
-| 3080 | dsh web | 官方安全限制：固定监听 `127.0.0.1`，拒绝绑定 0.0.0.0，不对外 |
+| 端口 | 进程            | 说明                                                               |
+| ---- | --------------- | ------------------------------------------------------------------ |
+| 3080 | dsh web         | 官方安全限制：固定监听 `127.0.0.1`，拒绝绑定 0.0.0.0，不对外       |
 | 3081 | dsh-pocket 代理 | **容器唯一对外口**：改写 Host/Origin 过 `/api` 信任栅栏 + PIN 认证 |
 
 ## 访问链路
@@ -33,29 +33,30 @@ DeepSeek 官方开源 agent harness（开发预览版），基于 Cordis「一�
 
 ## 配置说明
 
-| 变量 | 默认值 | 说明 |
-| ---- | ------ | ---- |
-| `DSH_VERSION` | `0.2.0-rc.2` | dsh npm 包版本 |
-| `DSH_NODE_VERSION` | `24.21.0` | Node 基础镜像版本（官方要求 ^22.19 或 >=24.2） |
-| `DSH_HOST_DATA_PATH` | `/data/dsh` | 持久化数据（credentials、会话、dsh-pocket 设置/PIN/cloudflared） |
-| `DSH_HOST_PROFILES_PATH` | dotfiles 的 `dsh/profiles` | profile 目录（git 管理，挂载须位于 `DSH_HOST_DATA_PATH` 之后） |
-| `SKCTL_STORE_PATH` | skctl 存储 | agent skills（只读挂载到 `~/.agents/skills`） |
-| `DSH_MEM_LIMIT` | `4g` | 内存上限 |
-| `DSH_POCKET_TUNNEL_TOKEN` | 空 | Cloudflare 命名隧道 Token（仅 settings.json 不存在时写入） |
-| `DSH_POCKET_TUNNEL_HOSTNAME` | 空 | 公网固定域名（如 `home-dsh.example.com`） |
-| `DSH_POCKET_PROXY_PORT` | `3081` | dsh-pocket 代理端口（须与 CF Service 端口、LAN_PORT 一致） |
-| `DSH_POCKET_LAN_IP` | 空 | 宿主局域网 IP（写 lanIpOverride；**每次启动同步**，IP 变化改此行重建） |
-| `DSH_POCKET_LAN_PORT` | `3081` | 局域网直连宿主端口（须与 PROXY_PORT 一致） |
-| `DSH_POCKET_PIN` | 空 | 固定公网 PIN（仅首次预置；**恰好 8 位**英文字母或数字） |
+| 变量                         | 默认值                     | 说明                                                                                                                      |
+| ---------------------------- | -------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| `DSH_VERSION`                | `0.2.0-rc.2`               | dsh npm 包版本                                                                                                            |
+| `DSH_NODE_VERSION`           | `24.21.0`                  | Node 基础镜像版本（官方要求 ^22.19 或 >=24.2）                                                                            |
+| `DSH_HOST_DATA_PATH`         | `/data/dsh`                | 持久化数据（credentials、会话、dsh-pocket 设置/PIN/cloudflared）                                                          |
+| `DSH_HOST_PROFILES_PATH`     | dotfiles 的 `dsh/profiles` | profile 目录（git 管理，挂载须位于 `DSH_HOST_DATA_PATH` 之后）                                                            |
+| `SKCTL_STORE_PATH`           | skctl 存储                 | agent skills（只读挂载到 `~/.agents/skills`）                                                                             |
+| `DSH_MEM_LIMIT`              | `4g`                       | 内存上限                                                                                                                  |
+| `DSH_POCKET_TUNNEL_TOKEN`    | 空                         | Cloudflare 命名隧道 Token（仅 settings.json 不存在时写入）                                                                |
+| `DSH_POCKET_TUNNEL_HOSTNAME` | 空                         | 公网固定域名（如 `home-dsh.example.com`）                                                                                 |
+| `DSH_POCKET_PROXY_PORT`      | `3081`                     | dsh-pocket 代理端口（须与 CF Service 端口、LAN_PORT 一致）                                                                |
+| `DSH_POCKET_LAN_IP`          | 空                         | 宿主局域网 IP（写 lanIpOverride；**每次启动同步**，IP 变化改此行重建）                                                    |
+| `DSH_POCKET_LAN_PORT`        | `3081`                     | 局域网直连宿主端口（须与 PROXY_PORT 一致）                                                                                |
+| `DSH_POCKET_PIN`             | 空                         | 固定公网 PIN（仅首次预置；**恰好 8 位**英文字母或数字）                                                                   |
+| `DSH_POCKET_TUNNEL_AUTO`     | `true`                     | 启动默认开启公网访问（写 `tunnel-auto.json` 标记，插件自动恢复隧道）；手动关闭仅维持到下次容器重启，设 `false` 恢复旧行为 |
 
 ## 数据与挂载
 
-| 宿主路径 | 容器路径 | 说明 |
-| -------- | -------- | ---- |
-| `/data/dsh` | `/home/docker/.dsh` | credentials、会话、dsh-pocket（settings/PIN/cloudflared） |
-| `~/develop/dotfiles/dsh/profiles` | `/home/docker/.dsh/profiles` | profile 定义 + 插件（git 管理 node_modules 忽略） |
-| `${HOST_PROJECT_PATH}` | 同路径 | 项目工作区（Web UI 目录选择器） |
-| `${SKCTL_STORE_PATH}/skills` | `/home/docker/.agents/skills` | agent skills（只读） |
+| 宿主路径                          | 容器路径                      | 说明                                                      |
+| --------------------------------- | ----------------------------- | --------------------------------------------------------- |
+| `/data/dsh`                       | `/home/docker/.dsh`           | credentials、会话、dsh-pocket（settings/PIN/cloudflared） |
+| `~/develop/dotfiles/dsh/profiles` | `/home/docker/.dsh/profiles`  | profile 定义 + 插件（git 管理 node_modules 忽略）         |
+| `${HOST_PROJECT_PATH}`            | 同路径                        | 项目工作区（Web UI 目录选择器）                           |
+| `${SKCTL_STORE_PATH}/skills`      | `/home/docker/.agents/skills` | agent skills（只读）                                      |
 
 ## 新机器部署（固化流程）
 
@@ -77,8 +78,10 @@ entrypoint 幂等完成：生成 dsh-pocket `settings.json`（命名隧道模式
 同步 `lanIpOverride`、按 lockfile 恢复 profile 依赖（node_modules）。
 cloudflared 二进制在首次开启公网时自动下载（清华镜像优先，缓存于 `/data/dsh/dsh-pocket/bin/`）。
 
-最后在 Web UI（本机 `http://127.0.0.1:3081`）→ 设置 → 手机访问 → 点「开启公网访问」；
-`/data/dsh/dsh-pocket/tunnel-auto.json` 记录启用状态，容器重启自动恢复隧道。
+公网访问**启动默认开启**：entrypoint 预置 `tunnel-auto.json` 标记，插件启动自动拉起隧道，
+容器/宿主重启后无需再手动开启。`/data/dsh/dsh-pocket/tunnel-auto.json` 记录启用状态。
+Web UI（本机 `http://127.0.0.1:3081`）→ 设置 → 手机访问的手动关闭**仅维持到下次容器重启**；
+要彻底禁止默认开启，设 `DSH_POCKET_TUNNEL_AUTO=false` 重建容器。
 
 ## 常见维护
 
@@ -110,6 +113,10 @@ docker compose build dsh && docker compose up -d dsh
 ```
 
 - dsh 处于 developer preview，升级前备份 `/data/dsh`（credentials、会话、dsh-pocket 配置）
+- dotfiles profile 携带 dsh-pocket 的 pnpm patch（`dsh/profiles/web/patches/dsh-pocket@2.10.6.patch`）：
+  上游 npm 2.10.6 在插件模式未注入 `home`，导致 `tunnel-auto.json` 自动恢复失效；
+  patch 从当前上游 main 移植了 fallback（`internals.home ?? DSH_HOME ?? ~/.dsh`）。
+  升级 dsh-pocket 后如官方版本已含该修复，删除 patch 并 `pnpm install` 更新 lockfile
 
 ## 注意事项
 
