@@ -47,7 +47,7 @@ Conda + UV 双工具链 Python 开发容器，一套环境覆盖数据处理、W
 
 | 宿主机路径                  | 容器路径                    | 说明             |
 | --------------------------- | --------------------------- | ---------------- |
-| `${HOST_PROJECT_PATH}`      | `${CONTAINER_PROJECT_PATH}` | 项目代码         |
+| `${HOST_PROJECT_PATH}`      | `${HOST_PROJECT_PATH}`      | 项目代码（路径一致） |
 | `common/.zshrc`             | `/home/docker/.zshrc`       | Zsh 配置         |
 | `common/.vimrc`             | `/home/docker/.vimrc`       | Vim 配置         |
 | `${DATA_PATH}`              | `/data`                     | 数据目录         |

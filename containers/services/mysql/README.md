@@ -28,7 +28,7 @@ MySQL 5.7 数据库容器，集成 mycli、XtraBackup 和 qpress，支持备份�
 | `${MYSQL_HOST_DATA_PATH}`    | `/var/lib/mysql`              | 数据持久化                   |
 | `${MYSQL_ENTRYPOINT_INITDB}` | `/docker-entrypoint-initdb.d` | 初始化脚本（首次启动执行）   |
 | `mysql/my.cnf`               | `/etc/mysql/conf.d/my.cnf`    | 自定义 MySQL 配置            |
-| `${HOST_PROJECT_PATH}`       | `${CONTAINER_PROJECT_PATH}`   | 项目代码（便于导入导出 SQL） |
+| `${HOST_PROJECT_PATH}`       | `${HOST_PROJECT_PATH}`        | 项目代码（便于导入导出 SQL，路径一致） |
 
 ## 关键配置 (`my.cnf`)
 

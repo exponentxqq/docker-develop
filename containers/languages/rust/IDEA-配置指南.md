@@ -13,11 +13,8 @@
 在 `~/develop/docker/.env` 中确保：
 
 ```bash
-# 项目路径（宿主机绝对路径，指向你的 Rust 项目根目录）
+# 项目路径（宿主机绝对路径，指向你的 Rust 项目根目录；容器内路径与宿主机一致）
 HOST_PROJECT_PATH=/home/xuqinqin/develop/person/os
-
-# 容器内对应路径（一般保持 /develop）
-CONTAINER_PROJECT_PATH=/develop
 
 # 宿主机 user id，与宿主机一致以保证文件权限
 HOST_UID=1000
@@ -78,7 +75,7 @@ IDEA 会自动检测。若未检测到：**Settings → Languages & Frameworks �
 
 ```bash
 docker compose -f ~/develop/docker/docker-compose.yml exec rust bash -c "
-  cd /develop && \
+  cd /home/xuqinqin/develop/person/os && \
   cargo build && \
   gdbserver :9999 target/debug/你的程序名
 "
@@ -88,7 +85,7 @@ docker compose -f ~/develop/docker/docker-compose.yml exec rust bash -c "
 
 ```bash
 docker compose exec rust zsh
-cd /develop
+cd /home/xuqinqin/develop/person/os
 cargo build
 gdbserver :9999 target/debug/你的程序名
 ```
@@ -101,7 +98,7 @@ gdbserver :9999 target/debug/你的程序名
    - **'target remote' args:** `localhost:9999`
    - **Symbol file:** 宿主机上 `target/debug/你的程序名` 的路径（与容器内路径一致，因挂载）
    - **Path mappings（可选）：**
-     - Remote: `/develop`
+     - Remote: `/home/xuqinqin/develop/person/os`
      - Local: `/home/xuqinqin/develop/person/os`（或你的宿主机项目路径）
 
 4. 启动 Debug 会话，连接 gdbserver
@@ -129,7 +126,7 @@ ports:
   "name": "Rust Dev",
   "dockerComposeFile": ["../../docker/docker-compose.yml"],
   "service": "rust",
-  "workspaceFolder": "/develop",
+  "workspaceFolder": "/home/xuqinqin/develop/person/os",
   "customizations": {
     "vscode": {
       "extensions": ["rust-lang.rust-analyzer"]

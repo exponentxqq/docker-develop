@@ -46,14 +46,14 @@ All paths in sub-files are relative to the **including file** (`docker-compose.y
 
 All configuration driven by `.env` (copy from `.env-example`). Key variables:
 
-- `HOST_PROJECT_PATH` / `CONTAINER_PROJECT_PATH` — project directory mapping
+- `HOST_PROJECT_PATH` — project directory (identity mount: same path on host and in containers)
 - `DOCKER_HOST_IP` — host IP for xdebug/extra_hosts
 - `HOST_UID` / `HOST_GID` / `HOST_USER` — should match host user id/group for file permissions
 - Service-specific variables: `MYSQL_VERSION`, `PHP_VERSION`, `MISE_VERSION`, etc.
 
 ## run.sh
 
-Wrapper that ensures a container is running, then `docker exec`s into it. Host and container project paths are identical (`HOST_PROJECT_PATH` == `CONTAINER_PROJECT_PATH`), so it simply `cd`s to the current working directory inside the container and runs the command via `bash --login` (loads profile PATH).
+Wrapper that ensures a container is running, then `docker exec`s into it. Host and container project paths are identical, so it simply `cd`s to the current working directory inside the container and runs the command via `bash --login` (loads profile PATH).
 
 TTY detection (`[ -t 0 ] && [ -t 1 ]`) prevents docker `-t` flag from being added when stdout is piped (avoids stdout/stderr merging in completion contexts). Completion-related env vars (`COMP_LINE` etc.) are forwarded into the container.
 

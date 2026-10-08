@@ -41,7 +41,6 @@ Rust 开发容器，基于 Debian Bookworm Slim，通过 rustup 安装工具链�
 
 | 宿主机路径                           | 容器路径                            | 说明                                     |
 | ------------------------------------ | ----------------------------------- | ---------------------------------------- |
-| `${HOST_PROJECT_PATH}`               | `${CONTAINER_PROJECT_PATH}`         | 项目代码                                 |
 | `${HOST_PROJECT_PATH}`               | `${HOST_PROJECT_PATH}`              | 项目代码（identity mount，路径一致）     |
 | `/home/${HOST_USER}/.cargo`          | `/home/${HOST_USER}/.cargo`         | Cargo 缓存（identity mount，路径一致）   |
 | `/usr/local/rustup`                  | `/usr/local/rustup`                 | Rust 工具链（identity mount，路径一致）  |

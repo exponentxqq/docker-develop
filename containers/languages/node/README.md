@@ -63,7 +63,7 @@ store-dir=/home/docker/.local/share/pnpm/store
 
 | 宿主机路径                   | 容器路径                               | 说明                        |
 | ---------------------------- | -------------------------------------- | --------------------------- |
-| `${HOST_PROJECT_PATH}`       | `${CONTAINER_PROJECT_PATH}`            | 项目代码                    |
+| `${HOST_PROJECT_PATH}`       | `${HOST_PROJECT_PATH}`                 | 项目代码（路径一致）        |
 | `node/npmrc`                 | `/home/docker/.npmrc`                  | npm/pnpm 配置               |
 | `volta-cache` (named volume) | `/home/docker/.volta`                  | Volta 和 Node.js 版本持久化 |
 | `cache/pnpm-cache`           | `/home/docker/.local/share/pnpm/store` | pnpm store                  |

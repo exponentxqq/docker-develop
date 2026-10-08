@@ -22,7 +22,7 @@ Nginx 反向代理容器，支持静态站点、PHP 站点代理、HTTPS 自签�
 | `nginx/site-enabled/`  | `/etc/nginx/conf.d/`        | 站点配置（一个 `.conf` 一个站点） |
 | `nginx/ssl/`           | `/etc/nginx/ssl/`           | SSL 证书目录                      |
 | `nginx/log/`           | `/nginx/log/`               | 访问日志和错误日志                |
-| `${HOST_PROJECT_PATH}` | `${CONTAINER_PROJECT_PATH}` | 项目代码（静态文件、PHP 代码）    |
+| `${HOST_PROJECT_PATH}` | `${HOST_PROJECT_PATH}`      | 项目代码（静态文件、PHP 代码，路径一致） |
 
 ## 主配置 (`nginx.conf`)
 
@@ -45,7 +45,7 @@ server {
     listen 80;
     server_name www.example.localhost;
 
-    root /develop/path/to/static/site;
+    root /home/xuqinqin/develop/path/to/static/site;
     index index.html index.htm;
 
     location / {
@@ -63,7 +63,7 @@ server {
     listen 80;
     server_name www.example.localhost;
 
-    root /develop/path/to/php/public;
+    root /home/xuqinqin/develop/path/to/php/public;
     index index.php index.html;
 
     location / {

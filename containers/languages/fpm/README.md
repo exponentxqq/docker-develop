@@ -54,7 +54,7 @@ PHP 7.2 FPM 容器，集成 Composer、Xdebug 和多个可选扩展，支持 Php
 
 | 宿主机路径             | 容器路径                     | 说明                               |
 | ---------------------- | ---------------------------- | ---------------------------------- |
-| `${HOST_PROJECT_PATH}` | `${CONTAINER_PROJECT_PATH}`  | 项目代码                           |
+| `${HOST_PROJECT_PATH}` | `${HOST_PROJECT_PATH}`       | 项目代码（路径一致）               |
 | `fpm/php.ini`          | `/usr/local/etc/php/php.ini` | PHP 配置                           |
 | `fpm/conf.d/`          | `/usr/local/etc/php.conf/`   | PHP 扩展配置（xdebug, redis 等）   |
 | `cache/composer-cache` | `/home/docker/.composer`     | Composer 缓存                      |

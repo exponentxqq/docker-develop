@@ -18,7 +18,7 @@ Go 语言开发容器，基于官方 golang 镜像。
 
 | 宿主机路径             | 容器路径                    | 说明                  |
 | ---------------------- | --------------------------- | --------------------- |
-| `${HOST_PROJECT_PATH}` | `${CONTAINER_PROJECT_PATH}` | 项目代码              |
+| `${HOST_PROJECT_PATH}` | `${HOST_PROJECT_PATH}`      | 项目代码（路径一致）  |
 | `cache/go-cache`       | `/usr/local/go`             | Go 工具链和缓存持久化 |
 
 > **注意**: `/usr/local/go` 的挂载会覆盖容器内 Go 安装目录。首次使用前需确保 `cache/go-cache` 包含完整的 Go 发行版，或手动初始化。

@@ -19,7 +19,7 @@ MongoDB 文档数据库容器，基于官方镜像，支持认证和数据持久
 | ------------------------ | --------------------------- | ---------- |
 | `${MONGO_HOST_DATA_DIR}` | `/data/db`                  | 数据持久化 |
 | `${MONGO_HOST_LOG_DIR}`  | `/data/log`                 | 日志文件   |
-| `${HOST_PROJECT_PATH}`   | `${CONTAINER_PROJECT_PATH}` | 项目代码   |
+| `${HOST_PROJECT_PATH}`   | `${HOST_PROJECT_PATH}`      | 项目代码（路径一致） |
 
 ## 环境变量
 
