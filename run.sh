@@ -1,7 +1,6 @@
 DOCKER_ROOT_DIR=$(dirname $(readlink -f "$0"))
 source "$DOCKER_ROOT_DIR/.env"
 project_path=$(pwd)
-# project_path=${project_path/#$HOST_PROJECT_PATH/$CONTAINER_PROJECT_PATH}
 
 container_names=$(cd "$DOCKER_ROOT_DIR" && docker compose ps | grep -v Exit | grep -v exited | awk '{print $1}' | grep -v Name | grep -v NAME | grep -v "^-")
 exists=false

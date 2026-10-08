@@ -15,7 +15,7 @@ services:
       - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
       - TZ=${TIMEZONE}
     volumes:
-      - ${HOST_PROJECT_PATH}:${CONTAINER_PROJECT_PATH}
+      - ${HOST_PROJECT_PATH}:${HOST_PROJECT_PATH}
       - ${MYSQL_HOST_DATA_PATH}:${MYSQL_CONTAINER_DATA_PATH}
       - ${MYSQL_ENTRYPOINT_INITDB}:/docker-entrypoint-initdb.d
       - ../containers/services/mysql/my.cnf:/etc/mysql/conf.d/my.cnf
@@ -149,7 +149,7 @@ services:
       - "80:80"
       - "443:443"
     volumes:
-      - ${HOST_PROJECT_PATH}:${CONTAINER_PROJECT_PATH}
+      - ${HOST_PROJECT_PATH}:${HOST_PROJECT_PATH}
       - ../containers/services/nginx/site-enabled:/etc/nginx/conf.d
       - ../containers/services/nginx/nginx.conf:/etc/nginx/nginx.conf
       - ../containers/services/nginx/ssl:/etc/nginx/ssl

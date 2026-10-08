@@ -55,7 +55,7 @@ services:
       - "${HERMES_API_PORT}:8642"
       - "${HERMES_DASHBOARD_PORT}:9119"
     volumes:
-      - ${HOST_PROJECT_PATH}:${CONTAINER_PROJECT_PATH}
+      - ${HOST_PROJECT_PATH}:${HOST_PROJECT_PATH}
       - ${HERMES_HOST_DATA_PATH}:/opt/data
     environment:
       - HERMES_DASHBOARD=${HERMES_DASHBOARD}
@@ -88,7 +88,7 @@ services:
     image: docker-dsh:${DSH_VERSION}
     restart: unless-stopped
     mem_limit: ${DSH_MEM_LIMIT:-4g}
-    working_dir: ${CONTAINER_PROJECT_PATH}
+    working_dir: ${HOST_PROJECT_PATH}
     ports:
       # 唯一对外端口：本机/局域网/公网(CF 隧道回源) 三类入口统一走 dsh-pocket 代理（PIN 认证）
       # 宿主端口须与代理端口一致（局域网链接按 proxyPort 拼接，映射后原样可用）
@@ -101,14 +101,14 @@ services:
       - DSH_POCKET_TUNNEL_HOSTNAME=${DSH_POCKET_TUNNEL_HOSTNAME:-}
       - DSH_POCKET_PROXY_PORT=${DSH_POCKET_PROXY_PORT:-3081}
       - DSH_POCKET_PIN=${DSH_POCKET_PIN:-}
-      - DSH_POCKET_LAN_IP=${DSH_POCKET_LAN_IP:-}
+      - DSH_POCKET_LAN_IP=${DOCKER_HOST_IP:-}
     env_file:
       # 宿主统一密钥文件（DEEPSEEK_API_KEY / ZAI_API_KEY / OPENCODE_GO_API_KEY 等）。
       # dsh 凭据解析优先级：容器环境变量 > credentials.yaml > dotenv，故由此注入的 key 压过 UI 写入的值。
       - /home/xuqinqin/.secrets
     volumes:
       # profiles 子路径挂载必须位于 ${DSH_HOST_DATA_PATH} 之后，否则会被父挂载遮蔽
-      - ${HOST_PROJECT_PATH}:${CONTAINER_PROJECT_PATH}
+      - ${HOST_PROJECT_PATH}:${HOST_PROJECT_PATH}
       - ${DSH_HOST_DATA_PATH}:/home/docker/.dsh
       - ${DSH_HOST_PROFILES_PATH}:/home/docker/.dsh/profiles
       # 用户级 AGENTS.md（dsh-agent-instructions 读取 $DSH_HOME/AGENTS.md 注入会话基线），源文件由 dotfiles 管理
