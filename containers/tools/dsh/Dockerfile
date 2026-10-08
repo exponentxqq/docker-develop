@@ -8,6 +8,7 @@ FROM node:${NODE_VERSION}-slim
 RUN apt-get update && \
   apt-get install -y --no-install-recommends \
   curl wget ca-certificates git python3 make g++ procps \
+  chromium chromium-sandbox fonts-noto-cjk \
   && rm -rf /var/lib/apt/lists/*
 
 ARG HOST_UID HOST_GID HOST_USER
@@ -26,8 +27,10 @@ ARG OPENSPEC_VERSION=latest
 ARG DBX_MCP_VERSION=latest
 ARG CBM_MCP_VERSION=0.11.0
 RUN npm install -g pnpm@${PNPM_VERSION} @deepseek-ai/dsh@${DSH_VERSION} \
-    @fission-ai/openspec@${OPENSPEC_VERSION} @dbx-app/mcp-server@${DBX_MCP_VERSION} \
-    codebase-memory-mcp@${CBM_MCP_VERSION} && \
+  @fission-ai/openspec@${OPENSPEC_VERSION} @dbx-app/mcp-server@${DBX_MCP_VERSION} \
+  codebase-memory-mcp@${CBM_MCP_VERSION} \
+  @deepseek-ai/dsh-browser-use@${DSH_VERSION} \
+  @deepseek-ai/dsh-experimental-browser-use-chrome-devtools-mcp@${DSH_VERSION} && \
   dsh --version && openspec --version && codebase-memory-mcp --version
 
 USER docker
