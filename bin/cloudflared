@@ -1,0 +1,9 @@
+#!/bin/bash
+# cloudflared wrapper：直接复用 cloudflared 容器内的二进制（与隧道 connector 同版本，永不分叉）。
+# ProxyCommand 用法：cloudflared access ssh --hostname %h
+# 不走 run.sh：ProxyCommand 要求 stdout 纯净（启停提示会污染 SSH 协议流）；-i 不加 -t 避免 TTY 污染。
+docker inspect -f '{{.State.Running}}' cloudflared 2>/dev/null | grep -q true || {
+    echo "cloudflared 容器未运行（docker compose up -d cloudflared）" >&2
+    exit 127
+}
+exec docker exec -i cloudflared cloudflared "$@"

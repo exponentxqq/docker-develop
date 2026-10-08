@@ -124,5 +124,23 @@ services:
     networks:
       - backend
 
+  cloudflared:
+    image: cloudflare/cloudflared:${CLOUDFLARED_VERSION}
+    container_name: cloudflared
+    restart: unless-stopped
+    # 命名隧道 run（ingress 在 CF 面板 remote-managed，本机 tunnel 由 ~/.secrets 的 TUNNEL_TOKEN 指认）；
+    # --no-autoupdate 须在子命令之前（cloudflared 2026.x 限制）
+    # --protocol http2：国内/企业网常屏蔽 UDP 7844，强制走 TCP 443（与 dsh-pocket 同款参数）
+    command: --no-autoupdate tunnel run --protocol http2
+    env_file:
+      # 宿主统一密钥文件：每机独立维护，TUNNEL_TOKEN 为本机隧道 token 的生效位
+      - /home/xuqinqin/.secrets
+    # host 网络：localhost 语义即宿主（22 sshd / 4224 dbx / 3081 dsh 均可直写 localhost 回源）
+    network_mode: host
+    logging:
+      options:
+        max-size: "10m"
+        max-file: "3"
+
 volumes:
   dbx-data:
