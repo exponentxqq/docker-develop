@@ -1,0 +1,9 @@
+#!/bin/bash
+# dsh 会话专用 java 包装：转发到 java 容器。宿主侧刻意不提供 bin/java——
+# nvim jdtls 的 JDK home 推导（command -v java）与 conform 的 google-java-format
+# 都依赖宿主 PATH 的裸 java，包装脚本会破坏它们。
+cleanup() {
+  docker exec java pkill -TERM -f "java $*" 2>/dev/null
+}
+trap cleanup INT TERM HUP
+exec "${HOST_PROJECT_PATH:-/home/xuqinqin/develop}/docker/run.sh" java java "$@"

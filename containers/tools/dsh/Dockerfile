@@ -11,6 +11,22 @@ RUN apt-get update && \
   chromium chromium-sandbox fonts-noto-cjk \
   && rm -rf /var/lib/apt/lists/*
 
+# docker CLI + compose 插件（静态二进制，pin 版本与宿主对齐；dsh 会话经 socket 操作宿主 daemon）
+ARG DOCKER_CLI_VERSION=29.9.0
+ARG DOCKER_COMPOSE_VERSION=v5.6.0
+RUN curl -fsSL "https://download.docker.com/linux/static/stable/x86_64/docker-${DOCKER_CLI_VERSION}.tgz" \
+      | tar -xz -C /usr/local/bin --strip-components=1 docker/docker && \
+    mkdir -p /usr/local/lib/docker/cli-plugins && \
+    curl -fsSL "https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION}/docker-compose-linux-x86_64" \
+      -o /usr/local/lib/docker/cli-plugins/docker-compose && \
+    chmod +x /usr/local/lib/docker/cli-plugins/docker-compose && \
+    docker --version && docker compose version
+
+# dsh 会话专用 java 包装（/usr/local/bin 已在 PATH，无需 entrypoint 改动）：
+# 转发 java 容器。宿主侧刻意不提供 bin/java——nvim jdtls 的 JDK home 推导
+# （command -v java）与 conform 的 google-java-format 都依赖宿主 PATH 的裸 java。
+COPY --chmod=755 java-wrapper /usr/local/bin/java
+
 ARG HOST_UID HOST_GID HOST_USER
 # node 官方镜像预置 UID 1000 的 node 用户，与宿主 UID 冲突，先移除（与 languages/node 一致）
 RUN userdel -r node 2>/dev/null || true; \
@@ -51,4 +67,8 @@ RUN chmod +x /home/docker/entrypoint.sh
 EXPOSE 3081
 
 ENTRYPOINT ["/home/docker/entrypoint.sh"]
-CMD ["dsh", "web", "--no-open"]
+# CMD 必须用绝对路径：entrypoint 末尾把包装脚本目录前置进 PATH 后，裸名 `dsh` 会解析到
+# <项目>/docker/bin/dsh 包装脚本——PID1 变成 bash 包装、经 docker exec 回到本容器重建进程树，
+# 而 docker exec 不继承 entrypoint 环境（PATH 注入失效），包装脚本也不转发 SIGTERM
+# （docker stop 等 10s 后被 SIGKILL）。绝对路径直指容器内真 dsh，环境随进程正常继承。
+CMD ["/usr/local/bin/dsh", "web", "--no-open"]

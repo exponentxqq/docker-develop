@@ -8,6 +8,7 @@ DeepSeek 官方开源 agent harness（开发预览版），基于 Cordis「一�
 - **基础镜像**: `node:24.21.0-slim`
 - **构建产物**: `docker-dsh:0.2.0-rc.2`
 - **安装方式**: npm 全局安装 `@deepseek-ai/dsh` + `pnpm`
+- **docker 能力**: 内置 docker CLI + compose 插件（静态二进制，版本由 `DSH_DOCKER_CLI_VERSION` / `DSH_DOCKER_COMPOSE_VERSION` 控制），经宿主 socket 操作 daemon
 
 ## 端口布局（容器内）
 
@@ -37,6 +38,9 @@ DeepSeek 官方开源 agent harness（开发预览版），基于 Cordis「一�
 | ---------------------------- | -------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
 | `DSH_VERSION`                | `0.2.0-rc.2`               | dsh npm 包版本                                                                                                            |
 | `DSH_NODE_VERSION`           | `24.21.0`                  | Node 基础镜像版本（官方要求 ^22.19 或 >=24.2）                                                                            |
+| `DSH_DOCKER_CLI_VERSION`     | `29.9.0`                   | 容器内 docker CLI 版本（静态二进制，与宿主对齐）                                                                          |
+| `DSH_DOCKER_COMPOSE_VERSION` | `v5.6.0`                   | 容器内 compose 插件版本                                                                                                   |
+| `DOCKER_GID`                 | 宿主 docker 组 gid         | socket 属组（`stat -c %g /var/run/docker.sock` 查看）；compose `group_add` 依据                                           |
 | `DSH_HOST_DATA_PATH`         | `/data/dsh`                | 持久化数据（credentials、会话、dsh-pocket 设置/PIN/cloudflared）                                                          |
 | `DSH_HOST_PROFILES_PATH`     | dotfiles 的 `dsh/profiles` | profile 目录（git 管理，挂载须位于 `DSH_HOST_DATA_PATH` 之后）                                                            |
 | `SKCTL_STORE_PATH`           | skctl 存储                 | agent skills（只读挂载到 `~/.agents/skills`）                                                                             |
@@ -57,6 +61,19 @@ DeepSeek 官方开源 agent harness（开发预览版），基于 Cordis「一�
 | `~/develop/dotfiles/dsh/profiles` | `/home/docker/.dsh/profiles`  | profile 定义 + 插件（git 管理 node_modules 忽略）         |
 | `${HOST_PROJECT_PATH}`            | 同路径                        | 项目工作区（Web UI 目录选择器）                           |
 | `${SKCTL_STORE_PATH}/skills`      | `/home/docker/.agents/skills` | agent skills（只读）                                      |
+| `${HOST_HOME}/.gitconfig`         | `/home/docker/.gitconfig`     | git 身份与宿主同源（只读）                                |
+| `${HOST_HOME}/.local/share/pnpm/store` | 同路径（identity）      | pnpm store 三端共享（宿主包装 / node 容器 / dsh 容器）    |
+| `${HOST_HOME}/.secrets`           | `/home/xuqinqin/.secrets`（只读） | 密钥文件（run.sh 内 `docker compose` 解析 env_file 需要） |
+| `/var/run/docker.sock`            | 同路径                        | 宿主 docker daemon（**等价宿主 root 权限**，见注意事项） |
+
+## 容器内 docker 与包装脚本
+
+- dsh 容器经 `/var/run/docker.sock` 操作宿主 daemon：会话内 `docker` / `docker compose` 与宿主同域，`run.sh <服务> "<命令>"` 及 `docker/bin/` 包装脚本原样可用
+- entrypoint 在完成自身初始化后把 `${HOST_PROJECT_PATH}/docker/bin` 前置进 `PATH`（dsh 进程及其全部子进程继承），会话内 `pnpm`/`npm`/`mysql`/`java` 等与宿主同构；刻意置于 profile 依赖恢复之后，恢复动作继续用容器内原生 pnpm
+- node 族包装脚本（`pnpm`/`npm`/`yarn`）带 cwd 分流守卫：在 `/home/docker/.dsh`（仅 dsh 容器存在的 profile 数据目录）下改为本地执行容器内版本——该语境转投 node 容器会因 `run.sh` 的 cd 目录缺失而静默错位安装
+- Java 走 `java` 容器：会话内 `java` 为镜像内置包装（`/usr/local/bin/java`，转发 `run.sh java`）、`bin/mvn`、`run.sh java './gradlew …'`（JDK 11/17/21，默认 17；版本自适应由 Gradle toolchains 完成）
+- CMD 必须使用绝对路径 `/usr/local/bin/dsh`：否则 entrypoint 注入 PATH 后裸名 `dsh` 会命中 `bin/dsh` 包装脚本，造成 PID1 套娃、PATH 注入失效与 SIGTERM 不转发
+
 
 ## 新机器部署（固化流程）
 
@@ -100,7 +117,7 @@ docker compose up -d dsh --force-recreate
 ## CLI 用法
 
 ```bash
-dsh --version                              # 经 bin/dsh 包装脚本（run.sh dsh dsh ...）
+run.sh dsh "dsh --version"                 # 宿主侧进容器执行 dsh CLI（bin/dsh 包装脚本已删除）
 dsh --profile headless "跑一下单元测试"     # 一次性任务
 dsh plugin --profile web add <包名>        # 插件管理（写入 dotfiles 的 profile，记得提交）
 ```
@@ -120,7 +137,7 @@ docker compose build dsh && docker compose up -d dsh
 
 ## 注意事项
 
-- dsh 是有文件读写与命令执行能力的 agent；三类入口均有 PIN 认证保护
+- dsh 是有文件读写与命令执行能力的 agent；三类入口均有 PIN 认证保护；**已接入宿主 docker socket（等价宿主 root 权限）**，请按同等敏感度对待会话访问权限
 - 本机/局域网入口由宿主 `3081` 承载（家庭网络内可达；家宽 NAT 后公网不可达）；
   公网入口仅经 Cloudflare 隧道进出，宿主不开任何公网入站端口
 - 容器内 CLI（`dsh --profile headless`）与常驻 Web 服务并存，各自独立会话

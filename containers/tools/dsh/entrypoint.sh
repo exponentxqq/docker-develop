@@ -85,7 +85,15 @@ if [ -n "$DSH_POCKET_LAN_IP" ]; then
   '
 fi
 
-# 5) profiles 依赖恢复：dotfiles 新 clone 后 node_modules 缺失时按 lockfile 安装
+# 5) pnpm 全局 store 配置：统一到宿主默认路径（三端共享）。~/.config/pnpm/rc 为 pnpm
+#    专有配置文件，npm 不读取——避免 npm 对 pnpm 专有键（store-dir）的未知配置警告
+PNPM_RC="$HOME/.config/pnpm/rc"
+mkdir -p "$(dirname "$PNPM_RC")"
+if ! grep -qs '^store-dir=' "$PNPM_RC"; then
+  printf 'store-dir=/home/xuqinqin/.local/share/pnpm/store\n' >> "$PNPM_RC"
+fi
+
+# 6) profiles 依赖恢复：dotfiles 新 clone 后 node_modules 缺失时按 lockfile 安装
 for prof in "$HOME"/.dsh/profiles/*/; do
   [ -f "${prof}package.json" ] && [ ! -d "${prof}node_modules" ] || continue
   if grep -q '"dependencies"' "${prof}package.json"; then
@@ -94,5 +102,10 @@ for prof in "$HOME"/.dsh/profiles/*/; do
       || echo "[entrypoint] WARN: $(basename "$prof") 依赖恢复失败，请进容器手动 pnpm install"
   fi
 done
+
+# 会话 PATH 注入（刻意置于 entrypoint 逻辑之后）：dsh 进程及其全部子进程（AI 会话 shell）
+# 继承前置的 docker 包装脚本目录，命令与宿主同构。本脚本第 5 步的 profile 依赖恢复
+# 在注入之前执行，继续使用容器内原生 pnpm。
+export PATH="${HOST_PROJECT_PATH:-/home/xuqinqin/develop}/docker/bin:$PATH"
 
 exec "$@"

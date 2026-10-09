@@ -1,4 +1,11 @@
 #!/bin/bash
+if [[ "$PWD" == /home/docker/.dsh* ]]; then
+  if [ -x /usr/local/bin/npm ]; then
+    exec /usr/local/bin/npm "$@"
+  fi
+  echo "[bin/npm] 错误：dsh 数据根语境未找到 /usr/local/bin/npm" >&2
+  exit 1
+fi
 cleanup() {
     docker exec node pkill -TERM -f "npm $*" 2>/dev/null
 }

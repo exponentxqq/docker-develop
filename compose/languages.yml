@@ -65,7 +65,6 @@ services:
       - /dev/shm:/dev/shm
       - ${HOST_HOME}:${HOST_HOME}
       - volta-cache:/home/docker/.volta
-      - ../cache/pnpm-cache:/home/docker/.local/share/pnpm/store
       - ../cache/npm-cache:/home/docker/.npm
       - ../cache/yarn-cache:/home/docker/.cache/yarn
     ports:
@@ -88,25 +87,29 @@ services:
         - HOST_UID=${HOST_UID}
         - HOST_GID=${HOST_GID}
         - HOST_USER=${HOST_USER}
-        - MISE_VERSION=${MISE_VERSION}
-        - BUILD_OPENCV=${BUILD_OPENCV}
+        - JAVA_UBUNTU_VERSION=${JAVA_UBUNTU_VERSION}
     container_name: java
-    image: docker-java:${MISE_VERSION}
+    image: docker-java:${JAVA_UBUNTU_VERSION}
     environment:
-      - JAVA_OPTS=-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5750 -Xmx256m -Xms128m
+      # 时区必须与宿主/业务（GMT+8）对齐：Instant ↔ DATETIME 往返依赖 JVM 默认时区，
+      # 容器缺省 UTC 会让 publishedAt 等时间字段整体偏移 8 小时（实测单测失败）
+      - TZ=${HOST_TZ:-Asia/Shanghai}
     user: ${HOST_UID}:${HOST_GID}
     volumes:
       - ../common/.zshrc:/home/docker/.zshrc
       - ../common/.vimrc:/home/docker/.vimrc
       - ${HOST_PROJECT_PATH}:${HOST_PROJECT_PATH}
-      - mise-cache:/home/docker/.local/share/mise
-      - ../cache/gradle-cache:/home/docker/.gradle
-      - ../cache/maven-cache:/home/docker/.m2
+      # gradle/maven 缓存与宿主共享（宿主 IDEA 与容器构建同一份缓存）。daemon registry 跨
+      # 宿主/容器共享偶发「daemon disappeared」属自愈型；极端时删 ~/.gradle/daemon 重建
+      - ${HOST_HOME}/.gradle:/home/docker/.gradle
+      - ${HOST_HOME}/.m2:/home/docker/.m2
     extra_hosts:
       - "dockerhost:${DOCKER_HOST_IP}"
     ports:
-      - "5750:5750"
-      - "8081-8089:8081-8089"
+      # 8080-8089：本地应用段（dev profile 默认 8080：OPC portal-app / child-game 等；console-app 本地 8081；含历史端口）
+      # 6666：management 端点（/shutdown 等）
+      - "8080-8089:8080-8089"
+      - "6666:6666"
     tty: true
     logging:
       options:
@@ -211,4 +214,3 @@ services:
 volumes:
   volta-cache:
   conda-envs:
-  mise-cache:

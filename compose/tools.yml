@@ -80,6 +80,8 @@ services:
       args:
         - NODE_VERSION=${DSH_NODE_VERSION}
         - DSH_VERSION=${DSH_VERSION}
+        - DOCKER_CLI_VERSION=${DSH_DOCKER_CLI_VERSION}
+        - DOCKER_COMPOSE_VERSION=${DSH_DOCKER_COMPOSE_VERSION}
         - HOST_UID=${HOST_UID}
         - HOST_GID=${HOST_GID}
         - HOST_USER=${HOST_USER}
@@ -103,10 +105,21 @@ services:
       - DSH_POCKET_LAN_IP=${DOCKER_HOST_IP:-}
       # 启动默认开启公网隧道（写 tunnel-auto.json 标记，插件启动自动恢复）；false = 手动关闭不跨重启
       - DSH_POCKET_TUNNEL_AUTO=${DSH_POCKET_TUNNEL_AUTO:-true}
+      # 包装脚本 PATH 注入依据（entrypoint 使用）；pnpm store 三端共享配置见 entrypoint
+      # （~/.config/pnpm/rc，不用 env 以避开 npm 对 pnpm 专有键的未知配置警告）
+      - HOST_PROJECT_PATH=${HOST_PROJECT_PATH}
+      # 空值占位：run.sh 内的 docker compose 调用会解析 DISPLAY，未设置时每次打 warning；
+      # 在 `cmd 2>&1 | head` 场景该 warning 会占满管道首行并引发 SIGPIPE（输出丢失）
+      - DISPLAY=${DISPLAY:-}
+      # 时区与宿主/业务对齐（GMT+8）：影响会话内 date/日志时间与 git 提交时区
+      - TZ=${HOST_TZ:-Asia/Shanghai}
     env_file:
       # 宿主统一密钥文件（DEEPSEEK_API_KEY / ZAI_API_KEY / OPENCODE_GO_API_KEY 等）。
       # dsh 凭据解析优先级：容器环境变量 > credentials.yaml > dotenv，故由此注入的 key 压过 UI 写入的值。
       - /home/xuqinqin/.secrets
+    # socket 属组为宿主 docker 组（gid 见 .env 的 DOCKER_GID）
+    group_add:
+      - "${DOCKER_GID}"
     volumes:
       # profiles 子路径挂载必须位于 ${DSH_HOST_DATA_PATH} 之后，否则会被父挂载遮蔽
       - ${HOST_PROJECT_PATH}:${HOST_PROJECT_PATH}
@@ -123,6 +136,15 @@ services:
       # git 身份与宿主同源：作者信息/hooksPath(defaultBranch 等；:ro 防容器内改全局配置；
       # 宿主 git 写配置是 lock+rename 原子替换，变更后需 up -d 重建才生效）
       - ${HOST_HOME}/.gitconfig:/home/docker/.gitconfig:ro
+      # 宿主密钥文件：run.sh 每次调用都会在容器内执行 `docker compose ps/up`，compose 解析
+      # env_file 时该路径缺失会直接报错、包装脚本「自动拉起未运行容器」链路失效，
+      # 故 identity 只读挂载（密钥本已由上方 env_file 注入 dsh 环境，此处仅补齐文件可见性）
+      - ${HOST_HOME}/.secrets:/home/xuqinqin/.secrets:ro
+      # pnpm store：三端共享（宿主包装 / node 容器 / dsh 容器），同路径挂载保证
+      # node_modules 符号链接在各容器内均可解析
+      - ${HOST_HOME}/.local/share/pnpm/store:/home/xuqinqin/.local/share/pnpm/store
+      # docker socket：dsh 会话经此操作宿主 daemon（等价宿主 root 权限，见设计文档安全节）
+      - /var/run/docker.sock:/var/run/docker.sock
     logging:
       options:
         max-size: "10m"

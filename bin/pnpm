@@ -1,4 +1,14 @@
 #!/bin/bash
+# dsh 数据根（仅 dsh 容器存在；宿主与 node 容器均无 /home/docker/.dsh）语境：
+# 转投 node 容器会因 run.sh 的 cd 目录缺失被静默跳过，pnpm 在错误机器的
+# 错误目录执行、依赖落空。必须本地执行容器内版本。
+if [[ "$PWD" == /home/docker/.dsh* ]]; then
+  if [ -x /usr/local/bin/pnpm ]; then
+    exec /usr/local/bin/pnpm "$@"
+  fi
+  echo "[bin/pnpm] 错误：dsh 数据根语境未找到 /usr/local/bin/pnpm" >&2
+  exit 1
+fi
 cleanup() {
     docker exec node pkill -TERM -f "pnpm $*" 2>/dev/null
 }

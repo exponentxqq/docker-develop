@@ -1,43 +1,25 @@
-ARG MISE_VERSION=latest
-FROM debian:bookworm-slim
+# Java 开发容器：ubuntu apt 多 JDK（11/17/21），版本自适应由项目 gradle toolchains
+# （自动探测 /usr/lib/jvm/*）与 ./mvnw wrapper 完成；不装 gradle（项目自带 wrapper）
+ARG JAVA_UBUNTU_VERSION=26.04
+FROM ubuntu:${JAVA_UBUNTU_VERSION}
 
+# openjdk 11/17 位于 universe 仓库（ubuntu 官方镜像 sources 默认启用 universe）
+# tzdata：TZ=Asia/Shanghai 依赖系统时区库；缺失时 glibc 静默回退 UTC（JVM 自带 tzdb 不受影响，
+# 故仅表现为容器内 date/脚本日志时间错误，排查成本高）
 RUN apt-get update && apt-get install -y --no-install-recommends \
-  cmake build-essential ant git curl wget ca-certificates \
-  && wget -qO- https://repo1.maven.org/maven2/org/flywaydb/flyway-commandline/6.4.2/flyway-commandline-6.4.2-linux-x64.tar.gz | tar xvz \
-  && ln -s `pwd`/flyway-6.4.2/flyway /usr/local/bin && chmod +x /usr/local/bin/flyway \
-  && apt-get clean && rm -rf /var/lib/apt/lists/*
+  openjdk-11-jdk-headless openjdk-17-jdk-headless openjdk-21-jdk-headless \
+  maven git curl wget ca-certificates tzdata \
+  && rm -rf /var/lib/apt/lists/*
+
+# 默认 JDK 17（对齐宿主现状）
+RUN update-alternatives --set java /usr/lib/jvm/java-17-openjdk-amd64/bin/java && \
+    update-alternatives --set javac /usr/lib/jvm/java-17-openjdk-amd64/bin/javac
 
 ARG HOST_UID HOST_GID HOST_USER
-RUN groupadd -g ${HOST_GID} docker && \
+# ubuntu 官方镜像预置 uid 1000 的 ubuntu 用户，与宿主 UID 冲突，先移除（与 dsh 容器一致）
+RUN userdel -r ubuntu 2>/dev/null || true; \
+  groupadd -g ${HOST_GID} docker && \
   useradd -m -u ${HOST_UID} -g ${HOST_GID} -s /bin/bash docker
-
-# login shell 下 /etc/profile 会重置 PATH，此脚本确保 mise 本体与 shims 始终在 PATH 中
-RUN echo 'export PATH="$HOME/.local/bin:$HOME/.local/share/mise/shims:$PATH"' > /etc/profile.d/mise.sh
 
 USER docker
 WORKDIR /home/docker
-
-ENV PATH="/home/docker/.local/bin:$PATH"
-
-ARG MISE_VERSION=2026.8.12
-# mise.run 脚本在当前版本时走 mise.jdx.dev 的默认 URL（404 bug），
-# 直接下载 GitHub release tarball 更可控；版本号由 MISE_VERSION 控制
-RUN set -eux; \
-  curl -fsSL -o /tmp/mise.tar.gz "https://github.com/jdx/mise/releases/download/v${MISE_VERSION}/mise-v${MISE_VERSION}-linux-x64.tar.gz"; \
-  mkdir -p /home/docker/.local/bin; \
-  tar -xzf /tmp/mise.tar.gz -C /tmp && mv /tmp/mise/bin/mise /home/docker/.local/bin/mise && chmod +x /home/docker/.local/bin/mise; \
-  mise --version; \
-  mise install java@11; \
-  mise install java@17; \
-  mise install maven@3.6.3; \
-  mise install maven@3.9; \
-  mise install gradle@6.0.1; \
-  mise install gradle@8; \
-  mise use --global java@11 maven@3.6.3 gradle@6.0.1; \
-  mise reshim; \
-  ls $HOME/.local/share/mise/shims
-
-# build opencv
-COPY ./build.sh /opt
-ARG BUILD_OPENCV=false
-RUN if [ $BUILD_OPENCV = true ]; then cd /opt && git config --global http.postBuffer 524288000 && sh build.sh; fi
