@@ -71,7 +71,7 @@ node/go containers mount the entire host home directory (`${HOST_HOME}:${HOST_HO
 
 ## dsh Container
 
-dsh（AI 开发工具）容器已接入 docker：挂载宿主 socket（`group_add` 注入 `.env` 的 `DOCKER_GID`）并烘入 docker CLI/compose 插件（`DSH_DOCKER_*` pin）；entrypoint 将 `~/develop/docker/bin` 注入会话 PATH——dsh 会话内命令与宿主同构（同一套包装脚本操作语言/服务容器）。
+dsh（AI 开发工具）容器已接入 docker：挂载宿主 socket（`group_add` 注入 `.env` 的 `DOCKER_GID`）并烘入 docker CLI/buildx/compose 插件（`DSH_DOCKER_*` pin；buildx 使会话内 `docker compose build` 走 BuildKit 并与宿主共享层缓存）；entrypoint 将 `~/develop/docker/bin` 注入会话 PATH——dsh 会话内命令与宿主同构（同一套包装脚本操作语言/服务容器）。
 
 - `bin/{pnpm,npm,yarn}` 含 cwd 守卫：在 dsh 数据根（`/home/docker/.dsh` 下）语境自动本地执行——转投 node 容器会因该目录在 node 容器不可见（`run.sh` 的 cd 静默跳过）而把依赖装到错误位置
 - pnpm store 三端共享 `/home/xuqinqin/.local/share/pnpm/store`（宿主包装 / node 容器 / dsh 容器）；dsh 侧配置在 `~/.config/pnpm/rc`（pnpm 专有文件，避免 npm 未知键警告），node 侧在 `containers/languages/node/npmrc`

@@ -11,16 +11,23 @@ RUN apt-get update && \
   chromium chromium-sandbox fonts-noto-cjk \
   && rm -rf /var/lib/apt/lists/*
 
-# docker CLI + compose 插件（静态二进制，pin 版本与宿主对齐；dsh 会话经 socket 操作宿主 daemon）
+# docker CLI + buildx/compose 插件（静态二进制，pin 版本与宿主对齐；dsh 会话经 socket 操作宿主 daemon）
+# buildx：会话内 docker compose build 走 BuildKit（无插件时 compose 回退内嵌 classic builder，
+# 不支持 COPY --chmod 等 BuildKit 语法）；默认 builder 为 docker driver，复用宿主 daemon 内建
+# BuildKit，与宿主构建共享层缓存。docker buildx version 兼作装完自校验（失败破层缓存重试）
 ARG DOCKER_CLI_VERSION=29.9.0
 ARG DOCKER_COMPOSE_VERSION=v5.6.0
+ARG DOCKER_BUILDX_VERSION=v0.38.0
 RUN curl -fsSL "https://download.docker.com/linux/static/stable/x86_64/docker-${DOCKER_CLI_VERSION}.tgz" \
       | tar -xz -C /usr/local/bin --strip-components=1 docker/docker && \
     mkdir -p /usr/local/lib/docker/cli-plugins && \
     curl -fsSL "https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION}/docker-compose-linux-x86_64" \
       -o /usr/local/lib/docker/cli-plugins/docker-compose && \
     chmod +x /usr/local/lib/docker/cli-plugins/docker-compose && \
-    docker --version && docker compose version
+    curl -fsSL "https://github.com/docker/buildx/releases/download/${DOCKER_BUILDX_VERSION}/buildx-${DOCKER_BUILDX_VERSION}.linux-amd64" \
+      -o /usr/local/lib/docker/cli-plugins/docker-buildx && \
+    chmod +x /usr/local/lib/docker/cli-plugins/docker-buildx && \
+    docker --version && docker compose version && docker buildx version
 
 # dsh 会话专用 java 包装（/usr/local/bin 已在 PATH，无需 entrypoint 改动）：
 # 转发 java 容器。宿主侧刻意不提供 bin/java——nvim jdtls 的 JDK home 推导
@@ -41,11 +48,17 @@ ARG PNPM_VERSION=10
 # codebase-memory-mcp: 不在镜像内安装，二进制来自宿主 npm 全局包目录（compose 只读挂载到 /usr/local/lib/cbm-host）
 ARG OPENSPEC_VERSION=latest
 ARG DBX_MCP_VERSION=latest
+# 回归护栏：npm 对 optionalDependencies 偶发静默跳过（拉取瞬时失败不报错、install 仍 exit 0，
+# 当前运行容器即因此缺原生包——mcp-server 启动即退，dsh 侧报 server is disconnected）。
+# npm 11 全局安装不提升（hoist）optional 依赖，原生包位于包内嵌套路径。装完校验其落盘；
+# 并入同一 RUN 以便失败时破掉本层缓存、下次构建自动重试安装
+# （镜像与上方 docker CLI 同为 x86_64 专用，平台写死）。
 RUN npm install -g pnpm@${PNPM_VERSION} @deepseek-ai/dsh@${DSH_VERSION} \
   @fission-ai/openspec@${OPENSPEC_VERSION} @dbx-app/mcp-server@${DBX_MCP_VERSION} \
   @deepseek-ai/dsh-browser-use@${DSH_VERSION} \
   @deepseek-ai/dsh-experimental-browser-use-chrome-devtools-mcp@${DSH_VERSION} && \
-  dsh --version && openspec --version
+  dsh --version && openspec --version && \
+  test -f /usr/local/lib/node_modules/@dbx-app/mcp-server/node_modules/@dbx-app/mcp-linux-x64-gnu/bin/dbx-mcp
 
 # codebase-memory-mcp：软链指向运行时挂载的宿主包目录（直指静态二进制，不经 npm wrapper、不依赖系统 node）
 RUN ln -s /usr/local/lib/cbm-host/bin/codebase-memory-mcp /usr/local/bin/codebase-memory-mcp
