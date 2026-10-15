@@ -1,6 +1,6 @@
 # docker-develop
 
-个人开发环境的 Docker 编排，13 个容器覆盖数据库、缓存、Web 代理、语言运行时和辅助工具。
+个人开发环境的 Docker 编排，19 个容器覆盖数据库、缓存、搜索引擎、Web 代理、语言运行时和辅助工具。
 
 ## 快速开始
 
@@ -54,7 +54,10 @@ docker/
 | [mysql](containers/services/mysql/README.md)       | mysql    | `mysql:5.7`    | MySQL 5.7 + mycli + XtraBackup |
 | [postgres](containers/services/postgres/README.md) | postgres | `postgres:13`  | PostgreSQL 13                  |
 | [redis](containers/services/redis/README.md)       | redis    | `redis:7`      | Redis 7 + 持久化               |
+| rabbitmq                                           | rabbitmq | `docker-rabbitmq:3.13` | RabbitMQ 3.13 + 管理台(15672) |
 | [mongo](containers/services/mongo/README.md)       | mongo    | `mongo:latest` | MongoDB + 认证                 |
+| [elasticsearch](containers/services/elasticsearch/README.md) | elasticsearch | `elasticsearch:7.17.3` | ES 7.17.3（同公司版本）+ IK 分词 + 认证 |
+| [rocketmq](containers/services/rocketmq/README.md) | rocketmq-namesrv / rocketmq-broker | `docker-rocketmq:4.7.1` | RocketMQ 4.7.1（NameServer + Broker） |
 | [nginx](containers/services/nginx/README.md)       | nginx    | `nginx:1.28`   | 反向代理 + HTTPS               |
 
 ### 语言运行时
@@ -73,7 +76,7 @@ docker/
 | 服务                             | 容器名    | 镜像           | 说明              |
 | -------------------------------- | --------- | -------------- | ----------------- |
 | [kubectl](containers/tools/kubectl/README.md)     | kubectl   | `ubuntu:22.04` | Kubernetes CLI    |
-| [litellm](containers/tools/litellm/README.md)     | litellm   | `litellm:main` | LLM API 网关      |
+| [dbx](containers/tools/dbx/README.md)             | dbx       | `t8y2/dbx:latest` | 数据库 Web 客户端（端口 4224） |
 | [hermes](containers/tools/hermes/README.md)       | hermes    | `hermes-agent:v2026.6.5` | AI 自学习代理 |
 | [dsh](containers/tools/dsh/README.md)             | dsh       | `node:24.21.0-slim` | DeepSeek Harness AI 代理 |
 
@@ -96,9 +99,9 @@ docker/
 | 文件                    | 服务                                 |
 | ----------------------- | ------------------------------------ |
 | `docker-compose.yml`    | networks + include                   |
-| `compose/services.yml`  | mysql, postgres, redis, mongo, nginx |
+| `compose/services.yml`  | mysql, postgres, redis, rabbitmq, mongo, elasticsearch, nginx, rocketmq-namesrv, rocketmq-broker |
 | `compose/languages.yml` | fpm, node, java, go, python, rust    |
-| `compose/tools.yml`     | kubectl, litellm, hermes, dsh     |
+| `compose/tools.yml`     | kubectl, dbx, hermes, dsh, cloudflared |
 
 所有文件由入口 `docker-compose.yml` 通过 `include` 自动合并，`run.sh`、`build.sh` 无需任何改动。
 

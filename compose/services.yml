@@ -222,3 +222,42 @@ services:
         max-file: "3"
     networks:
       - backend
+
+  elasticsearch:
+    build:
+      context: ../containers/services/elasticsearch
+      dockerfile: ./Dockerfile
+      args:
+        - ELASTICSEARCH_IMAGE=${ELASTICSEARCH_IMAGE}
+        - ELASTICSEARCH_VERSION=${ELASTICSEARCH_VERSION}
+    container_name: elasticsearch
+    image: docker-elasticsearch:${ELASTICSEARCH_VERSION}
+    mem_limit: ${ELASTICSEARCH_MEM_LIMIT:-1g}
+    environment:
+      # 本地开发：单节点模式（免集群发现）
+      - discovery.type=single-node
+      # 与公司 dev 环境同构：开启基础认证（http + 账号密码，无 TLS）
+      - xpack.security.enabled=true
+      - ELASTIC_PASSWORD=${ELASTICSEARCH_PASSWORD}
+      # 堆内存（建议不超过容器内存上限的一半）
+      - ES_JAVA_OPTS=${ELASTICSEARCH_JAVA_OPTS:--Xms512m -Xmx512m}
+      # cgroup v2 宿主上 ES 7.17.3 自带 JDK 18 的 cgroup 探测会抛 NPE（CgroupV2Subsystem）导致启动失败；
+      # 必须用 JDK_JAVA_OPTIONS 才能覆盖到 bin/elasticsearch 的工具 JVM（JvmOptionsParser 只读它，不读 ES_JAVA_OPTS）
+      - JDK_JAVA_OPTIONS=-XX:-UseContainerSupport
+      - TZ=${TIMEZONE}
+    # ES bootstrap 检查要求 max file descriptors ≥ 65535
+    ulimits:
+      nofile:
+        soft: 65536
+        hard: 65536
+    ports:
+      # transport 9300 仅在 backend 网络内使用，不对宿主发布
+      - "${ELASTICSEARCH_PORT}:9200"
+    volumes:
+      - ${ELASTICSEARCH_HOST_DATA_PATH}:/usr/share/elasticsearch/data
+    logging:
+      options:
+        max-size: "10m"
+        max-file: "3"
+    networks:
+      - backend

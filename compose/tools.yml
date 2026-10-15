@@ -35,6 +35,7 @@ services:
     volumes:
       - dbx-data:/app/data
       - ${HOST_HOME}/.ssh:/root/.ssh
+      - ${HOST_HOME}:${HOST_HOME}
     networks:
       - backend
 

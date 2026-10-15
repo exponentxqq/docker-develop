@@ -24,19 +24,19 @@ docker compose config --no-path-resolution
 
 ## Architecture
 
-Multi-service Docker dev environment, 17 services on a single `backend` bridge network. Services are addressed by container name (no static IPs).
+Multi-service Docker dev environment, 19 services on a single `backend` bridge network. Services are addressed by container name (no static IPs).
 
 **Compose split via `include` (Compose v2.20+):**
 
 ```
 docker-compose.yml          → networks + include directives
-compose/services.yml        → mysql, postgres, redis, rabbitmq, mongo, nginx, rocketmq-namesrv, rocketmq-broker
+compose/services.yml        → mysql, postgres, redis, rabbitmq, mongo, elasticsearch, nginx, rocketmq-namesrv, rocketmq-broker
 compose/languages.yml       → fpm, node, java, go, python, rust
 compose/tools.yml           → kubectl, dbx, hermes, dsh, cloudflared
 ```
 
 **Container directories** are organized under `containers/` mirroring the compose split:
-- `containers/services/` — mysql, postgres, redis, rabbitmq, mongo, nginx, rocketmq
+- `containers/services/` — mysql, postgres, redis, rabbitmq, mongo, elasticsearch, nginx, rocketmq
 - `containers/languages/` — fpm, node, java, go, python, rust
 - `containers/tools/` — kubectl, dbx, hermes, dsh
 
