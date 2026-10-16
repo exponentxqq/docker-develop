@@ -19,6 +19,7 @@ services:
       - ${MYSQL_HOST_DATA_PATH}:${MYSQL_CONTAINER_DATA_PATH}
       - ${MYSQL_ENTRYPOINT_INITDB}:/docker-entrypoint-initdb.d
       - ../containers/services/mysql/my.cnf:/etc/mysql/conf.d/my.cnf
+      - /tmp:/tmp
     # 放宽进程数和文件句柄限制，避免高并发时 mysql 连接/临时表耗尽默认配额
     ulimits:
       nproc: 65535
@@ -54,6 +55,7 @@ services:
     volumes:
       - ${POSTGRES_HOST_DATA_PATH}:/var/lib/postgresql
       - ../containers/services/postgres/log:/var/log/postgresql
+      - /tmp:/tmp
     logging:
       options:
         max-size: "10m"
@@ -75,6 +77,7 @@ services:
       - ../containers/services/redis/log/redis.log:/var/log/redis/redis-server.log
       - ${REDIS_HOST_DATA_PATH}:${REDIS_CONTAINER_DATA_PATH}
       - ../containers/services/redis/redis.conf:/usr/local/etc/redis/redis.conf
+      - /tmp:/tmp
     logging:
       options:
         max-size: "10m"
@@ -101,6 +104,7 @@ services:
     volumes:
       - ${RABBITMQ_HOST_DATA_PATH}:${RABBITMQ_CONTAINER_DATA_PATH}
       - ../containers/services/rabbitmq/rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf
+      - /tmp:/tmp
     logging:
       options:
         max-size: "10m"
@@ -125,6 +129,7 @@ services:
     volumes:
       - ${MONGO_HOST_DATA_DIR}:${MONGO_CONTAINER_DATA_DIR}
       - ${MONGO_HOST_LOG_DIR}:${MONGO_CONTAINER_LOG_DIR}
+      - /tmp:/tmp
     ports:
       - "${MONGO_PORT}:27017"
     logging:
@@ -154,6 +159,7 @@ services:
       - ../containers/services/nginx/nginx.conf:/etc/nginx/nginx.conf
       - ../containers/services/nginx/ssl:/etc/nginx/ssl
       - ../containers/services/nginx/log:/nginx/log
+      - /tmp:/tmp
     extra_hosts:
       - "dockerhost:${DOCKER_HOST_IP}"
     logging:
@@ -184,6 +190,7 @@ services:
     volumes:
       - ${ROCKETMQ_HOST_LOG_PATH}/namesrv:/home/${HOST_USER}/logs
       - ../containers/services/rocketmq/start.sh:/home/rocketmq/start.sh:ro
+      - /tmp:/tmp
     logging:
       options:
         max-size: "10m"
@@ -214,6 +221,7 @@ services:
       - ${ROCKETMQ_HOST_LOG_PATH}/broker:/home/${HOST_USER}/logs
       - ../containers/services/rocketmq/start.sh:/home/rocketmq/start.sh:ro
       - ../containers/services/rocketmq/broker.conf:/etc/rocketmq/broker.conf:ro
+      - /tmp:/tmp
     depends_on:
       - rocketmq-namesrv
     logging:
@@ -255,6 +263,7 @@ services:
       - "${ELASTICSEARCH_PORT}:9200"
     volumes:
       - ${ELASTICSEARCH_HOST_DATA_PATH}:/usr/share/elasticsearch/data
+      - /tmp:/tmp
     logging:
       options:
         max-size: "10m"
