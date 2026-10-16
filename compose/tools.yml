@@ -11,6 +11,7 @@ services:
     tty: true
     volumes:
       - ../containers/tools/kubectl/config:/root/.kube
+      - /tmp:/tmp
     logging:
       options:
         max-size: "10m"
@@ -36,6 +37,7 @@ services:
       - dbx-data:/app/data
       - ${HOST_HOME}/.ssh:/root/.ssh
       - ${HOST_HOME}:${HOST_HOME}
+      - /tmp:/tmp
     networks:
       - backend
 
@@ -58,6 +60,7 @@ services:
     volumes:
       - ${HOST_PROJECT_PATH}:${HOST_PROJECT_PATH}
       - ${HERMES_HOST_DATA_PATH}:/opt/data
+      - /tmp:/tmp
     environment:
       - HERMES_DASHBOARD=${HERMES_DASHBOARD}
       - HERMES_DASHBOARD_HOST=0.0.0.0
@@ -115,6 +118,22 @@ services:
       - DISPLAY=${DISPLAY:-}
       # 时区与宿主/业务对齐（GMT+8）：影响会话内 date/日志时间与 git 提交时区
       - TZ=${HOST_TZ:-Asia/Shanghai}
+      # web_fetch 代理出站：dsh-http-proxy 读到 http(s)_proxy 后走代理隧道、由代理远端解析目标域名，
+      # 跳过本地公网 IP 校验——绕开宿主 mihomo TUN fake-ip(198.18/16) 与 SSRF 校验的正面冲突。
+      # 变量为通用宿主代理配置（HOST_HTTP_PROXY，见 .env），其他容器需要时同样引用；
+      # 空值时 dsh-http-proxy 视为未设置，回退直连分支。大小写成对写（undici 小写优先，dsh-http-proxy 双读）
+      - HTTP_PROXY=${HOST_HTTP_PROXY:-}
+      - http_proxy=${HOST_HTTP_PROXY:-}
+      - HTTPS_PROXY=${HOST_HTTP_PROXY:-}
+      - https_proxy=${HOST_HTTP_PROXY:-}
+      # undici 按域名后缀/精确 IP 匹配（不支持 CIDR）：backend 互访走服务名，宿主回访走网关 IP
+      - NO_PROXY=${HOST_NO_PROXY:-}
+      - no_proxy=${HOST_NO_PROXY:-}
+      # CBM 缓存库路径统一：codebase-memory 的账户 daemon 按 CBM_CACHE_DIR 路径**字符串哈希**
+      # 校验缓存目录一致性（不做 realpath），宿主 daemon 与容器 MCP 必须用完全相同的字符串
+      # 才能共享同一 daemon/索引库，否则报 "different cache directory" 拒连。
+      # 与 volumes 的 ${CBM_DATA_PATH}:${CBM_DATA_PATH} 挂载配套。
+      - CBM_CACHE_DIR=${CBM_DATA_PATH:-/data/codebase-memory-mcp}
     env_file:
       # 宿主统一密钥文件（DEEPSEEK_API_KEY / ZAI_API_KEY / OPENCODE_GO_API_KEY 等）。
       # dsh 凭据解析优先级：容器环境变量 > credentials.yaml > dotenv，故由此注入的 key 压过 UI 写入的值。
@@ -133,8 +152,12 @@ services:
       - ${SKCTL_STORE_PATH}/skills:/home/docker/.agents/skills:ro
       # codebase-memory-mcp：宿主 npm 全局包目录只读挂载（镜像不再预装；/usr/local/bin 软链在 Dockerfile 预置）
       - ${CBM_HOST_PKG_PATH}:/usr/local/lib/cbm-host:ro
-      # 共享索引库：与宿主同库（宿主 ~/.cache/codebase-memory-mcp 软链到此目录）
-      - ${CBM_DATA_PATH}:/home/docker/.cache/codebase-memory-mcp
+      # 共享索引库：与宿主同库且**同路径字符串**——CBM daemon 按路径字符串哈希校验缓存目录、
+      # 不做 realpath，容器内挂载点必须与宿主访问路径完全一致（identity 挂载：源路径即目标路径），
+      # 配合 environment 的 CBM_CACHE_DIR，宿主/容器共享同一 daemon 与索引库。
+      # （曾因同库异名冲突：容器 /home/docker/.cache/codebase-memory-mcp vs 宿主 /data/...，
+      #   dsh 容器重启令 daemon 易主后双方互拒，codebase-memory MCP 断连。）
+      - ${CBM_DATA_PATH}:${CBM_DATA_PATH}
       # git 身份与宿主同源：作者信息/hooksPath(defaultBranch 等；:ro 防容器内改全局配置；
       # 宿主 git 写配置是 lock+rename 原子替换，变更后需 up -d 重建才生效）
       - ${HOST_HOME}/.gitconfig:/home/docker/.gitconfig:ro
@@ -147,6 +170,7 @@ services:
       - ${HOST_HOME}/.local/share/pnpm/store:/home/xuqinqin/.local/share/pnpm/store
       # docker socket：dsh 会话经此操作宿主 daemon（等价宿主 root 权限，见设计文档安全节）
       - /var/run/docker.sock:/var/run/docker.sock
+      - /tmp:/tmp
     logging:
       options:
         max-size: "10m"
@@ -165,6 +189,8 @@ services:
     env_file:
       # 宿主统一密钥文件：每机独立维护，TUNNEL_TOKEN 为本机隧道 token 的生效位
       - /home/xuqinqin/.secrets
+    volumes:
+      - /tmp:/tmp
     # host 网络：localhost 语义即宿主（22 sshd / 4224 dbx / 3081 dsh 均可直写 localhost 回源）
     network_mode: host
     logging:
