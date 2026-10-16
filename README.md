@@ -1,6 +1,6 @@
 # docker-develop
 
-个人开发环境的 Docker 编排，19 个容器覆盖数据库、缓存、搜索引擎、Web 代理、语言运行时和辅助工具。
+个人开发环境的 Docker 编排，20 个容器覆盖数据库、缓存、搜索引擎、Web 代理、语言运行时和辅助工具。
 
 ## 快速开始
 
@@ -51,36 +51,37 @@ docker/
 
 | 服务                           | 容器名   | 镜像           | 说明                           |
 | ------------------------------ | -------- | -------------- | ------------------------------ |
-| [mysql](containers/services/mysql/README.md)       | mysql    | `mysql:5.7`    | MySQL 5.7 + mycli + XtraBackup |
-| [postgres](containers/services/postgres/README.md) | postgres | `postgres:13`  | PostgreSQL 13                  |
-| [redis](containers/services/redis/README.md)       | redis    | `redis:7`      | Redis 7 + 持久化               |
+| [mysql](containers/services/mysql/README.md)       | mysql    | `docker-mysql:5.7`    | MySQL 5.7 + mycli + XtraBackup |
+| [postgres](containers/services/postgres/README.md) | postgres | `docker-postgres:13.22`  | PostgreSQL 13                  |
+| [redis](containers/services/redis/README.md)       | redis    | `docker-redis:7.4.5`      | Redis 7 + 持久化               |
 | rabbitmq                                           | rabbitmq | `docker-rabbitmq:3.13` | RabbitMQ 3.13 + 管理台(15672) |
-| [mongo](containers/services/mongo/README.md)       | mongo    | `mongo:latest` | MongoDB + 认证                 |
-| [elasticsearch](containers/services/elasticsearch/README.md) | elasticsearch | `elasticsearch:7.17.3` | ES 7.17.3（同公司版本）+ IK 分词 + 认证 |
+| [mongo](containers/services/mongo/README.md)       | mongo    | `docker-mongo:7.0.37` | MongoDB + 认证                 |
+| [elasticsearch](containers/services/elasticsearch/README.md) | elasticsearch | `docker-elasticsearch:7.17.3` | ES 7.17.3（同公司版本）+ IK 分词 + 认证 |
 | [rocketmq](containers/services/rocketmq/README.md) | rocketmq-namesrv / rocketmq-broker | `docker-rocketmq:4.7.1` | RocketMQ 4.7.1（NameServer + Broker） |
-| [nginx](containers/services/nginx/README.md)       | nginx    | `nginx:1.28`   | 反向代理 + HTTPS               |
+| [nginx](containers/services/nginx/README.md)       | nginx    | `docker-nginx:1.28.0`   | 反向代理 + HTTPS               |
 
 ### 语言运行时
 
 | 服务                       | 容器名 | 镜像              | 说明                         |
 | -------------------------- | ------ | ----------------- | ---------------------------- |
-| [node](containers/languages/node/README.md)     | node   | `debian:bookworm` | Node.js + Volta 多版本管理   |
-| [fpm](containers/languages/fpm/README.md)       | fpm    | `php:7.2-fpm`     | PHP-FPM + Composer + Xdebug  |
-| [java](containers/languages/java/README.md)     | java   | `openjdk:11`      | JDK 11 + Maven/Gradle/Flyway |
-| [go](containers/languages/go/README.md)         | go     | `golang:latest`   | Go 工具链                    |
-| [python](containers/languages/python/README.md) | python | `miniconda3`      | Conda + UV 双工具链          |
-| [rust](containers/languages/rust/README.md)     | rust   | `rust:1.83`       | Rust + Cargo + gdb           |
+| [node](containers/languages/node/README.md)     | node   | `docker-node:2.0.2` | Node.js + Volta 多版本管理   |
+| [fpm](containers/languages/fpm/README.md)       | fpm    | `docker-fpm:8.2`     | PHP-FPM + Composer + Xdebug  |
+| [java](containers/languages/java/README.md)     | java   | `docker-java:26.04`      | JDK 11/17/21 + Maven/Gradle/Flyway |
+| [go](containers/languages/go/README.md)         | go     | `docker-go:1.27`   | Go 工具链                    |
+| [python](containers/languages/python/README.md) | python | `docker-python:26.1.1`      | Conda + UV 双工具链          |
+| [rust](containers/languages/rust/README.md)     | rust   | `docker-rust:1.95`       | Rust + Cargo + gdb           |
 
 ### 辅助工具
 
 | 服务                             | 容器名    | 镜像           | 说明              |
 | -------------------------------- | --------- | -------------- | ----------------- |
-| [kubectl](containers/tools/kubectl/README.md)     | kubectl   | `ubuntu:22.04` | Kubernetes CLI    |
-| [dbx](containers/tools/dbx/README.md)             | dbx       | `t8y2/dbx:latest` | 数据库 Web 客户端（端口 4224） |
-| [hermes](containers/tools/hermes/README.md)       | hermes    | `hermes-agent:v2026.6.5` | AI 自学习代理 |
-| [dsh](containers/tools/dsh/README.md)             | dsh       | `node:24.21.0-slim` | DeepSeek Harness AI 代理 |
+| [kubectl](containers/tools/kubectl/README.md)     | kubectl   | `docker-kubectl:1.34.1` | Kubernetes CLI    |
+| [dbx](containers/tools/dbx/README.md)             | dbx       | `docker-dbx:latest` | 数据库 Web 客户端（端口 4224） |
+| [hermes](containers/tools/hermes/README.md)       | hermes    | `docker-hermes:v2026.6.5` | AI 自学习代理 |
+| [dsh](containers/tools/dsh/README.md)             | dsh       | `docker-dsh:0.2.0-rc.2` | DeepSeek Harness AI 代理 |
+| cloudflared                                       | cloudflared | `cloudflare/cloudflared:2026.10.0` | Cloudflare 命名隧道（host 网络，回源 localhost） |
 
-> 每个服务的详细说明、配置参数、使用方式见对应目录下的 `README.md`。
+> 镜像列为 compose 实际使用的标签（构建产物 `docker-<服务>:<版本>`，版本由 `.env` 变量控制；`cloudflared` 直接用官方镜像）；各服务的基础镜像、详细说明、配置参数与使用方式见对应目录下的 `README.md`。
 
 ## run.sh 用法
 
@@ -104,6 +105,20 @@ docker/
 | `compose/tools.yml`     | kubectl, dbx, hermes, dsh, cloudflared |
 
 所有文件由入口 `docker-compose.yml` 通过 `include` 自动合并，`run.sh`、`build.sh` 无需任何改动。
+
+## 共享临时目录
+
+所有容器都 identity 挂载宿主机 `/tmp`（`/tmp:/tmp`），容器内路径与宿主一致，可用于容器之间、容器与宿主之间交换临时文件：
+
+```bash
+# 宿主（或任一分容器）写入，其他容器立即可见
+echo hello > /tmp/share-test
+docker exec node cat /tmp/share-test
+```
+
+- 权限沿用宿主 `/tmp` 的 `1777`（sticky）：各容器均可写，但删不掉其他用户创建的文件；
+- node 容器的 X11 socket（宿主 `/tmp/.X11-unix`）随该挂载一并共享，无需单独挂载；
+- 该目录受宿主 systemd-tmpfiles 定期清理，只放临时文件，勿持久化数据。
 
 ## 常用命令
 

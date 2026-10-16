@@ -4,8 +4,8 @@
 
 ## 镜像
 
-- **基础镜像**: `debian:bookworm-slim`
-- **构建产物**: `docker-node:bookworm`
+- **基础镜像**: `ubuntu:26.04`
+- **构建产物**: `docker-node:${VOLTA_VERSION}`（当前 `2.0.2`）
 - **版本管理**: [Volta](https://volta.sh)（类似 nvm，但更快且支持项目级自动切换）
 
 ## 版本策略
@@ -45,10 +45,10 @@ volta install node@18
 
 ## 包管理器
 
-预装 pnpm，通过 `node/npmrc` 配置 store 目录：
+预装 pnpm，通过 `node/npmrc` 配置 store 目录——指向宿主 pnpm store（三端共享：宿主包装 / node 容器 / dsh 容器），经下方 `${HOST_HOME}` identity 挂载在容器内同路径可见：
 
 ```
-store-dir=/home/docker/.local/share/pnpm/store
+store-dir=/home/xuqinqin/.local/share/pnpm/store
 ```
 
 支持的包管理器：pnpm（推荐）、npm、yarn。缓存目录通过挂载持久化，跨容器重建保留。
@@ -63,13 +63,12 @@ store-dir=/home/docker/.local/share/pnpm/store
 
 | 宿主机路径                   | 容器路径                               | 说明                        |
 | ---------------------------- | -------------------------------------- | --------------------------- |
-| `${HOST_PROJECT_PATH}`       | `${HOST_PROJECT_PATH}`                 | 项目代码（路径一致）        |
+| `${HOST_HOME}`               | `${HOST_HOME}`                         | 宿主家目录（identity）：项目代码、pnpm store、LSP 文件 URI |
 | `node/npmrc`                 | `/home/docker/.npmrc`                  | npm/pnpm 配置               |
 | `volta-cache` (named volume) | `/home/docker/.volta`                  | Volta 和 Node.js 版本持久化 |
-| `cache/pnpm-cache`           | `/home/docker/.local/share/pnpm/store` | pnpm store                  |
 | `cache/npm-cache`            | `/home/docker/.npm`                    | npm cache                   |
 | `cache/yarn-cache`           | `/home/docker/.cache/yarn`             | Yarn cache                  |
-| `/tmp/.X11-unix`             | `/tmp/.X11-unix`                       | X11 转发（GUI 应用）        |
+| `/tmp`                       | `/tmp`                                 | 共享临时目录（含 X11 转发 socket） |
 | `/dev/shm`                   | `/dev/shm`                             | 共享内存                    |
 
 ## 预装依赖

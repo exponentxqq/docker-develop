@@ -1,11 +1,11 @@
 # PHP-FPM
 
-PHP 7.2 FPM 容器，集成 Composer、Xdebug 和多个可选扩展，支持 PhpStorm 断点调试。
+PHP 8.2 FPM 容器，集成 Composer、Xdebug 和多个可选扩展，支持 PhpStorm 断点调试。
 
 ## 镜像
 
-- **基础镜像**: `php:7.2-fpm`（通过 `PHP_VERSION` 环境变量控制）
-- **构建产物**: `docker-fpm:7.2`
+- **基础镜像**: `php:8.2-fpm`（通过 `PHP_VERSION` 环境变量控制）
+- **构建产物**: `docker-fpm:8.2`
 
 ## 已安装扩展
 

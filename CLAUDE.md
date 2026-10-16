@@ -24,7 +24,7 @@ docker compose config --no-path-resolution
 
 ## Architecture
 
-Multi-service Docker dev environment, 19 services on a single `backend` bridge network. Services are addressed by container name (no static IPs).
+Multi-service Docker dev environment, 20 services — 19 on a single `backend` bridge network (`cloudflared` uses host networking). Services are addressed by container name (no static IPs).
 
 **Compose split via `include` (Compose v2.20+):**
 
@@ -41,6 +41,8 @@ compose/tools.yml           → kubectl, dbx, hermes, dsh, cloudflared
 - `containers/tools/` — kubectl, dbx, hermes, dsh
 
 All paths in sub-files are relative to the **including file** (`docker-compose.yml`), not the sub-file itself. Paths use `../` prefix to reach the repo root (e.g., `context: ../containers/languages/node`, `../cache/pnpm-cache`).
+
+**Shared temporary directory**: every container identity-mounts the host `/tmp` (`/tmp:/tmp`), so `/tmp/foo` refers to the same file on the host and inside all containers — the scratch space for container↔container and container↔host temp-file exchange. Permissions follow the host `/tmp` (1777, sticky). The node container's X11 socket (`/tmp/.X11-unix`) rides along with this mount (no separate mount needed).
 
 ## Environment Variables
 
@@ -63,7 +65,7 @@ Base image: `ubuntu:26.04`. apt 安装 openjdk 11/17/21（默认 17，`update-al
 
 ## Node Service (Volta)
 
-Base image: `debian:bookworm-slim`. Volta manages node/npm/pnpm/yarn versions per project via `package.json` `volta` field. Default Node version set by `NODE_VERSION` env var, pre-installed at build time along with `pnpm@latest` and `yarn`. `VOLTA_VERSION` is pinned and verified at build; image tag is `docker-node:${VOLTA_VERSION}`.
+Base image: `ubuntu:26.04`. Volta manages node/npm/pnpm/yarn versions per project via `package.json` `volta` field. Default Node version set by `NODE_VERSION` env var, pre-installed at build time along with `pnpm@latest` and `yarn`. `VOLTA_VERSION` is pinned and verified at build; image tag is `docker-node:${VOLTA_VERSION}`.
 
 **Named volume `volta-cache`** (not bind mount) preserves pre-installed tools across container rebuilds. Named volumes copy image data on first creation; bind mounts would overwrite with empty host directory.
 
