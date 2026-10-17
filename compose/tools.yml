@@ -161,6 +161,9 @@ services:
       # git 身份与宿主同源：作者信息/hooksPath(defaultBranch 等；:ro 防容器内改全局配置；
       # 宿主 git 写配置是 lock+rename 原子替换，变更后需 up -d 重建才生效）
       - ${HOST_HOME}/.gitconfig:/home/docker/.gitconfig:ro
+      # 宿主 ssh 身份只读挂载：容器内 git ssh remote（codeup）fetch/push 用（镜像含 openssh-client）；
+      # ro 防容器内改，宿主新增 known_hosts/host 条目后需 up -d 重建才生效（与 .gitconfig 同语义）
+      - ${HOST_HOME}/.ssh:/home/docker/.ssh:ro
       # 宿主密钥文件：run.sh 每次调用都会在容器内执行 `docker compose ps/up`，compose 解析
       # env_file 时该路径缺失会直接报错、包装脚本「自动拉起未运行容器」链路失效，
       # 故 identity 只读挂载（密钥本已由上方 env_file 注入 dsh 环境，此处仅补齐文件可见性）

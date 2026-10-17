@@ -5,9 +5,10 @@ FROM node:${NODE_VERSION}-slim
 
 # python3/make/g++: node-pty 等原生模块编译
 # procps: 提供 pkill，供 bin/ 包装脚本的清理逻辑使用
+# openssh-client: git ssh remote（codeup 等）fetch/push 所需；密钥经 compose 只读挂载，不进镜像
 RUN apt-get update && \
   apt-get install -y --no-install-recommends \
-  curl wget ca-certificates git python3 make g++ procps \
+  curl wget ca-certificates git python3 make g++ procps openssh-client \
   chromium chromium-sandbox fonts-noto-cjk \
   && rm -rf /var/lib/apt/lists/*
 
