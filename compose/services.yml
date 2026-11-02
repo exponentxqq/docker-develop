@@ -49,7 +49,7 @@ services:
       - POSTGRES_USER=${POSTGRES_USER}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
       - POSTGRES_DB=${POSTGRES_DB}
-      - TZ=${TIMEZONE}
+      - TZ=${HOST_TZ}
     ports:
       - "${POSTGRES_PORT}:5432"
     volumes:

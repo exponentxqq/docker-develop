@@ -8,6 +8,7 @@ services:
         - KUBECTL_VERSION=${KUBECTL_VERSION}
     container_name: kubectl
     image: docker-kubectl:${KUBECTL_VERSION}
+    mem_limit: ${KUBECTL_MEM_LIMIT:-128m}
     tty: true
     volumes:
       - ../containers/tools/kubectl/config:/root/.kube
@@ -23,13 +24,14 @@ services:
     build:
       context: ../containers/tools/dbx
       dockerfile: Dockerfile
-      pull: true
+      args:
+        - DBX_VERSION=${DBX_VERSION}
     container_name: dbx
-    image: docker-dbx
+    image: docker-dbx:${DBX_VERSION}
     mem_limit: ${DBX_MEM_LIMIT:-512m}
     restart: unless-stopped
-    pull_policy: build
     environment:
+      - DBX_VERSION=${DBX_VERSION}
       - DBX_DISABLE_PASSWORD=${DBX_DISABLE_PASSWORD}
     ports:
       - "${DBX_WEB_PORT}:4224"
@@ -184,6 +186,7 @@ services:
   cloudflared:
     image: cloudflare/cloudflared:${CLOUDFLARED_VERSION}
     container_name: cloudflared
+    mem_limit: ${CLOUD_FLARED_MEM_LIMIT:-128m}
     restart: unless-stopped
     # 命名隧道 run（ingress 在 CF 面板 remote-managed，本机 tunnel 由 ~/.secrets 的 TUNNEL_TOKEN 指认）；
     # --no-autoupdate 须在子命令之前（cloudflared 2026.x 限制）

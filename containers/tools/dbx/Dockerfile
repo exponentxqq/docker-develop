@@ -1,2 +1,3 @@
-FROM t8y2/dbx:latest
+ARG DBX_VERSION=latest
+FROM t8y2/dbx:${DBX_VERSION}
 
