@@ -33,7 +33,7 @@ services:
       - ../common/.zshrc:/home/docker/.zshrc
       - ../common/.vimrc:/home/docker/.vimrc
       - /var/run/docker.sock:/var/run/docker.sock
-      - /tmp:/tmp
+      - /data/tmp:/tmp
     logging:
       options:
         max-size: "10m"
@@ -67,7 +67,8 @@ services:
       - volta-cache:/home/docker/.volta
       - ../cache/npm-cache:/home/docker/.npm
       - ../cache/yarn-cache:/home/docker/.cache/yarn
-      - /tmp:/tmp
+      - /data/tmp:/tmp
+      - /tmp/.X11-unix:/tmp/.X11-unix
     ports:
       - "8090-8099:8090-8099"
     ipc: host
@@ -104,7 +105,7 @@ services:
       # 宿主/容器共享偶发「daemon disappeared」属自愈型；极端时删 ~/.gradle/daemon 重建
       - ${HOST_HOME}/.gradle:/home/docker/.gradle
       - ${HOST_HOME}/.m2:/home/docker/.m2
-      - /tmp:/tmp
+      - /data/tmp:/tmp
     extra_hosts:
       - "dockerhost:${DOCKER_HOST_IP}"
     ports:
@@ -136,7 +137,7 @@ services:
     volumes:
       - ${HOST_HOME}:${HOST_HOME}
       - ../cache/go-cache:/go
-      - /tmp:/tmp
+      - /data/tmp:/tmp
     tty: true
     ports:
       - "3000:3000"
@@ -168,7 +169,7 @@ services:
       - conda-envs:/home/docker/.conda/envs
       - ../cache/conda-pkgs:/home/docker/.conda/pkgs
       - ../cache/uv-cache:/home/docker/.cache/uv
-      - /tmp:/tmp
+      - /data/tmp:/tmp
     ports:
       - "5000:5000"
     extra_hosts:
@@ -202,7 +203,7 @@ services:
       - /usr/local/rustup:/usr/local/rustup
       - ../common/.zshrc:/home/docker/.zshrc
       - ../common/.vimrc:/home/docker/.vimrc
-      - /tmp:/tmp
+      - /data/tmp:/tmp
     extra_hosts:
       - "dockerhost:${DOCKER_HOST_IP}"
     ports:

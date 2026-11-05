@@ -42,7 +42,7 @@ compose/tools.yml           → kubectl, dbx, hermes, dsh, cloudflared
 
 All paths in sub-files are relative to the **including file** (`docker-compose.yml`), not the sub-file itself. Paths use `../` prefix to reach the repo root (e.g., `context: ../containers/languages/node`, `../cache/pnpm-cache`).
 
-**Shared temporary directory**: every container identity-mounts the host `/tmp` (`/tmp:/tmp`), so `/tmp/foo` refers to the same file on the host and inside all containers — the scratch space for container↔container and container↔host temp-file exchange. Permissions follow the host `/tmp` (1777, sticky). The node container's X11 socket (`/tmp/.X11-unix`) rides along with this mount (no separate mount needed).
+**Shared temporary directory**: every container mounts the host `/data/tmp` as its `/tmp` (`/data/tmp:/tmp`), so `/tmp/foo` inside any container is the same file as `/data/tmp/foo` on the host — the scratch space for container↔container and container↔host temp-file exchange. The host `/tmp` itself stays a tmpfs and is NOT shared with containers. Permissions follow the host `/data/tmp` (1777, sticky; 3-day aging cleanup via host `/etc/tmpfiles.d/docker-tmp.conf`). The node container's X11 socket gets a separate mount (`/tmp/.X11-unix:/tmp/.X11-unix`).
 
 ## Environment Variables
 

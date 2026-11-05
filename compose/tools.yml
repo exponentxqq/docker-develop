@@ -12,7 +12,7 @@ services:
     tty: true
     volumes:
       - ../containers/tools/kubectl/config:/root/.kube
-      - /tmp:/tmp
+      - /data/tmp:/tmp
     logging:
       options:
         max-size: "10m"
@@ -39,7 +39,7 @@ services:
       - dbx-data:/app/data
       - ${HOST_HOME}/.ssh:/root/.ssh
       - ${HOST_HOME}:${HOST_HOME}
-      - /tmp:/tmp
+      - /data/tmp:/tmp
     networks:
       - backend
 
@@ -62,7 +62,7 @@ services:
     volumes:
       - ${HOST_PROJECT_PATH}:${HOST_PROJECT_PATH}
       - ${HERMES_HOST_DATA_PATH}:/opt/data
-      - /tmp:/tmp
+      - /data/tmp:/tmp
     environment:
       - HERMES_DASHBOARD=${HERMES_DASHBOARD}
       - HERMES_DASHBOARD_HOST=0.0.0.0
@@ -175,7 +175,7 @@ services:
       - ${HOST_HOME}/.local/share/pnpm/store:/home/xuqinqin/.local/share/pnpm/store
       # docker socket：dsh 会话经此操作宿主 daemon（等价宿主 root 权限，见设计文档安全节）
       - /var/run/docker.sock:/var/run/docker.sock
-      - /tmp:/tmp
+      - /data/tmp:/tmp
     logging:
       options:
         max-size: "10m"
@@ -196,7 +196,7 @@ services:
       # 宿主统一密钥文件：每机独立维护，TUNNEL_TOKEN 为本机隧道 token 的生效位
       - /home/xuqinqin/.secrets
     volumes:
-      - /tmp:/tmp
+      - /data/tmp:/tmp
     # host 网络：localhost 语义即宿主（22 sshd / 4224 dbx / 3081 dsh 均可直写 localhost 回源）
     network_mode: host
     logging:
