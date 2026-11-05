@@ -65,8 +65,8 @@ services:
       - /dev/shm:/dev/shm
       - ${HOST_HOME}:${HOST_HOME}
       - volta-cache:/home/docker/.volta
-      - ../cache/npm-cache:/home/docker/.npm
-      - ../cache/yarn-cache:/home/docker/.cache/yarn
+      - ${HOST_HOME}/.npm:/home/docker/.npm
+      - ${HOST_HOME}/.cache/yarn:/home/docker/.cache/yarn
       - /data/tmp:/tmp
       - /tmp/.X11-unix:/tmp/.X11-unix
     ports:
