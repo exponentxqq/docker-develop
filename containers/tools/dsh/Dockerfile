@@ -75,7 +75,8 @@ WORKDIR /home/docker
 ENV HOME=/home/docker
 
 COPY --chown=docker:docker entrypoint.sh /home/docker/entrypoint.sh
-RUN chmod +x /home/docker/entrypoint.sh
+COPY --chown=docker:docker entrypoint.d/ /home/docker/entrypoint.d/
+RUN chmod +x /home/docker/entrypoint.sh /home/docker/entrypoint.d/*.sh
 
 # 容器唯一对外口：dsh-pocket 代理（本机/局域网/公网入口统一由此进出，含 PIN 认证）
 # dsh web 自身固定监听 127.0.0.1:3080（官方安全限制），不经此口暴露

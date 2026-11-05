@@ -91,9 +91,10 @@ cp .env-example .env && vim .env
 docker compose build dsh && docker compose up -d dsh
 ```
 
-entrypoint 幂等完成：生成 dsh-pocket `settings.json`（命名隧道模式）、预置固定 PIN、
-同步 `lanIpOverride`、按 lockfile 恢复 profile 依赖（node_modules）。
-cloudflared 二进制在首次开启公网时自动下载（清华镜像优先，缓存于 `/data/dsh/dsh-pocket/bin/`）。
+entrypoint（瘦入口 + `entrypoint.d/` 按文件名序执行的步骤脚本）幂等完成：生成 dsh-pocket
+`settings.json`（命名隧道模式）、预置固定 PIN、同步 `lanIpOverride`、按 lockfile 恢复 profile
+依赖（node_modules）、拉起常驻共享浏览器（`:9222`，browser-use attach 模式，多会话共享同一
+chromium 实例）。cloudflared 二进制在首次开启公网时自动下载（清华镜像优先，缓存于 `/data/dsh/dsh-pocket/bin/`）。
 
 公网访问**启动默认开启**：entrypoint 预置 `tunnel-auto.json` 标记，插件启动自动拉起隧道，
 容器/宿主重启后无需再手动开启。`/data/dsh/dsh-pocket/tunnel-auto.json` 记录启用状态。
