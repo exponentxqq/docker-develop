@@ -4,7 +4,7 @@ Go 语言开发容器，基于官方 golang 镜像。
 
 ## 镜像
 
-- **基础镜像**: `golang:latest`（官方最新稳定版）
+- **基础镜像**: `golang:${GO_VERSION}`（版本由根 `.env` 的 `GO_VERSION` 驱动）
 - **构建产物**: `docker-go:latest`
 - **工具链和缓存挂载到宿主机**以实现持久化
 
@@ -16,12 +16,14 @@ Go 语言开发容器，基于官方 golang 镜像。
 
 ## 挂载
 
-| 宿主机路径             | 容器路径                    | 说明                  |
-| ---------------------- | --------------------------- | --------------------- |
-| `${HOST_PROJECT_PATH}` | `${HOST_PROJECT_PATH}`      | 项目代码（路径一致）  |
-| `cache/go-cache`       | `/usr/local/go`             | Go 工具链和缓存持久化 |
+| 宿主机路径                     | 容器路径                       | 说明                          |
+| ------------------------------ | ------------------------------ | ----------------------------- |
+| `${HOST_HOME}`                 | `${HOST_HOME}`                 | 宿主 home（路径一致）         |
+| `${HOST_HOME}/go`              | `/home/docker/go`              | GOPATH/模块缓存与宿主共享     |
+| `${HOST_HOME}/.cache/go-build` | `/home/docker/.cache/go-build` | 构建缓存（GOCACHE）与宿主共享 |
+| `/data/tmp`                    | `/tmp`                         | 临时目录                      |
 
-> **注意**: `/usr/local/go` 的挂载会覆盖容器内 Go 安装目录。首次使用前需确保 `cache/go-cache` 包含完整的 Go 发行版，或手动初始化。
+> **注意**: 官方镜像自带 `ENV GOPATH=/go`，Dockerfile 已覆盖为 `/home/docker/go`。`go install` 的工具落在 `$GOPATH/bin`（宿主侧 `~/go/bin`）；gopls 由镜像构建期装到 `/usr/local/bin`，不受挂载影响。
 
 ## 使用方式
 

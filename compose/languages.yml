@@ -136,7 +136,8 @@ services:
     mem_limit: ${GO_MEM_LIMIT:-4g}
     volumes:
       - ${HOST_HOME}:${HOST_HOME}
-      - ../cache/go-cache:/go
+      - ${HOST_HOME}/go:/home/docker/go
+      - ${HOST_HOME}/.cache/go-build:/home/docker/.cache/go-build
       - /data/tmp:/tmp
     tty: true
     ports:
