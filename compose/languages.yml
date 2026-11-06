@@ -48,6 +48,8 @@ services:
       network: host
       args:
         - NODE_VERSION=${NODE_VERSION}
+        - PNPM_VERSION=${PNPM_VERSION}
+        - YARN_VERSION=${YARN_VERSION}
         - VOLTA_VERSION=${VOLTA_VERSION}
         - OCR_VERSION=${OCR_VERSION}
         - HOST_UID=${HOST_UID}
@@ -55,6 +57,9 @@ services:
         - HOST_USER=${HOST_USER}
     environment:
       - DISPLAY=${DISPLAY}
+      # pnpm 12 起 CLI 不再从 ~/.npmrc 读 pnpm 专属配置（store-dir 失效），
+      # 改由 PNPM_CONFIG_* 环境变量提供；npmrc 挂载保留给旧版 pnpm/npm/yarn
+      - PNPM_CONFIG_STORE_DIR=${HOST_HOME}/.local/share/pnpm/store
     container_name: node
     image: docker-node:${VOLTA_VERSION}
     user: ${HOST_UID}:${HOST_GID}

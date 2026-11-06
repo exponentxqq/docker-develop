@@ -1,6 +1,6 @@
 # Node.js
 
-基于 Debian Bookworm + Volta 的 Node.js 开发容器，一个容器覆盖所有版本。
+基于 Ubuntu 26.04 + Volta 的 Node.js 开发容器，一个容器覆盖所有版本。
 
 ## 镜像
 
@@ -29,8 +29,9 @@
 
 | 变量           | 默认值    | 说明                        |
 | -------------- | --------- | --------------------------- |
-| `NODE_VERSION` | `22.18.0` | 容器默认预装的 Node.js 版本 |
-| `PNPM_VERSION` | `10.18.2` | 预装的 pnpm 版本            |
+| `NODE_VERSION` | `26.13.0` | 容器默认预装的 Node.js 版本 |
+| `PNPM_VERSION` | `12.18.0` | 预装的 pnpm 版本            |
+| `YARN_VERSION` | `1.22.22` | 预装的 yarn classic 版本    |
 
 ### 切换版本
 
@@ -45,11 +46,16 @@ volta install node@18
 
 ## 包管理器
 
-预装 pnpm，通过 `node/npmrc` 配置 store 目录——指向宿主 pnpm store（三端共享：宿主包装 / node 容器 / dsh 容器），经下方 `${HOST_HOME}` identity 挂载在容器内同路径可见：
+预装 pnpm，store 目录指向宿主 pnpm store（三端共享：宿主包装 / node 容器 / dsh 容器），经下方 `${HOST_HOME}` identity 挂载在容器内同路径可见：
 
 ```
 store-dir=/home/xuqinqin/.local/share/pnpm/store
 ```
+
+> pnpm 12 起 CLI 不再从 `~/.npmrc` 读取 pnpm 专属配置（`store-dir` 失效），store 目录改由
+> compose 注入的 `PNPM_CONFIG_STORE_DIR` 环境变量提供（见 `languages.yml`）；`npmrc`
+> 挂载保留给旧版 pnpm（项目 volta pin ≤10）与 npm/yarn 使用。各主版本 pnpm 使用各自
+> 版本化的 store 子目录（`v10`/`v11`），共存不冲突，仅多占磁盘。
 
 支持的包管理器：pnpm（推荐）、npm、yarn。缓存目录通过挂载持久化，跨容器重建保留。
 

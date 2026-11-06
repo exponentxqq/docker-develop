@@ -28,12 +28,14 @@ WORKDIR /home/docker
 ENV VOLTA_HOME=/home/docker/.volta
 ENV PATH=$VOLTA_HOME/bin:$PATH
 
-ARG NODE_VERSION=22
+ARG NODE_VERSION=26
+ARG PNPM_VERSION=12
+ARG YARN_VERSION=1.22.22
 ARG VOLTA_VERSION=2.0.2
 RUN set -eux; \
   curl -fsSL https://get.volta.sh | bash -s -- --version ${VOLTA_VERSION}; \
   volta --version; \
-  volta install node@${NODE_VERSION} pnpm@latest yarn@1.22.22
+  volta install node@${NODE_VERSION} pnpm@${PNPM_VERSION} yarn@${YARN_VERSION}
 
 ARG OCR_VERSION=1.12.4
 RUN volta install @alibaba-group/open-code-review@${OCR_VERSION}
