@@ -1,13 +1,13 @@
-# Java 开发容器：ubuntu apt 多 JDK（11/17/21），版本自适应由项目 gradle toolchains
+# Java 开发容器：ubuntu apt 多 JDK（11/17/21/25），版本自适应由项目 gradle toolchains
 # （自动探测 /usr/lib/jvm/*）与 ./mvnw wrapper 完成；不装 gradle（项目自带 wrapper）
 ARG JAVA_UBUNTU_VERSION=26.04
 FROM ubuntu:${JAVA_UBUNTU_VERSION}
 
-# openjdk 11/17 位于 universe 仓库（ubuntu 官方镜像 sources 默认启用 universe）
+# openjdk 11/17/21 位于 universe 仓库、openjdk-25 位于 main（镜像 sources 默认启用 universe/main）
 # tzdata：TZ=Asia/Shanghai 依赖系统时区库；缺失时 glibc 静默回退 UTC（JVM 自带 tzdb 不受影响，
 # 故仅表现为容器内 date/脚本日志时间错误，排查成本高）
 RUN apt-get update && apt-get install -y --no-install-recommends \
-  openjdk-11-jdk-headless openjdk-17-jdk-headless openjdk-21-jdk-headless \
+  openjdk-11-jdk-headless openjdk-17-jdk-headless openjdk-21-jdk-headless openjdk-25-jdk-headless \
   maven git curl wget ca-certificates tzdata \
   && rm -rf /var/lib/apt/lists/*
 
