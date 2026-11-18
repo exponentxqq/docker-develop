@@ -3,6 +3,7 @@ FROM ubuntu:26.04
 RUN apt-get update && \
   apt-get install -y --no-install-recommends \
   curl ca-certificates git \
+  ffmpeg \
   python3 build-essential \
   libgtk-3-0t64 libnotify-dev libnss3 libxss1 libasound2t64 libxtst6 xauth xvfb \
   libgbm1 libdrm2 libxcb-dri3-0 libx11-xcb1 libxcomposite1 libxcursor1 libxdamage1 \
