@@ -159,6 +159,9 @@ services:
       # 配合 environment 的 CBM_CACHE_DIR，宿主/容器共享同一 daemon 与索引库。
       # （曾因同库异名冲突：容器 /home/docker/.cache/codebase-memory-mcp vs 宿主 /data/...，
       #   dsh 容器重启令 daemon 易主后双方互拒，codebase-memory MCP 断连。）
+      # 另一类断连（2026-11-23）：容器重启硬杀本代际 daemon，/tmp（即本目录所在的
+      # /data/tmp）残留 socket 三件套，新代际 daemon 因 EEXIST 拒启——由
+      # containers/tools/dsh/entrypoint.d/80-cbm-stale-socket.sh 启动前探活清理兜底。
       - ${CBM_DATA_PATH}:${CBM_DATA_PATH}
       # git 身份与宿主同源：作者信息/hooksPath(defaultBranch 等；:ro 防容器内改全局配置；
       # 宿主 git 写配置是 lock+rename 原子替换，变更后需 up -d 重建才生效）

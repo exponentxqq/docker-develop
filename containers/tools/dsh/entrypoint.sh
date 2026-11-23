@@ -23,6 +23,8 @@ set -e
 #   50-pnpm-store.sh          pnpm 全局 store 配置
 #   60-profile-deps.sh        profiles 依赖恢复
 #   70-shared-chromium.sh     常驻共享浏览器（browser-use attach，:9222）
+#   80-cbm-stale-socket.sh    CBM 残留 daemon socket 探活清理（容器重启硬杀 daemon 的
+#                             善后：EEXIST 令新代际拒启 → codebase-memory MCP 断连）
 
 export POCKET_DIR="$HOME/.dsh/dsh-pocket"
 
