@@ -1,0 +1,10 @@
+#!/bin/bash
+# gh wrapper：复用 dsh 容器内的 gh（与镜像同版本，永不分叉）。GH_CONFIG_DIR 由镜像
+# ENV 提供（docker exec 继承 image ENV），token 与容器内同源（/data/dsh/gh）。
+# 不走 run.sh：与 cloudflared 同款直连 inspect+exec，避免启停提示污染输出；
+# -i 不加 -t，保持 stdout 纯净（管道/重定向场景友好）。
+docker inspect -f '{{.State.Running}}' dsh 2>/dev/null | grep -q true || {
+    echo "dsh 容器未运行（docker compose up -d dsh）" >&2
+    exit 127
+}
+exec docker exec -i dsh gh "$@"

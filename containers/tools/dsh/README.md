@@ -9,6 +9,7 @@ DeepSeek 官方开源 agent harness（开发预览版），基于 Cordis「一�
 - **构建产物**: `docker-dsh:0.2.0-rc.2`
 - **安装方式**: npm 全局安装 `@deepseek-ai/dsh` + `pnpm`
 - **docker 能力**: 内置 docker CLI + compose 插件（静态二进制，版本由 `DSH_DOCKER_CLI_VERSION` / `DSH_DOCKER_COMPOSE_VERSION` 控制），经宿主 socket 操作 daemon
+- **gh CLI**: GitHub 命令行（静态二进制，版本由 `DSH_GH_VERSION` 控制，置于 Dockerfile 末尾以保留前序层缓存）；认证配置经 `GH_CONFIG_DIR` 落 `/data/dsh/gh`，容器重建 token 不丢；宿主侧 `docker/bin/gh` 包装转发本容器
 
 ## 端口布局（容器内）
 
@@ -40,6 +41,7 @@ DeepSeek 官方开源 agent harness（开发预览版），基于 Cordis「一�
 | `DSH_NODE_VERSION`           | `24.21.0`                  | Node 基础镜像版本（官方要求 ^22.19 或 >=24.2）                                                                            |
 | `DSH_DOCKER_CLI_VERSION`     | `29.9.0`                   | 容器内 docker CLI 版本（静态二进制，与宿主对齐）                                                                          |
 | `DSH_DOCKER_COMPOSE_VERSION` | `v5.6.0`                   | 容器内 compose 插件版本                                                                                                   |
+| `DSH_GH_VERSION`             | `2.103.3`                  | 容器内 gh CLI 版本（GitHub 命令行；认证配置经 `GH_CONFIG_DIR` 落 `/data/dsh/gh` 持久）                                   |
 | `DOCKER_GID`                 | 宿主 docker 组 gid         | socket 属组（`stat -c %g /var/run/docker.sock` 查看）；compose `group_add` 依据                                           |
 | `DSH_HOST_DATA_PATH`         | `/data/dsh`                | 持久化数据（credentials、会话、dsh-pocket 设置/PIN/cloudflared）                                                          |
 | `DSH_HOST_PROFILES_PATH`     | dotfiles 的 `dsh/profiles` | profile 目录（git 管理，挂载须位于 `DSH_HOST_DATA_PATH` 之后）                                                            |

@@ -82,6 +82,27 @@ RUN chmod +x /home/docker/entrypoint.sh /home/docker/entrypoint.d/*.sh
 # dsh web 自身固定监听 127.0.0.1:3080（官方安全限制），不经此口暴露
 EXPOSE 3081
 
+# gh CLI（GitHub CLI，静态二进制，pin 版本；置于文件末尾以保留前序层缓存，升级仅重建本层）：
+# 会话内 GitHub 操作（issue/PR/GraphQL）命令行化；宿主侧经仓库 bin/gh 包装转发本容器。
+# 认证配置经 GH_CONFIG_DIR 落持久挂载区 ~/.dsh（宿主 /data/dsh），容器重建 token 不丢。
+# ENV 而非 entrypoint 注入：docker exec 不经 entrypoint，exec 进程须同样拿到该路径
+ARG GH_VERSION=2.103.3
+# ADD <url> 的下载由 BuildKit frontend 在 daemon 进程内执行（宿主网络栈），不经 RUN
+# 沙箱——本机 RUN 沙箱直连 releases CDN 被 TUN 网关 504、宿主代理端口又仅对特定网段
+# 开放（沙箱访问被 RST），daemon 侧下载是唯一可行路径；--checksum 固定内容哈希，
+# 与 ARG 版本号共同 pin 住供应链
+ADD --checksum=sha256:4c806978ffce1cec70853302a56d70ac6da4f19bae7adca4e1a8ab00633dd91d \
+      "https://github.com/cli/cli/releases/download/v${GH_VERSION}/gh_${GH_VERSION}_linux_amd64.tar.gz" \
+      /tmp/gh-dist/
+# ADD 对 URL 形式的 .tar.gz 不做自动解压（保持原文件），故 RUN 内显式解包、仅取 bin/gh
+# ADD 下载物为 root:0600，本段位于 USER docker 之后，须临时切 root 安装再切回
+USER root
+RUN tar -xz -f /tmp/gh-dist/gh_${GH_VERSION}_linux_amd64.tar.gz \
+      -C /usr/local/bin --strip-components=2 "gh_${GH_VERSION}_linux_amd64/bin/gh" && \
+    rm -rf /tmp/gh-dist && gh --version
+USER docker
+ENV GH_CONFIG_DIR=/home/docker/.dsh/gh
+
 ENTRYPOINT ["/home/docker/entrypoint.sh"]
 # CMD 必须用绝对路径：entrypoint 末尾把包装脚本目录前置进 PATH 后，裸名 `dsh` 会解析到
 # <项目>/docker/bin/dsh 包装脚本——PID1 变成 bash 包装、经 docker exec 回到本容器重建进程树，
