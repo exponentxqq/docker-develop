@@ -13,4 +13,13 @@ cleanup() {
     docker exec node pkill -TERM -f "pnpm $*" 2>/dev/null
 }
 trap cleanup INT TERM HUP
-docker-run node pnpm "$@"
+# 项目（含上层目录）的 package.json 声明了 packageManager 字段时，经 node
+# 发行版自带的 corepack 按声明自动切换 pnpm 版本（volta 不支持 pnpm 项目级
+# 钉定，packageManager 是官方替代机制）；未声明的项目维持原行为。
+# 依赖：node 镜像 bin/ 自带 corepack；缓存目录须可写（~/.cache 归属 root，故用 .volta）。
+PM=$(docker-run node node -e 'let d=process.cwd();for(;;){try{if(require(d+"/package.json").packageManager){console.log("yes");break}}catch(e){}const nd=require("path").dirname(d);if(nd===d){console.log("no");break}d=nd}' 2>/dev/null)
+if [ "$PM" = "yes" ]; then
+  docker-run node bash -c 'export COREPACK_HOME=/home/docker/.volta/.corepack-cache; CB="$(dirname "$(/home/docker/.volta/bin/volta which node)")/corepack"; exec "$CB" pnpm "$@"' pnpm "$@"
+else
+  docker-run node pnpm "$@"
+fi
